@@ -2,6 +2,8 @@
     CONSOLE APPLICATION : win32_test Project Overview
 ========================================================================
 
+This is a first stab of improved embedding API for mozilla
+
 AppWizard has created this win32_test application for you.  
 
 This file contains a summary of what you will find in each of the files that
