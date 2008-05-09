@@ -7,14 +7,14 @@
 
 #define MAX_LOADSTRING 100
 
-class MyEmbedListener : public EmbedListener
+class MyListener : public MozViewListener
 {
     void SetTitle(const char* newTitle);
 };
 
-void MyEmbedListener::SetTitle(const char *newTitle)
+void MyListener::SetTitle(const char *newTitle)
 {
-    HWND hWnd = (HWND)pMozEmbed->GetNativeWindow();
+    HWND hWnd = (HWND)pMozView->GetNativeWindow();
     ::SetWindowTextA(hWnd, newTitle);
 }
 
@@ -58,20 +58,20 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     RECT rect;
     GetClientRect(hWnd, &rect);
 
-    MozEmbed mozEmbed;
-    int res = mozEmbed.CreateBrowser(hWnd, rect.left, rect.top,
+    MozView mozView;
+    int res = mozView.CreateBrowser(hWnd, rect.left, rect.top,
         rect.right - rect.left, rect.bottom - rect.top);
 
     if(res)
         return res;
 
-    MyEmbedListener myListener;
-    mozEmbed.SetListener(&myListener);
+    MyListener myListener;
+    mozView.SetListener(&myListener);
 
-    SetWindowLongPtr(hWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(&mozEmbed));
+    SetWindowLongPtr(hWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(&mozView));
 
-    mozEmbed.LoadURI("http://google.com");
-    //mozEmbed.LoadURI("file:///C:/mozilla/test/test.html");
+    mozView.LoadURI("http://google.com");
+    //mozView.LoadURI("file:///C:/mozilla/test/test.html");
 
 	// Main message loop:
 	while (GetMessage(&msg, NULL, 0, 0))
@@ -209,29 +209,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
     case WM_SIZE:
         {
-            MozEmbed* pMozEmbed = (MozEmbed*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-            if(pMozEmbed)
+            MozView* pMozView = (MozView*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+            if(pMozView)
             {
                 RECT rect;
                 GetClientRect(hWnd, &rect);
-                pMozEmbed->SetPositionAndSize(rect.left, rect.top,
+                pMozView->SetPositionAndSize(rect.left, rect.top,
                     rect.right - rect.left, rect.bottom - rect.top);
             }
         }
         break;
     case WM_ACTIVATE:
         {
-            MozEmbed* pMozEmbed = (MozEmbed*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-            if(pMozEmbed)
+            MozView* pMozView = (MozView*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+            if(pMozView)
             {
                 switch (wParam)
                 {
                 case WA_CLICKACTIVE:
                 case WA_ACTIVE:
-                    pMozEmbed->SetFocus(true);
+                    pMozView->SetFocus(true);
                     break;
                 case WA_INACTIVE:
-                    pMozEmbed->SetFocus(false);
+                    pMozView->SetFocus(false);
                     break;
                 default:
                     break;
