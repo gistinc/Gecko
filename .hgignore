@@ -2,3 +2,6 @@ syntax: regexp
 ^win32/.*debug/
 ^win32/.*Debug/
 \.ncb
+\.\#
+^linux/test$
+\.DS_Store
