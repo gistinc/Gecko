@@ -30,7 +30,7 @@ private:
     class Private;
     Private *mPrivate;
 
-    nsresult InitEmbedding();};
+};
 
 /**
  * This is the callback interface to the embeddig app.

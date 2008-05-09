@@ -267,6 +267,30 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\EmbeddingSetup.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\common\EmbeddingSetup.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\WebBrowserChrome.cpp"
 				>
 				<FileConfiguration
