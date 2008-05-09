@@ -48,8 +48,8 @@ using namespace std;
 
 #ifdef WIN32
   //TODO: make this file fully X platform
-#  define WIN32_LEAN_AND_MEAN
 #  include <windows.h>
+#  undef MAX_PATH
 #  define MAX_PATH _MAX_PATH
 #else
 #  define MAX_PATH PATH_MAX
@@ -264,7 +264,11 @@ nsresult MozEmbed::InitEmbedding()
 
     printf("b\n");
     // init embedding
+#ifdef WIN32
+    rv = XRE_InitEmbedding(xuldir, appdir, nsnull, nsnull, 0);
+#else
     rv = XRE_InitEmbedding(xuldir, appdir, const_cast<GTKEmbedDirectoryProvider*>(&kDirectoryProvider), nsnull, 0);
+#endif
     if (NS_FAILED(rv)) {
         cerr << "XRE_InitEmbedding failed" << endl;
         return 9;
