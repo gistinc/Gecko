@@ -1,12 +1,10 @@
 #ifndef __embed_h_
 #define __embed_h_
 
-#include "nsCOMPtr.h"
 #include "prtypes.h"
 
-class nsIWebBrowser;
-class nsIWebNavigation;
-class nsIWebBrowserChrome;
+// XXX
+typedef PRUint32 nsresult;
 
 class EmbedListener;
 
@@ -28,13 +26,10 @@ public:
     void* GetNativeWindow();
 
 private:
-    nsresult InitEmbedding();
-    EmbedListener* pListener;
-    void* nativeWindow;
-    nsCOMPtr<nsIWebBrowser> webBrowser;
-    nsCOMPtr<nsIWebNavigation> webNavigation;
-    nsCOMPtr<nsIWebBrowserChrome> chrome;
-};
+    class Private;
+    Private *mPrivate;
+
+    nsresult InitEmbedding();};
 
 /**
  * This is the callback interface to the embeddig app.

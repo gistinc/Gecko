@@ -78,6 +78,17 @@ using namespace std;
 // our stuff
 #include "WebBrowserChrome.h"
 
+class MozEmbed::Private{
+public:
+  Private() : nativeWindow(NULL), pListener(NULL) {}
+
+  EmbedListener* pListener;
+  void* nativeWindow;
+  nsCOMPtr<nsIWebBrowser> webBrowser;
+  nsCOMPtr<nsIWebNavigation> webNavigation;
+  nsCOMPtr<nsIWebBrowserChrome> chrome;
+};
+
 XRE_InitEmbeddingType XRE_InitEmbedding = NULL;
 XRE_TermEmbeddingType XRE_TermEmbedding = NULL;
 
@@ -285,25 +296,25 @@ nsresult MozEmbed::InitEmbedding()
 
 nsresult MozEmbed::CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
 {
-    nativeWindow = aNativeWindow;
+  mPrivate->nativeWindow = aNativeWindow;
 
     nsresult rv;
 
     nsCOMPtr<nsIBaseWindow> baseWindow;
-    webBrowser = do_CreateInstance(NS_WEBBROWSER_CONTRACTID, &rv);
+    mPrivate->webBrowser = do_CreateInstance(NS_WEBBROWSER_CONTRACTID, &rv);
     if (NS_FAILED(rv)) {
             printf("do_CreateInstance webBrowser\n");
     }
-    baseWindow = do_QueryInterface(webBrowser);
-    rv = baseWindow->InitWindow(nativeWindow, 0, x, y, width, height);
+    baseWindow = do_QueryInterface(mPrivate->webBrowser);
+    rv = baseWindow->InitWindow(mPrivate->nativeWindow, 0, x, y, width, height);
     if (NS_FAILED(rv)) {
             printf("InitWindow\n");
     }
     
-    nsIWebBrowserChrome **aNewWindow = getter_AddRefs(chrome);
+    nsIWebBrowserChrome **aNewWindow = getter_AddRefs(mPrivate->chrome);
     CallQueryInterface(static_cast<nsIWebBrowserChrome*>(new WebBrowserChrome(this)), aNewWindow);
-    webBrowser->SetContainerWindow(chrome.get());
-    chrome->SetWebBrowser(webBrowser);
+    mPrivate->webBrowser->SetContainerWindow(mPrivate->chrome.get());
+    mPrivate->chrome->SetWebBrowser(mPrivate->webBrowser);
 
     rv = baseWindow->Create();
     if (NS_FAILED(rv)) {
@@ -314,7 +325,7 @@ nsresult MozEmbed::CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y, PRIn
             printf("SetVisibility\n");
     }
 
-    webNavigation = do_QueryInterface(webBrowser);
+    mPrivate->webNavigation = do_QueryInterface(mPrivate->webBrowser);
     
     SetFocus(true);
 
@@ -322,9 +333,9 @@ nsresult MozEmbed::CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y, PRIn
 }
 
 MozEmbed::MozEmbed()
-: nativeWindow(NULL), pListener(NULL)
 {
-    InitEmbedding();
+  mPrivate = new Private();
+  InitEmbedding();
 }
 
 MozEmbed::~MozEmbed()
@@ -333,13 +344,15 @@ MozEmbed::~MozEmbed()
 
     // release browser and chrome
     nsCOMPtr<nsIBaseWindow> baseWindow;
-    baseWindow = do_QueryInterface(webBrowser);
+    baseWindow = do_QueryInterface(mPrivate->webBrowser);
     baseWindow->Destroy();
-    chrome->SetWebBrowser(NULL);
-    
+    mPrivate->chrome->SetWebBrowser(NULL);
+
     baseWindow = NULL;
-    webBrowser = NULL;
-    chrome = NULL;
+
+    mPrivate->webBrowser = NULL;
+    mPrivate->chrome = NULL;
+    delete mPrivate;
 
     // terminate embedding
     if (!XRE_TermEmbedding) {
@@ -360,7 +373,7 @@ nsresult MozEmbed::SetPositionAndSize(PRInt32 x, PRInt32 y, PRInt32 width, PRInt
 {
     nsresult rv;
     nsCOMPtr<nsIBaseWindow> baseWindow;
-    baseWindow = do_QueryInterface(webBrowser);
+    baseWindow = do_QueryInterface(mPrivate->webBrowser);
     rv = baseWindow->SetPositionAndSize(x, y, width, height, PR_TRUE);
     if (NS_FAILED(rv))
         return 1;
@@ -371,7 +384,7 @@ nsresult MozEmbed::SetPositionAndSize(PRInt32 x, PRInt32 y, PRInt32 width, PRInt
 nsresult MozEmbed::LoadURI(const char* uri)
 {
     nsresult rv;
-    rv = webNavigation->LoadURI(NS_ConvertASCIItoUTF16(uri).get(),
+    rv = mPrivate->webNavigation->LoadURI(NS_ConvertASCIItoUTF16(uri).get(),
         nsIWebNavigation::LOAD_FLAGS_NONE, 0, 0, 0);
     return rv;
 }
@@ -379,7 +392,7 @@ nsresult MozEmbed::LoadURI(const char* uri)
 nsresult MozEmbed::SetFocus(PRBool focus)
 {
     nsCOMPtr<nsIWebBrowserFocus> browserFocus;
-    browserFocus = do_QueryInterface(webBrowser);
+    browserFocus = do_QueryInterface(mPrivate->webBrowser);
     if(focus)
         browserFocus->Activate();
     else
@@ -389,18 +402,18 @@ nsresult MozEmbed::SetFocus(PRBool focus)
 
 void MozEmbed::SetListener(EmbedListener *pNewListener)
 {
-    pListener = pNewListener;
-    pListener->SetMozEmbed(this);
+  mPrivate->pListener = pNewListener;
+  mPrivate->pListener->SetMozEmbed(this);
 }
 
 EmbedListener* MozEmbed::GetListener()
 {
-    return pListener;
+    return mPrivate->pListener;
 }
 
 void* MozEmbed::GetNativeWindow()
 {
-    return nativeWindow;
+    return mPrivate->nativeWindow;
 }
 
 // ---- EmbedListener ---
