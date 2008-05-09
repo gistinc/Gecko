@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Pelle Johnsen <pjohnsen@mozilla.com>
+ *   Dave Camp <dcamp@mozilla.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,6 +36,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#include "xpcom-config.h"
+#include "mozilla-config.h"
+
 #include "embed.h"
 
 // CRT headers
@@ -42,9 +46,15 @@
 #include <string>
 using namespace std;
 
-//TODO: make this file fully X platform
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#ifdef WIN32
+  //TODO: make this file fully X platform
+#  define WIN32_LEAN_AND_MEAN
+#  include <windows.h>
+#  define MAX_PATH _MAX_PATH
+#else
+#  define MAX_PATH PATH_MAX
+#endif
+
 
 // Mozilla Frozen APIs
 #include "nsXULAppAPI.h"
@@ -71,26 +81,96 @@ using namespace std;
 XRE_InitEmbeddingType XRE_InitEmbedding = NULL;
 XRE_TermEmbeddingType XRE_TermEmbedding = NULL;
 
+#ifdef MOZ_WIDGET_GTK2
+#include "nsIDirectoryService.h"
+#include "nsAppDirectoryServiceDefs.h"
+nsIDirectoryServiceProvider *sAppFileLocProvider = nsnull;
+nsCOMPtr<nsILocalFile> sProfileDir = nsnull;
+
+class GTKEmbedDirectoryProvider : public nsIDirectoryServiceProvider2
+{
+public:
+  NS_DECL_ISUPPORTS_INHERITED
+  NS_DECL_NSIDIRECTORYSERVICEPROVIDER
+  NS_DECL_NSIDIRECTORYSERVICEPROVIDER2
+};
+
+static const GTKEmbedDirectoryProvider kDirectoryProvider;
+
+NS_IMPL_QUERY_INTERFACE2(GTKEmbedDirectoryProvider,
+                         nsIDirectoryServiceProvider,
+                         nsIDirectoryServiceProvider2)
+
+NS_IMETHODIMP_(nsrefcnt)
+GTKEmbedDirectoryProvider::AddRef()
+{
+  return 1;
+}
+
+NS_IMETHODIMP_(nsrefcnt)
+GTKEmbedDirectoryProvider::Release()
+{
+  return 1;
+}
+
+NS_IMETHODIMP
+GTKEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
+                                   nsIFile* *aResult)
+{
+  if (sAppFileLocProvider) {
+    nsresult rv = sAppFileLocProvider->GetFile(aKey, aPersist,
+                                                             aResult);
+    if (NS_SUCCEEDED(rv))
+      return rv;
+  }
+
+  if (sProfileDir && !strcmp(aKey, NS_APP_USER_PROFILE_50_DIR)) {
+    *aPersist = PR_TRUE;
+    return sProfileDir->Clone(aResult);
+  }
+
+  return NS_ERROR_FAILURE;
+}
+
+NS_IMETHODIMP
+GTKEmbedDirectoryProvider::GetFiles(const char *aKey,
+                                    nsISimpleEnumerator* *aResult)
+{
+  nsCOMPtr<nsIDirectoryServiceProvider2>
+    dp2(do_QueryInterface(sAppFileLocProvider));
+
+  if (!dp2)
+    return NS_ERROR_FAILURE;
+
+  return dp2->GetFiles(aKey, aResult);
+}
+#endif
+
 nsresult StartupProfile()
 {
-	nsCOMPtr<nsIFile> appDataDir;
-	nsresult rv = NS_GetSpecialDirectory(NS_APP_APPLICATION_REGISTRY_DIR, getter_AddRefs(appDataDir));
-	if (NS_FAILED(rv))
-      return rv;
+    nsCOMPtr<nsIFile> appDataDir;
+    nsresult rv = NS_GetSpecialDirectory(NS_APP_APPLICATION_REGISTRY_DIR, getter_AddRefs(appDataDir));
+    if (NS_FAILED(rv))
+        return rv;
 
-	appDataDir->AppendNative(nsCString("embedTest"));
-	nsCOMPtr<nsILocalFile> localAppDataDir(do_QueryInterface(appDataDir));
+    appDataDir->AppendNative(nsCString("embedTest"));
+    nsCOMPtr<nsILocalFile> localAppDataDir(do_QueryInterface(appDataDir));
 
-	nsCOMPtr<nsProfileDirServiceProvider> locProvider;
+#ifdef MOZ_WIDGET_GTK2
+    sProfileDir = localAppDataDir;
+    return NS_OK;
+#else
+    nsCOMPtr<nsProfileDirServiceProvider> locProvider;
     NS_NewProfileDirServiceProvider(PR_TRUE, getter_AddRefs(locProvider));
     if (!locProvider)
-      return NS_ERROR_FAILURE;
-    
-	rv = locProvider->Register();
+        return NS_ERROR_FAILURE;
+
+    rv = locProvider->Register();
     if (NS_FAILED(rv))
-      return rv;
-    
-	return locProvider->SetProfileDir(localAppDataDir);
+        return rv;
+
+    return locProvider->SetProfileDir(localAppDataDir);
+#endif
 }
 
 nsresult MozEmbed::InitEmbedding()
@@ -105,12 +185,10 @@ nsresult MozEmbed::InitEmbedding()
         "2.0",
         PR_FALSE
     };
-
     // find xpcom shared lib (uses GRE_HOME env var if set)
-    char temp[_MAX_PATH];
+    char temp[MAX_PATH];
     rv = GRE_GetGREPathWithProperties(&vr, 1, nsnull, 0,
         temp, sizeof(temp));
-
     string xpcomPath(temp);
     cout << "xpcom: " << xpcomPath << endl;
 
@@ -126,6 +204,21 @@ nsresult MozEmbed::InitEmbedding()
         return 2;
     }
 
+    // load XUL functions
+    nsDynamicFunctionLoad nsFuncs[] = {
+            {"XRE_InitEmbedding", (NSFuncPtr*)&XRE_InitEmbedding},
+            {"XRE_TermEmbedding", (NSFuncPtr*)&XRE_TermEmbedding},
+            {0, 0}
+    };
+
+    cout << "here?";
+
+    rv = XPCOMGlueLoadXULFunctions(nsFuncs);
+    if (NS_FAILED(rv)) {
+        cerr << "Couldn't load XUL functions" << endl;
+        return 4;
+    }
+
     // strip the filename from xpcom so we have the dir instead
     size_t lastslash = xpcomPath.find_last_of("/\\");
     if (lastslash == string::npos) {
@@ -134,32 +227,18 @@ nsresult MozEmbed::InitEmbedding()
     }
     string xpcomDir = xpcomPath.substr(0, lastslash);
 
-    // load XUL functions
-    nsDynamicFunctionLoad nsFuncs[] = {
-            {"XRE_InitEmbedding", (NSFuncPtr*)&XRE_InitEmbedding},
-            {"XRE_TermEmbedding", (NSFuncPtr*)&XRE_TermEmbedding},
-            {0, 0}
-    };
-
-    rv = XPCOMGlueLoadXULFunctions(nsFuncs);
-    if (NS_FAILED(rv)) {
-        cerr << "Couldn't load XUL functions" << endl;
-        return 4;
-    }
-
-    printf("InitEmbedding: %p\n", XRE_InitEmbedding);
-
     // create nsILocalFile pointing to xpcomDir
     nsCOMPtr<nsILocalFile> xuldir;
     rv = NS_NewNativeLocalFile(nsCString(xpcomDir.c_str()), PR_FALSE,
                                getter_AddRefs(xuldir));
     if (NS_FAILED(rv)) {
-        cerr << "Unable to create nsILocalFile for xuldir" << endl;
+      cerr << "Unable to create nsILocalFile for xuldir " << xpcomDir << endl;
         return 6;
     }
 
+#ifdef WIN32
     // create nsILocalFile pointing to appdir (WIN32)
-    char self[_MAX_PATH];
+    char self[MAX_PATH];
     GetModuleFileNameA(GetModuleHandle(NULL), self, sizeof(self));
     string selfPath(self);
     lastslash = selfPath.find_last_of("/\\");
@@ -169,17 +248,23 @@ nsresult MozEmbed::InitEmbedding()
     }
 
     selfPath = selfPath.substr(0, lastslash);
+#else
+    // XXX: crap!
+    string selfPath = "/home/dave/moz/embed/linux";
+#endif
 
+    nsCOMPtr<nsILocalFile> binDir;
     nsCOMPtr<nsILocalFile> appdir;
     rv = NS_NewNativeLocalFile(nsCString(selfPath.c_str()), PR_FALSE,
                                getter_AddRefs(appdir));
     if (NS_FAILED(rv)) {
         cerr << "Unable to create nsILocalFile for appdir" << endl;
-        return 8;
+  8;
     }
 
+    printf("b\n");
     // init embedding
-    rv = XRE_InitEmbedding(xuldir, appdir, nsnull, nsnull, 0);
+    rv = XRE_InitEmbedding(xuldir, appdir, const_cast<GTKEmbedDirectoryProvider*>(&kDirectoryProvider), nsnull, 0);
     if (NS_FAILED(rv)) {
         cerr << "XRE_InitEmbedding failed" << endl;
         return 9;
