@@ -1,0 +1,4 @@
+syntax: regexp
+^win32/.*debug/
+^win32/.*Debug/
+\.ncb
