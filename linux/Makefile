@@ -14,4 +14,4 @@ HEADERS = \
 	nsXPCOMGlue.h
 
 test: $(SRCS) $(HEADERS) Makefile
-	g++ $(SRCS) `pkg-config --cflags --libs gtk+-2.0` $(MOZ_CFLAGS) $(MOZ_LIBS) -o test
+	g++ $(SRCS) -I../common `pkg-config --cflags --libs gtk+-2.0` $(MOZ_CFLAGS) $(MOZ_LIBS) -o test

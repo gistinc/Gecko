@@ -78,11 +78,11 @@ using namespace std;
 // our stuff
 #include "WebBrowserChrome.h"
 
-class MozEmbed::Private{
+class MozView::Private{
 public:
   Private() : nativeWindow(NULL), pListener(NULL) {}
 
-  EmbedListener* pListener;
+  MozViewListener* pListener;
   void* nativeWindow;
   nsCOMPtr<nsIWebBrowser> webBrowser;
   nsCOMPtr<nsIWebNavigation> webNavigation;
@@ -184,7 +184,7 @@ nsresult StartupProfile()
 #endif
 }
 
-nsresult MozEmbed::InitEmbedding()
+nsresult MozView::InitEmbedding()
 {
     nsresult rv;
 
@@ -294,7 +294,7 @@ nsresult MozEmbed::InitEmbedding()
     return NS_OK;
 }
 
-nsresult MozEmbed::CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
+nsresult MozView::CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
 {
   mPrivate->nativeWindow = aNativeWindow;
 
@@ -332,13 +332,13 @@ nsresult MozEmbed::CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y, PRIn
     return 0;
 }
 
-MozEmbed::MozEmbed()
+MozView::MozView()
 {
   mPrivate = new Private();
   InitEmbedding();
 }
 
-MozEmbed::~MozEmbed()
+MozView::~MozView()
 {
     nsresult rv;
 
@@ -369,7 +369,7 @@ MozEmbed::~MozEmbed()
     }    
 }
 
-nsresult MozEmbed::SetPositionAndSize(PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
+nsresult MozView::SetPositionAndSize(PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
 {
     nsresult rv;
     nsCOMPtr<nsIBaseWindow> baseWindow;
@@ -381,7 +381,7 @@ nsresult MozEmbed::SetPositionAndSize(PRInt32 x, PRInt32 y, PRInt32 width, PRInt
         return 0;
 }
 
-nsresult MozEmbed::LoadURI(const char* uri)
+nsresult MozView::LoadURI(const char* uri)
 {
     nsresult rv;
     rv = mPrivate->webNavigation->LoadURI(NS_ConvertASCIItoUTF16(uri).get(),
@@ -389,7 +389,7 @@ nsresult MozEmbed::LoadURI(const char* uri)
     return rv;
 }
 
-nsresult MozEmbed::SetFocus(PRBool focus)
+nsresult MozView::SetFocus(PRBool focus)
 {
     nsCOMPtr<nsIWebBrowserFocus> browserFocus;
     browserFocus = do_QueryInterface(mPrivate->webBrowser);
@@ -400,37 +400,37 @@ nsresult MozEmbed::SetFocus(PRBool focus)
     return NS_OK;
 }
 
-void MozEmbed::SetListener(EmbedListener *pNewListener)
+void MozView::SetListener(MozViewListener *pNewListener)
 {
   mPrivate->pListener = pNewListener;
-  mPrivate->pListener->SetMozEmbed(this);
+  mPrivate->pListener->SetMozView(this);
 }
 
-EmbedListener* MozEmbed::GetListener()
+MozViewListener* MozView::GetListener()
 {
     return mPrivate->pListener;
 }
 
-void* MozEmbed::GetNativeWindow()
+void* MozView::GetNativeWindow()
 {
     return mPrivate->nativeWindow;
 }
 
-// ---- EmbedListener ---
-EmbedListener::EmbedListener()
-: pMozEmbed(NULL)
+// ---- MozViewListener ---
+MozViewListener::MozViewListener()
+: pMozView(NULL)
 {
 }
 
-EmbedListener::~EmbedListener()
+MozViewListener::~MozViewListener()
 {
 }
 
-void EmbedListener::SetTitle(const char *newTitle)
+void MozViewListener::SetTitle(const char *newTitle)
 {
 }
 
-void EmbedListener::SetMozEmbed(MozEmbed *pAMozEmbed)
+void MozViewListener::SetMozView(MozView *pAMozView)
 {
-    pMozEmbed = pAMozEmbed;
+    pMozView = pAMozView;
 }

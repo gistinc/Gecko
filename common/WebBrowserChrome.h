@@ -8,7 +8,7 @@
 #include "nsIEmbeddingSiteWindow.h"
 #include "nsIInterfaceRequestor.h"
 
-class MozEmbed;
+class MozView;
 
 class WebBrowserChrome : public nsIWebBrowserChrome,
     public nsIWebProgressListener,
@@ -22,7 +22,7 @@ public:
     NS_DECL_NSIEMBEDDINGSITEWINDOW
     NS_DECL_NSIINTERFACEREQUESTOR
 
-    WebBrowserChrome(MozEmbed* pAMozEmbed);
+    WebBrowserChrome(MozView* pAMozView);
 
 private:
     ~WebBrowserChrome();
@@ -31,7 +31,7 @@ protected:
     /* additional members */
     nsCOMPtr<nsIWebBrowser> mWebBrowser;
     PRUint32 mChromeFlags;
-    MozEmbed* pMozEmbed;
+    MozView* pMozView;
 
 };
 

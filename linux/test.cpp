@@ -1,7 +1,7 @@
 #include "embed.h"
 #include <gtk/gtk.h>
 
-class GtkEmbedListener : public EmbedListener
+class GtkEmbedListener : public MozViewListener
 {
 public:
   GtkEmbedListener(GtkWidget *widget) {
@@ -26,14 +26,14 @@ main(int argc, char **argv)
   gtk_widget_show (window);
   g_signal_connect(window, "delete_event", gtk_main_quit, NULL);
 
-  MozEmbed embed;
+  MozView view;
   GtkEmbedListener myListener(window);
-  embed.SetListener(&myListener);
+  view.SetListener(&myListener);
 
   GtkAllocation alloc = window->allocation;
-  embed.CreateBrowser(window, 0, 0, alloc.width, alloc.height);
+  view.CreateBrowser(window, 0, 0, alloc.width, alloc.height);
 
-  embed.LoadURI("http://www.google.com");
+  view.LoadURI("http://www.google.com");
 
   gtk_main();
 }

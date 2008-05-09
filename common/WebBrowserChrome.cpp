@@ -6,8 +6,8 @@
 
 using namespace std;
 
-WebBrowserChrome::WebBrowserChrome(MozEmbed* pAMozEmbed)
-: mChromeFlags(0), pMozEmbed(pAMozEmbed)
+WebBrowserChrome::WebBrowserChrome(MozView* pAMozView)
+: mChromeFlags(0), pMozView(pAMozView)
 {
     /* member initializers and constructor code */
 }
@@ -177,7 +177,7 @@ NS_IMETHODIMP WebBrowserChrome::GetTitle(PRUnichar * *aTitle)
 }
 NS_IMETHODIMP WebBrowserChrome::SetTitle(const PRUnichar * aTitle)
 {
-    EmbedListener* pListener = pMozEmbed->GetListener();
+    MozViewListener* pListener = pMozView->GetListener();
     if(pListener) {
         pListener->SetTitle(NS_ConvertUTF16toUTF8(aTitle).get());
         return NS_OK;

@@ -6,13 +6,14 @@
 // XXX
 typedef PRUint32 nsresult;
 
-class EmbedListener;
+class MozViewListener;
 
-class MozEmbed
+class MozView
 {
 public:
-    MozEmbed();
-    virtual ~MozEmbed();
+    MozView();
+    virtual ~MozView();
+
     nsresult CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y,
         PRInt32 width, PRInt32 height);
     nsresult SetPositionAndSize(PRInt32 x, PRInt32 y,
@@ -20,8 +21,8 @@ public:
     nsresult LoadURI(const char* uri);
     nsresult SetFocus(PRBool focus);
 
-    void SetListener(EmbedListener* pNewListener);
-    EmbedListener* GetListener();
+    void SetListener(MozViewListener* pNewListener);
+    MozViewListener* GetListener();
 
     void* GetNativeWindow();
 
@@ -36,23 +37,23 @@ private:
  * The app can subclass this and override methods that will
  * be called as appropriate.
  *
- * Use MozEmbed::SetListener to regster the listener
+ * Use MozView::SetListener to regster the listener
  *
- * EmbedListener implements noop defaults, so the app only
+ * MozViewListener implements noop defaults, so the app only
  * needs to override the methods it uses.
  */
-class EmbedListener
+class MozViewListener
 {
 public:
-    EmbedListener();
-    virtual ~EmbedListener();
-    void SetMozEmbed(MozEmbed* pAMozEmbed);
+    MozViewListener();
+    virtual ~MozViewListener();
+    void SetMozView(MozView* pAMozView);
 
     // methods the embedding app can override
     virtual void SetTitle(const char* newTitle);
 
 protected:
-    MozEmbed* pMozEmbed;
+    MozView* pMozView;
 };
 
 #endif /* __embed_h_ */
