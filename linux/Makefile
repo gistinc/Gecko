@@ -3,13 +3,13 @@ MOZ_LIBS=`pkg-config --libs libxul libxul-embedding-unstable mozilla-js`
 
 SRCS= \
 	test.cpp \
-	embed.cpp \
-	WebBrowserChrome.cpp \
+	../common/embed.cpp \
+	../common/WebBrowserChrome.cpp \
 	nsGlueLinkingDlopen.cpp \
 	nsXPCOMGlue.cpp
 
 HEADERS = \
-	embed.h \
+	../common/embed.h \
 	nsGlueLinking.h \
 	nsXPCOMGlue.h
 
