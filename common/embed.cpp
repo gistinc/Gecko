@@ -83,38 +83,38 @@ nsresult MozView::CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y, PRInt
 {
   mPrivate->nativeWindow = aNativeWindow;
 
-    nsresult rv;
+  nsresult rv;
 
-    nsCOMPtr<nsIBaseWindow> baseWindow;
-    mPrivate->webBrowser = do_CreateInstance(NS_WEBBROWSER_CONTRACTID, &rv);
-    if (NS_FAILED(rv)) {
-            printf("do_CreateInstance webBrowser\n");
-    }
-    baseWindow = do_QueryInterface(mPrivate->webBrowser);
-    rv = baseWindow->InitWindow(mPrivate->nativeWindow, 0, x, y, width, height);
-    if (NS_FAILED(rv)) {
-            printf("InitWindow\n");
-    }
-    
-    nsIWebBrowserChrome **aNewWindow = getter_AddRefs(mPrivate->chrome);
-    CallQueryInterface(static_cast<nsIWebBrowserChrome*>(new WebBrowserChrome(this)), aNewWindow);
-    mPrivate->webBrowser->SetContainerWindow(mPrivate->chrome.get());
-    mPrivate->chrome->SetWebBrowser(mPrivate->webBrowser);
+  nsCOMPtr<nsIBaseWindow> baseWindow;
+  mPrivate->webBrowser = do_CreateInstance(NS_WEBBROWSER_CONTRACTID, &rv);
+  if (NS_FAILED(rv)) {
+    printf("do_CreateInstance webBrowser\n");
+  }
+  baseWindow = do_QueryInterface(mPrivate->webBrowser);
+  rv = baseWindow->InitWindow(mPrivate->nativeWindow, 0, x, y, width, height);
+  if (NS_FAILED(rv)) {
+    printf("InitWindow\n");
+  }
+  
+  nsIWebBrowserChrome **aNewWindow = getter_AddRefs(mPrivate->chrome);
+  CallQueryInterface(static_cast<nsIWebBrowserChrome*>(new WebBrowserChrome(this)), aNewWindow);
+  mPrivate->webBrowser->SetContainerWindow(mPrivate->chrome.get());
+  mPrivate->chrome->SetWebBrowser(mPrivate->webBrowser);
 
-    rv = baseWindow->Create();
-    if (NS_FAILED(rv)) {
-            printf("Create\n");
-    }
-    rv =baseWindow->SetVisibility(PR_TRUE);
-    if (NS_FAILED(rv)) {
-            printf("SetVisibility\n");
-    }
+  rv = baseWindow->Create();
+  if (NS_FAILED(rv)) {
+    printf("Create\n");
+  }
+  rv =baseWindow->SetVisibility(PR_TRUE);
+  if (NS_FAILED(rv)) {
+    printf("SetVisibility\n");
+  }
 
-    mPrivate->webNavigation = do_QueryInterface(mPrivate->webBrowser);
-    
-    SetFocus(true);
+  mPrivate->webNavigation = do_QueryInterface(mPrivate->webBrowser);
+  
+  SetFocus(true);
 
-    return 0;
+  return 0;
 }
 
 MozView::MozView()
@@ -125,48 +125,48 @@ MozView::MozView()
 
 MozView::~MozView()
 {
-    // release browser and chrome
-    nsCOMPtr<nsIBaseWindow> baseWindow;
-    baseWindow = do_QueryInterface(mPrivate->webBrowser);
-    baseWindow->Destroy();
-    mPrivate->chrome->SetWebBrowser(NULL);
+  // release browser and chrome
+  nsCOMPtr<nsIBaseWindow> baseWindow;
+  baseWindow = do_QueryInterface(mPrivate->webBrowser);
+  baseWindow->Destroy();
+  mPrivate->chrome->SetWebBrowser(NULL);
 
-    baseWindow = NULL;
+  baseWindow = NULL;
 
-    mPrivate->webBrowser = NULL;
-    mPrivate->chrome = NULL;
-    delete mPrivate;
+  mPrivate->webBrowser = NULL;
+  mPrivate->chrome = NULL;
+  delete mPrivate;
 }
 
 nsresult MozView::SetPositionAndSize(PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
 {
-    nsresult rv;
-    nsCOMPtr<nsIBaseWindow> baseWindow;
-    baseWindow = do_QueryInterface(mPrivate->webBrowser);
-    rv = baseWindow->SetPositionAndSize(x, y, width, height, PR_TRUE);
-    if (NS_FAILED(rv))
-        return 1;
-    else
-        return 0;
+  nsresult rv;
+  nsCOMPtr<nsIBaseWindow> baseWindow;
+  baseWindow = do_QueryInterface(mPrivate->webBrowser);
+  rv = baseWindow->SetPositionAndSize(x, y, width, height, PR_TRUE);
+  if (NS_FAILED(rv))
+    return 1;
+  else
+    return 0;
 }
 
 nsresult MozView::LoadURI(const char* uri)
 {
-    nsresult rv;
-    rv = mPrivate->webNavigation->LoadURI(NS_ConvertASCIItoUTF16(uri).get(),
-        nsIWebNavigation::LOAD_FLAGS_NONE, 0, 0, 0);
-    return rv;
+  nsresult rv;
+  rv = mPrivate->webNavigation->LoadURI(NS_ConvertASCIItoUTF16(uri).get(),
+    nsIWebNavigation::LOAD_FLAGS_NONE, 0, 0, 0);
+  return rv;
 }
 
 nsresult MozView::SetFocus(PRBool focus)
 {
-    nsCOMPtr<nsIWebBrowserFocus> browserFocus;
-    browserFocus = do_QueryInterface(mPrivate->webBrowser);
-    if(focus)
-        browserFocus->Activate();
-    else
-        browserFocus->Deactivate();
-    return NS_OK;
+  nsCOMPtr<nsIWebBrowserFocus> browserFocus;
+  browserFocus = do_QueryInterface(mPrivate->webBrowser);
+  if(focus)
+    browserFocus->Activate();
+  else
+    browserFocus->Deactivate();
+  return NS_OK;
 }
 
 void MozView::SetListener(MozViewListener *pNewListener)
@@ -177,12 +177,12 @@ void MozView::SetListener(MozViewListener *pNewListener)
 
 MozViewListener* MozView::GetListener()
 {
-    return mPrivate->pListener;
+  return mPrivate->pListener;
 }
 
 void* MozView::GetNativeWindow()
 {
-    return mPrivate->nativeWindow;
+  return mPrivate->nativeWindow;
 }
 
 // ---- MozViewListener ---
@@ -201,5 +201,5 @@ void MozViewListener::SetTitle(const char *newTitle)
 
 void MozViewListener::SetMozView(MozView *pAMozView)
 {
-    pMozView = pAMozView;
+  pMozView = pAMozView;
 }

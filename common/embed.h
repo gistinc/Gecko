@@ -11,24 +11,24 @@ class MozViewListener;
 class MozView
 {
 public:
-    MozView();
-    virtual ~MozView();
+  MozView();
+  virtual ~MozView();
 
-    nsresult CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y,
-        PRInt32 width, PRInt32 height);
-    nsresult SetPositionAndSize(PRInt32 x, PRInt32 y,
-        PRInt32 width, PRInt32 height);
-    nsresult LoadURI(const char* uri);
-    nsresult SetFocus(PRBool focus);
+  nsresult CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y,
+    PRInt32 width, PRInt32 height);
+  nsresult SetPositionAndSize(PRInt32 x, PRInt32 y,
+    PRInt32 width, PRInt32 height);
+  nsresult LoadURI(const char* uri);
+  nsresult SetFocus(PRBool focus);
 
-    void SetListener(MozViewListener* pNewListener);
-    MozViewListener* GetListener();
+  void SetListener(MozViewListener* pNewListener);
+  MozViewListener* GetListener();
 
-    void* GetNativeWindow();
+  void* GetNativeWindow();
 
 private:
-    class Private;
-    Private *mPrivate;
+  class Private;
+  Private *mPrivate;
 
 };
 
@@ -45,15 +45,15 @@ private:
 class MozViewListener
 {
 public:
-    MozViewListener();
-    virtual ~MozViewListener();
-    void SetMozView(MozView* pAMozView);
+  MozViewListener();
+  virtual ~MozViewListener();
+  void SetMozView(MozView* pAMozView);
 
-    // methods the embedding app can override
-    virtual void SetTitle(const char* newTitle);
+  // methods the embedding app can override
+  virtual void SetTitle(const char* newTitle);
 
 protected:
-    MozView* pMozView;
+  MozView* pMozView;
 };
 
 #endif /* __embed_h_ */
