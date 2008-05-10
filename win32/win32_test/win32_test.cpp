@@ -13,7 +13,7 @@ using namespace std;
 class MyListener : public MozViewListener
 {
   void SetTitle(const char* newTitle);
-  void StatusChanged(const char* newStatus);
+  void StatusChanged(const char* newStatus, PRUint32 statusType);
   void LocationChanged(const char* newLocation);
 };
 
@@ -23,7 +23,7 @@ void MyListener::SetTitle(const char *newTitle)
   ::SetWindowTextA(hWnd, newTitle);
 }
 
-void MyListener::StatusChanged(const char *newStatus)
+void MyListener::StatusChanged(const char *newStatus, PRUint32 statusType)
 {
   cout << "STATUS:" << newStatus << endl;
 }

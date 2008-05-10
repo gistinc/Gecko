@@ -51,7 +51,7 @@ public:
 
   // methods the embedding app can override
   virtual void SetTitle(const char* newTitle);
-  virtual void StatusChanged(const char* newStatus);
+  virtual void StatusChanged(const char* newStatus, PRUint32 statusType);
   virtual void LocationChanged(const char* newLocation);
 
 protected:

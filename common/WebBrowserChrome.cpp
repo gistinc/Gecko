@@ -51,7 +51,7 @@ NS_IMETHODIMP WebBrowserChrome::SetStatus(PRUint32 statusType, const PRUnichar *
 {
   MozViewListener* pListener = pMozView->GetListener();
   if(pListener) {
-    pListener->StatusChanged(NS_ConvertUTF16toUTF8(status).get());
+    pListener->StatusChanged(NS_ConvertUTF16toUTF8(status).get(), statusType);
     return NS_OK;
   }
   else {

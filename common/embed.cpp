@@ -207,7 +207,7 @@ void MozViewListener::SetTitle(const char *newTitle)
 {
 }
 
-void MozViewListener::StatusChanged(const char* newStatus)
+void MozViewListener::StatusChanged(const char* newStatus, PRUint32 statusType)
 {
 }
 
