@@ -2,6 +2,7 @@
 #include "embed.h"
 #include "nsIDOMWindow.h"
 #include "nsStringAPI.h"
+#include "nsIURI.h"
 #include <iostream>
 
 using namespace std;
@@ -26,6 +27,7 @@ NS_INTERFACE_MAP_BEGIN(WebBrowserChrome)
    NS_INTERFACE_MAP_ENTRY(nsIWebBrowserChrome)
    NS_INTERFACE_MAP_ENTRY(nsIEmbeddingSiteWindow)
    NS_INTERFACE_MAP_ENTRY(nsIWebProgressListener)
+   NS_INTERFACE_MAP_ENTRY(nsISupportsWeakReference)
 NS_INTERFACE_MAP_END
 
 NS_IMETHODIMP WebBrowserChrome::GetInterface(const nsIID &aIID, void** aInstancePtr)
@@ -47,8 +49,14 @@ NS_IMETHODIMP WebBrowserChrome::GetInterface(const nsIID &aIID, void** aInstance
 /* void setStatus (in unsigned long statusType, in wstring status); */
 NS_IMETHODIMP WebBrowserChrome::SetStatus(PRUint32 statusType, const PRUnichar *status)
 {
-    wcout << "STATUS: " << status << endl;
+  MozViewListener* pListener = pMozView->GetListener();
+  if(pListener) {
+    pListener->StatusChanged(NS_ConvertUTF16toUTF8(status).get());
     return NS_OK;
+  }
+  else {
+    return NS_ERROR_NOT_IMPLEMENTED;
+  }
 }
 
 /* attribute nsIWebBrowser webBrowser; */
@@ -125,7 +133,16 @@ NS_IMETHODIMP WebBrowserChrome::OnProgressChange(nsIWebProgress *aWebProgress, n
 /* void onLocationChange (in nsIWebProgress aWebProgress, in nsIRequest aRequest, in nsIURI aLocation); */
 NS_IMETHODIMP WebBrowserChrome::OnLocationChange(nsIWebProgress *aWebProgress, nsIRequest *aRequest, nsIURI *aLocation)
 {
+  MozViewListener* pListener = pMozView->GetListener();
+  if(pListener) {
+    nsCString spec;
+    aLocation->GetSpec(spec);
+    pListener->LocationChanged(spec.get());
+    return NS_OK;
+  }
+  else {
     return NS_ERROR_NOT_IMPLEMENTED;
+  }
 }
 
 /* void onStatusChange (in nsIWebProgress aWebProgress, in nsIRequest aRequest, in nsresult aStatus, in wstring aMessage); */

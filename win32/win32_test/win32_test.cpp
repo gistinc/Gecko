@@ -5,18 +5,34 @@
 #include "win32_test.h"
 #include "embed.h"
 
+#include <iostream>
+using namespace std;
+
 #define MAX_LOADSTRING 100
 
 class MyListener : public MozViewListener
 {
-    void SetTitle(const char* newTitle);
+  void SetTitle(const char* newTitle);
+  void StatusChanged(const char* newStatus);
+  void LocationChanged(const char* newLocation);
 };
 
 void MyListener::SetTitle(const char *newTitle)
 {
-    HWND hWnd = (HWND)pMozView->GetNativeWindow();
-    ::SetWindowTextA(hWnd, newTitle);
+  HWND hWnd = (HWND)pMozView->GetNativeWindow();
+  ::SetWindowTextA(hWnd, newTitle);
 }
+
+void MyListener::StatusChanged(const char *newStatus)
+{
+  cout << "STATUS:" << newStatus << endl;
+}
+
+void MyListener::LocationChanged(const char *newLocation)
+{
+  cout << "LOCATION:" << newLocation << endl;
+}
+
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
