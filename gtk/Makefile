@@ -19,7 +19,7 @@ HEADERS = \
 	nsGlueLinking.h \
 	nsXPCOMGlue.h
 
-CFLAGS=-I../common `pkg-config --cflags gtk+-2.0` $(MOZ_CFLAGS)
+CFLAGS=-fno-rtti -I../common `pkg-config --cflags gtk+-2.0` $(MOZ_CFLAGS)
 LDFLAGS=`pkg-config --libs gtk+-2.0` $(MOZ_LIBS)
 
 test: $(SRCS) $(HEADERS)
