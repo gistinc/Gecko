@@ -1,5 +1,5 @@
-#ifndef GTK_MOZ_VIEW_GTK_H
-#define GTK_MOZ_VIEW_GTK_H
+#ifndef MOZ_WEB_VIEW_GTK_H
+#define MOZ_WEB_VIEW_GTK_H
 
 #include <gtk/gtkbin.h>
 
@@ -33,4 +33,5 @@ GtkWidget *moz_web_view_new      (void);
 void       moz_web_view_load_uri (MozWebView *view, const char *uri);
 
 G_END_DECLS
+
 #endif
