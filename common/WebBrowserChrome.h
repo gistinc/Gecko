@@ -9,7 +9,6 @@
 #include "nsIInterfaceRequestor.h"
 #include "nsWeakReference.h"
 
-
 class MozView;
 
 class WebBrowserChrome : public nsIWebBrowserChrome,
@@ -27,8 +26,7 @@ public:
 
     WebBrowserChrome(MozView* pAMozView);
 
-private:
-    ~WebBrowserChrome();
+    virtual ~WebBrowserChrome();
 
 protected:
     /* additional members */

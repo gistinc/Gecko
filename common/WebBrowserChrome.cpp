@@ -1,3 +1,4 @@
+#include "xpcom-config.h"
 #include "WebBrowserChrome.h"
 #include "embed.h"
 #include "nsIDOMWindow.h"
