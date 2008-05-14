@@ -7,13 +7,16 @@
 #include "nsIWebProgressListener.h"
 #include "nsIEmbeddingSiteWindow.h"
 #include "nsIInterfaceRequestor.h"
+#include "nsWeakReference.h"
+
 
 class MozView;
 
 class WebBrowserChrome : public nsIWebBrowserChrome,
     public nsIWebProgressListener,
     public nsIEmbeddingSiteWindow,
-    public nsIInterfaceRequestor
+    public nsIInterfaceRequestor,
+    public nsSupportsWeakReference
 {
 public:
     NS_DECL_ISUPPORTS

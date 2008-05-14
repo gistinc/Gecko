@@ -54,6 +54,8 @@ using namespace std;
 #include "nsCOMPtr.h"
 #include "nsStringAPI.h"
 #include "nsComponentManagerUtils.h"
+#include "nsIWeakReference.h"
+#include "nsIWeakReferenceUtils.h"
 
 #include "nsIWebBrowser.h"
 #include "nsIWebNavigation.h"
@@ -110,6 +112,12 @@ nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y, PRInt
   if (NS_FAILED(rv)) {
     printf("SetVisibility\n");
   }
+
+  // register the progress listener
+  nsCOMPtr<nsIWebProgressListener> listener = do_QueryInterface(mPrivate->chrome);
+  nsCOMPtr<nsIWeakReference> thisListener(do_GetWeakReference(listener));
+  mPrivate->webBrowser->AddWebBrowserListener(thisListener, NS_GET_IID(nsIWebProgressListener));
+
 
   mPrivate->webNavigation = do_QueryInterface(mPrivate->webBrowser);
 
@@ -223,6 +231,14 @@ MozViewListener::~MozViewListener()
 }
 
 void MozViewListener::SetTitle(const char *newTitle)
+{
+}
+
+void MozViewListener::StatusChanged(const char* newStatus, PRUint32 statusType)
+{
+}
+
+void MozViewListener::LocationChanged(const char* newLocation)
 {
 }
 
