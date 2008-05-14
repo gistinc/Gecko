@@ -1,10 +1,16 @@
+CC=gcc
+CXX=g++
+
 MOZ_CFLAGS=-DMOZ_DLL_SUFFIX="\".so\"" `pkg-config --cflags libxul libxul-embedding-unstable mozilla-js`
 MOZ_LIBS=`pkg-config --libs libxul libxul-embedding-unstable mozilla-js`
 
-SRCS= \
+
+SRCS = \
 	test.cpp \
+	moz-web-view.cpp \
 	../common/embed.cpp \
 	../common/WebBrowserChrome.cpp \
+	../common/EmbeddingSetup.cpp \
 	nsGlueLinkingDlopen.cpp \
 	nsXPCOMGlue.cpp
 
@@ -13,5 +19,12 @@ HEADERS = \
 	nsGlueLinking.h \
 	nsXPCOMGlue.h
 
-test: $(SRCS) $(HEADERS) Makefile
-	g++ $(SRCS) -I../common `pkg-config --cflags --libs gtk+-2.0` $(MOZ_CFLAGS) $(MOZ_LIBS) -o test
+CFLAGS=-I../common `pkg-config --cflags gtk+-2.0` $(MOZ_CFLAGS)
+LDFLAGS=`pkg-config --libs gtk+-2.0` $(MOZ_LIBS)
+
+test: $(SRCS) $(HEADERS)
+	$(CXX) $(CFLAGS) $(SRCS) $(LDFLAGS) -o test
+
+all: test
+clean:
+	rm test

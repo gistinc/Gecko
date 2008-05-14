@@ -217,8 +217,6 @@ nsresult SetupEmbedding::InitEmbedding()
             {0, 0}
     };
 
-    cout << "here?";
-
     rv = XPCOMGlueLoadXULFunctions(nsFuncs);
     if (NS_FAILED(rv)) {
         cerr << "Couldn't load XUL functions" << endl;
@@ -268,7 +266,6 @@ nsresult SetupEmbedding::InitEmbedding()
         return 8;
     }
 
-    printf("b\n");
     // init embedding
 #ifdef WIN32
     rv = XRE_InitEmbedding(xuldir, appdir, nsnull, nsnull, 0);

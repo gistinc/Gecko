@@ -14,4 +14,4 @@ typedef PRUint32 nsresult;
  */
 nsresult InitEmbedding();
 
-#endif __EmbeddingSetup_h_
+#endif // __EmbeddingSetup_h_

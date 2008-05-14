@@ -5,3 +5,5 @@ syntax: regexp
 \.\#
 ^linux/test$
 \.DS_Store
+Cache/
+\.orig$

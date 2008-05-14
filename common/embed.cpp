@@ -60,6 +60,7 @@ using namespace std;
 #include "nsEmbedCID.h"
 
 #include "nsIWebBrowserFocus.h"
+#include "nsIWidget.h"
 
 // Non-Frozen
 #include "nsIBaseWindow.h"
@@ -69,19 +70,19 @@ using namespace std;
 
 class MozView::Private{
 public:
-  Private() : nativeWindow(NULL), pListener(NULL) {}
+  Private() : parentWindow(NULL), pListener(NULL) {}
 
   MozViewListener* pListener;
-  void* nativeWindow;
+  void* parentWindow;
   nsCOMPtr<nsIWebBrowser> webBrowser;
   nsCOMPtr<nsIWebNavigation> webNavigation;
   nsCOMPtr<nsIWebBrowserChrome> chrome;
 };
 
 
-nsresult MozView::CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
+nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
 {
-  mPrivate->nativeWindow = aNativeWindow;
+  mPrivate->parentWindow = aParentWindow;
 
   nsresult rv;
 
@@ -91,11 +92,11 @@ nsresult MozView::CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y, PRInt
     printf("do_CreateInstance webBrowser\n");
   }
   baseWindow = do_QueryInterface(mPrivate->webBrowser);
-  rv = baseWindow->InitWindow(mPrivate->nativeWindow, 0, x, y, width, height);
+  rv = baseWindow->InitWindow(mPrivate->parentWindow, 0, x, y, width, height);
   if (NS_FAILED(rv)) {
     printf("InitWindow\n");
   }
-  
+
   nsIWebBrowserChrome **aNewWindow = getter_AddRefs(mPrivate->chrome);
   CallQueryInterface(static_cast<nsIWebBrowserChrome*>(new WebBrowserChrome(this)), aNewWindow);
   mPrivate->webBrowser->SetContainerWindow(mPrivate->chrome.get());
@@ -111,7 +112,7 @@ nsresult MozView::CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y, PRInt
   }
 
   mPrivate->webNavigation = do_QueryInterface(mPrivate->webBrowser);
-  
+
   SetFocus(true);
 
   return 0;
@@ -169,6 +170,20 @@ nsresult MozView::SetFocus(PRBool focus)
   return NS_OK;
 }
 
+void MozView::Show()
+{
+  nsCOMPtr<nsIBaseWindow> baseWindow;
+  baseWindow = do_QueryInterface(mPrivate->webBrowser);
+  baseWindow->SetVisibility(PR_TRUE);
+}
+
+void MozView::Hide()
+{
+  nsCOMPtr<nsIBaseWindow> baseWindow;
+  baseWindow = do_QueryInterface(mPrivate->webBrowser);
+  baseWindow->SetVisibility(PR_FALSE);
+}
+
 void MozView::SetListener(MozViewListener *pNewListener)
 {
   mPrivate->pListener = pNewListener;
@@ -180,9 +195,21 @@ MozViewListener* MozView::GetListener()
   return mPrivate->pListener;
 }
 
+void* MozView::GetParentWindow()
+{
+  return mPrivate->parentWindow;
+}
+
 void* MozView::GetNativeWindow()
 {
-  return mPrivate->nativeWindow;
+  nsCOMPtr<nsIBaseWindow> baseWindow = do_QueryInterface(mPrivate->webBrowser);
+  nsCOMPtr<nsIWidget> mozWidget;
+
+  if (NS_SUCCEEDED(baseWindow->GetMainWidget(getter_AddRefs(mozWidget)))) {
+    return mozWidget->GetNativeData(NS_NATIVE_WINDOW);
+  } else {
+    return NULL;
+  }
 }
 
 // ---- MozViewListener ---

@@ -21,15 +21,18 @@ public:
   nsresult LoadURI(const char* uri);
   nsresult SetFocus(PRBool focus);
 
+  void Show();
+  void Hide();
+
   void SetListener(MozViewListener* pNewListener);
   MozViewListener* GetListener();
 
-  void* GetNativeWindow();
+  void* GetParentWindow();
+  void *GetNativeWindow();
 
 private:
   class Private;
   Private *mPrivate;
-
 };
 
 /**
