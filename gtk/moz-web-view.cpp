@@ -4,7 +4,9 @@
 #include "embed.h"
 
 enum {
-  TITLE,
+  TITLE_CHANGED,
+  STATUS_CHANGED,
+  LOCATION_CHANGED,
   LAST_SIGNAL
 };
 
@@ -15,8 +17,16 @@ public:
   ViewListener(MozWebView *view) : mView(view) {}
   virtual ~ViewListener() {}
 
-  virtual void SetTitle(const char *newTitle) {
-    g_signal_emit(G_OBJECT(mView), signals[TITLE], 0, newTitle);
+  virtual void SetTitle(const char *new_title) {
+    g_signal_emit(G_OBJECT(mView), signals[TITLE_CHANGED], 0, new_title);
+  }
+
+  virtual void StatusChanged(const char *new_status, PRUint32 flags) {
+    g_signal_emit(G_OBJECT(mView), signals[STATUS_CHANGED], 0, new_status);
+  }
+
+  virtual void LocationChanged(const char *new_uri) {
+    g_signal_emit(G_OBJECT(mView), signals[LOCATION_CHANGED], 0, new_uri);
   }
 
 private:
@@ -26,11 +36,50 @@ private:
 struct _MozWebViewPriv {
   MozView *view;
   GtkWidget *offscreen;
+  GtkWidget *offscreen_window;
   GtkWidget *mozWidget;
   ViewListener *listener;
 };
 
 G_DEFINE_TYPE(MozWebView, moz_web_view, GTK_TYPE_BIN)
+
+static void
+moz_web_view_map(GtkWidget *widget)
+{
+  g_return_if_fail(widget != NULL);
+  g_return_if_fail(MOZ_IS_WEB_VIEW(widget));
+
+  MozWebView *view = MOZ_WEB_VIEW (widget);
+
+  GTK_WIDGET_SET_FLAGS(widget, GTK_MAPPED);
+
+  view->priv->view->Show();
+
+  if (gtk_bin_get_child(GTK_BIN(widget)) != view->priv->mozWidget) {
+    // XXX: gtkmozembed does this reparenting during realization, but
+    // for as-yet-undiagnosed reasons it's not working there.
+    // *Ideally* we wouldn't need to do this reparenting at all,
+    // but the moz backend always assumes that its parent is realized.
+    gtk_widget_reparent (view->priv->mozWidget, widget);
+  }
+
+  gdk_window_show(widget->window);
+
+}
+
+static void
+moz_web_view_unmap(GtkWidget *widget)
+{
+  g_return_if_fail(widget != NULL);
+  g_return_if_fail(MOZ_IS_WEB_VIEW(widget));
+
+  MozWebView *view = MOZ_WEB_VIEW (widget);
+
+  GTK_WIDGET_UNSET_FLAGS(widget, GTK_MAPPED);
+
+  view->priv->view->Hide();
+  gdk_window_hide(widget->window);
+}
 
 static void
 moz_web_view_realize(GtkWidget *widget)
@@ -73,49 +122,15 @@ moz_web_view_unrealize(GtkWidget *widget)
 
   MozWebView *view = MOZ_WEB_VIEW(widget);
 
-  if (!GTK_WIDGET_REALIZED(widget))
-    return;
+  if (GTK_WIDGET_MAPPED(widget))
+    moz_web_view_unmap(widget);
+
+  if (gtk_bin_get_child(GTK_BIN(widget)) == view->priv->mozWidget) {
+    gtk_widget_reparent(view->priv->mozWidget,
+                        GTK_WIDGET (view->priv->offscreen));
+  }
 
   GTK_WIDGET_CLASS (moz_web_view_parent_class)->unrealize (widget);
-}
-
-static void
-moz_web_view_map(GtkWidget *widget)
-{
-  g_return_if_fail(widget != NULL);
-  g_return_if_fail(MOZ_IS_WEB_VIEW(widget));
-
-  MozWebView *view = MOZ_WEB_VIEW (widget);
-
-  GTK_WIDGET_SET_FLAGS(widget, GTK_MAPPED);
-
-  view->priv->view->Show();
-
-  // XXX: gtkmozembed does this reparenting during realization, but
-  // for as-yet-undiagnosed reasons it's not working there.
-  // *Ideally* we wouldn't need to do this reparenting at all,
-  // but the moz backend always assumes that its parent is realized.
-  gtk_widget_reparent (view->priv->mozWidget, widget);
-
-  gdk_window_show(widget->window);
-
-}
-
-static void
-moz_web_view_unmap(GtkWidget *widget)
-{
-  g_return_if_fail(widget != NULL);
-  g_return_if_fail(MOZ_IS_WEB_VIEW(widget));
-
-  MozWebView *view = MOZ_WEB_VIEW (widget);
-
-  GTK_WIDGET_UNSET_FLAGS(widget, GTK_MAPPED);
-
-  gtk_widget_reparent(gtk_bin_get_child (GTK_BIN (widget)),
-                      GTK_WIDGET (view->priv->offscreen));
-
-  view->priv->view->Hide();
-  gdk_window_hide(widget->window);
 }
 
 static void
@@ -145,7 +160,7 @@ moz_web_view_destroy (GtkObject *object)
 
   if (view->priv->view) {
     delete view->priv->view;
-    view->priv->view= NULL;
+    view->priv->view = NULL;
   }
 
   if (view->priv->listener) {
@@ -188,11 +203,29 @@ moz_web_view_class_init (MozWebViewClass *klass)
 
   gobject_class->finalize = moz_web_view_finalize;
 
-  signals[TITLE] =
-    g_signal_new ("title",
+  signals[TITLE_CHANGED] =
+    g_signal_new ("title-changed",
                   G_TYPE_FROM_CLASS(klass),
                   G_SIGNAL_RUN_FIRST,
-                  G_STRUCT_OFFSET(MozWebViewClass, title),
+                  G_STRUCT_OFFSET(MozWebViewClass, title_changed),
+                  NULL, NULL,
+                  g_cclosure_marshal_VOID__STRING,
+                  G_TYPE_NONE, 1, G_TYPE_STRING);
+
+  signals[STATUS_CHANGED] =
+    g_signal_new ("status-changed",
+                  G_TYPE_FROM_CLASS(klass),
+                  G_SIGNAL_RUN_FIRST,
+                  G_STRUCT_OFFSET(MozWebViewClass, status_changed),
+                  NULL, NULL,
+                  g_cclosure_marshal_VOID__STRING,
+                  G_TYPE_NONE, 1, G_TYPE_STRING);
+
+  signals[LOCATION_CHANGED] =
+    g_signal_new ("location-changed",
+                  G_TYPE_FROM_CLASS(klass),
+                  G_SIGNAL_RUN_FIRST,
+                  G_STRUCT_OFFSET(MozWebViewClass, location_changed),
                   NULL, NULL,
                   g_cclosure_marshal_VOID__STRING,
                   G_TYPE_NONE, 1, G_TYPE_STRING);
@@ -211,7 +244,6 @@ moz_web_view_init (MozWebView *view)
   gtk_widget_realize(view->priv->offscreen);
 
   view->priv->view->CreateBrowser(view->priv->offscreen, 0, 0, 500, 500);
-
   view->priv->mozWidget = gtk_bin_get_child(GTK_BIN(view->priv->offscreen));
 }
 

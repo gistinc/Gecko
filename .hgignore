@@ -3,7 +3,7 @@ syntax: regexp
 ^win32/.*Debug/
 \.ncb
 \.\#
-^linux/test$
+^gtk/test$
 \.DS_Store
 Cache/
 \.orig$

@@ -36,7 +36,7 @@ private:
 };
 
 /**
- * This is the callback interface to the embeddig app.
+ * This is the callback interface to the embedding app.
  * The app can subclass this and override methods that will
  * be called as appropriate.
  *

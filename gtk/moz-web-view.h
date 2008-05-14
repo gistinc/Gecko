@@ -24,7 +24,10 @@ struct _MozWebViewClass {
   GtkBinClass parent_class;
 
   /* Signals */
-  void (*title) (MozWebView *view, const char *title);
+  void (*title_changed) (MozWebView *view, const char *title);
+  void (*status_changed) (MozWebView *view, const char *status, guint32 statusType);
+  void (*location_changed) (const char *uri);
+
 };
 
 GType      moz_web_view_get_type (void);

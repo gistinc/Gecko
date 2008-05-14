@@ -23,7 +23,7 @@ CFLAGS=-fno-rtti -I../common `pkg-config --cflags gtk+-2.0` $(MOZ_CFLAGS)
 LDFLAGS=`pkg-config --libs gtk+-2.0` $(MOZ_LIBS)
 
 test: $(SRCS) $(HEADERS)
-	$(CXX) $(CFLAGS) $(SRCS) $(LDFLAGS) -o test
+	$(CXX) -g $(CFLAGS) $(SRCS) $(LDFLAGS) -o test
 
 all: test
 clean:
