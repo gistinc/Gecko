@@ -137,8 +137,10 @@ MozView::~MozView()
   // release browser and chrome
   nsCOMPtr<nsIBaseWindow> baseWindow;
   baseWindow = do_QueryInterface(mPrivate->webBrowser);
-  baseWindow->Destroy();
-  mPrivate->chrome->SetWebBrowser(NULL);
+  if(baseWindow)
+    baseWindow->Destroy();
+  if(mPrivate->chrome)
+    mPrivate->chrome->SetWebBrowser(NULL);
 
   baseWindow = NULL;
 
