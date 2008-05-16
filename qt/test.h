@@ -14,6 +14,7 @@ public:
   MyBrowser(QWidget *parent = 0);
 public slots:
   void updateLocation(const QString& url);
+  void updateTitle(const QString& title);
   void go();
 
 private:

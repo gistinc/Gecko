@@ -22,6 +22,9 @@ MyBrowser::MyBrowser(QWidget *parent)
   connect(mozView, SIGNAL(locationChanged(const QString&)),
     this, SLOT(updateLocation(const QString&)));
 
+  connect(mozView, SIGNAL(titleChanged(const QString&)),
+    this, SLOT(updateTitle(const QString&)));
+
   connect(location, SIGNAL(returnPressed()),
     this, SLOT(go()));
   
@@ -31,6 +34,11 @@ MyBrowser::MyBrowser(QWidget *parent)
 void MyBrowser::updateLocation(const QString& url)
 {
   location->setText(url);
+}
+
+void MyBrowser::updateTitle(const QString& title)
+{
+  setWindowTitle(title);
 }
 
 void MyBrowser::go()

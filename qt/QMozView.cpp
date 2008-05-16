@@ -37,19 +37,50 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "QMozView.h"
-#include <QtDebug>
 #include "embed.h"
+
+// used for receiving notification from MozView
+class QMozViewListener : public MozViewListener
+{
+public:
+  QMozViewListener(QMozView* aQMozView) : pQMozView(aQMozView) {}
+  virtual ~QMozViewListener() {}
+
+  void SetTitle(const char* newTitle);
+  void StatusChanged(const char* newStatus, PRUint32 statusType);
+  void LocationChanged(const char* newLocation);
+
+private:
+  QMozView* pQMozView;
+};
+
+void QMozViewListener::SetTitle(const char* newTitle)
+{
+  pQMozView->titleChanged(newTitle);
+}
+
+void QMozViewListener::StatusChanged(const char* newStatus, PRUint32 statusType)
+{
+  pQMozView->statusChanged(newStatus);
+}
+
+void QMozViewListener::LocationChanged(const char* newLocation)
+{
+  pQMozView->locationChanged(newLocation);
+}
 
 class QMozView::Private
 {
 public:
+  Private(QMozView* aQMozView) : listener(aQMozView) {mozView.SetListener(&listener);}
   MozView mozView;
+  QMozViewListener listener;
 };
 
 QMozView::QMozView(QWidget *parent)
 : QWidget(parent)
 {
-  mPrivate = new Private();
+  mPrivate = new Private(this);
 
   mPrivate->mozView.CreateBrowser(winId(), 0, 0, 100, 100);
 }
@@ -68,4 +99,3 @@ void QMozView::loadUri(const QString &uri)
 {
   mPrivate->mozView.LoadURI(uri.toUtf8());
 }
-

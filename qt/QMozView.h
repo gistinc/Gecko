@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+class QMozViewListener;
+
 class QMozView : public QWidget
 {
   Q_OBJECT
@@ -15,6 +17,8 @@ public:
 
 signals:
   void locationChanged(const QString& newUri);
+  void titleChanged(const QString& newTitle);
+  void statusChanged(const QString& newStatus);
 
 protected:
   void resizeEvent(QResizeEvent* event);
@@ -22,6 +26,8 @@ protected:
 private:
   class Private;
   Private* mPrivate;
+
+  friend class QMozViewListener;
 };
 
 #endif /* __QMozView_h_ */
