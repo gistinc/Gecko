@@ -69,6 +69,8 @@ using namespace std;
 
 // our stuff
 #include "WebBrowserChrome.h"
+#include "ContentListener.h"
+
 
 class MozView::Private{
 public:
@@ -79,6 +81,7 @@ public:
   nsCOMPtr<nsIWebBrowser> webBrowser;
   nsCOMPtr<nsIWebNavigation> webNavigation;
   nsCOMPtr<nsIWebBrowserChrome> chrome;
+  nsCOMPtr<nsIURIContentListener> contentListener;
 };
 
 
@@ -118,8 +121,11 @@ nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y, PRInt
   nsCOMPtr<nsIWeakReference> thisListener(do_GetWeakReference(listener));
   mPrivate->webBrowser->AddWebBrowserListener(thisListener, NS_GET_IID(nsIWebProgressListener));
 
-
   mPrivate->webNavigation = do_QueryInterface(mPrivate->webBrowser);
+
+  // register the content listener
+  mPrivate->contentListener = new ContentListener(this, mPrivate->webNavigation);
+  mPrivate->webBrowser->SetParentURIContentListener(mPrivate->contentListener); 
 
   SetFocus(true);
 
@@ -130,6 +136,7 @@ MozView::MozView()
 {
   mPrivate = new Private();
   InitEmbedding();
+
 }
 
 MozView::~MozView()
@@ -146,6 +153,7 @@ MozView::~MozView()
 
   mPrivate->webBrowser = NULL;
   mPrivate->chrome = NULL;
+  mPrivate->contentListener = NULL;
   delete mPrivate;
 }
 
@@ -242,6 +250,11 @@ void MozViewListener::StatusChanged(const char* newStatus, PRUint32 statusType)
 
 void MozViewListener::LocationChanged(const char* newLocation)
 {
+}
+
+PRBool MozViewListener::OpenURI(const char* newLocation)
+{
+  return false;
 }
 
 void MozViewListener::SetMozView(MozView *pAMozView)

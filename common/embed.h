@@ -56,6 +56,7 @@ public:
   virtual void SetTitle(const char* newTitle);
   virtual void StatusChanged(const char* newStatus, PRUint32 statusType);
   virtual void LocationChanged(const char* newLocation);
+  virtual PRBool OpenURI(const char* newLocation);
 
 protected:
   MozView* pMozView;
