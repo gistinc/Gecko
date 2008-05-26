@@ -1,18 +1,19 @@
-TEMPLATE = app
+TEMPLATE = lib
 
-HEADERS = QMozView.h test.h \
+HEADERS = QMozView.h \
 	../common/embed.h ../common/EmbeddingSetup.h \
 	../common/WebBrowserChrome.h
 
-SOURCES = QMozView.cpp test.cpp \
+SOURCES = QMozView.cpp \
 	../common/embed.cpp ../common/EmbeddingSetup.cpp \
 	../common/WebBrowserChrome.cpp
 
-TARGET = test
+TARGET = qmozembed
 
-CONFIG += qt
+CONFIG += qt static
 
 DEFINES += XPCOM_GLUE=1 XP_WIN=1
+CONFIG(dll):DEFINES += Q_MOZVIEW_EXPORT=Q_DECL_EXPORT
 
 win32 {
 INCLUDEPATH = $(GRE_HOME)/../include/xulapp \

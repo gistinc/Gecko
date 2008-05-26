@@ -1,11 +1,15 @@
 #ifndef __QMozView_h_
 #define __QMozView_h_
 
+#ifndef Q_MOZVIEW_EXPORT
+#define Q_MOZVIEW_EXPORT
+#endif
+
 #include <QWidget>
 
 class QMozViewListener;
 
-class QMozView : public QWidget
+class Q_MOZVIEW_EXPORT QMozView : public QWidget
 {
   Q_OBJECT
 
