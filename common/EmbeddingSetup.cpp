@@ -62,6 +62,8 @@ using namespace std;
 #  undef MAX_PATH
 #  define MAX_PATH _MAX_PATH
 #else
+#  include <unistd.h>
+#  include <string.h>
 #  define MAX_PATH PATH_MAX
 #endif
 
@@ -240,10 +242,15 @@ nsresult SetupEmbedding::InitEmbedding()
         return 6;
     }
 
-#ifdef WIN32
-    // create nsILocalFile pointing to appdir (WIN32)
+    // create nsILocalFile pointing to appdir
     char self[MAX_PATH];
+#ifdef WIN32
     GetModuleFileNameA(GetModuleHandle(NULL), self, sizeof(self));
+#else
+    ssize_t len;
+    if ((len = readlink("/proc/self/exe", self, sizeof(self)-1)) != -1)
+      self[len] = '\0';
+#endif
     string selfPath(self);
     lastslash = selfPath.find_last_of("/\\");
     if (lastslash == string::npos) {
@@ -252,10 +259,6 @@ nsresult SetupEmbedding::InitEmbedding()
     }
 
     selfPath = selfPath.substr(0, lastslash);
-#else
-    // XXX: crap!
-    string selfPath = "/home/dave/moz/embed/linux";
-#endif
 
     nsCOMPtr<nsILocalFile> binDir;
     nsCOMPtr<nsILocalFile> appdir;
