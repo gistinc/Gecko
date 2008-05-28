@@ -8,6 +8,30 @@ typedef PRUint32 nsresult;
 
 class MozViewListener;
 
+class MozApp
+{
+public:
+  static MozApp *Instance()
+  {
+    static MozApp singleton;
+    return &singleton;
+  }
+  virtual ~MozApp();
+
+  nsresult SetCharPref(const char *name, const char *value);
+  nsresult SetBoolPref(const char *name, PRBool value);
+
+ private:
+  // Private constructor and various singleton black magick
+  MozApp();
+  MozApp(const MozApp&);            // Prevent copy-construction
+  MozApp& operator=(const MozApp&); // Prevent assignment
+
+  class Private;
+  Private *mPrivate;
+};
+
+
 class MozView
 {
 public:
@@ -19,6 +43,11 @@ public:
   nsresult SetPositionAndSize(PRInt32 x, PRInt32 y,
     PRInt32 width, PRInt32 height);
   nsresult LoadURI(const char* uri);
+  nsresult LoadData(const PRUint8 *data,
+		    PRUint32       len,
+		    const char    *base_url,
+		    const char    *content_type);
+
   nsresult SetFocus(PRBool focus);
 
   void Show();
@@ -57,6 +86,7 @@ public:
   virtual void StatusChanged(const char* newStatus, PRUint32 statusType);
   virtual void LocationChanged(const char* newLocation);
   virtual PRBool OpenURI(const char* newLocation);
+  virtual void DocumentLoaded();
 
 protected:
   MozView* pMozView;

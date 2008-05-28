@@ -56,6 +56,10 @@ using namespace std;
 #include "nsComponentManagerUtils.h"
 #include "nsIWeakReference.h"
 #include "nsIWeakReferenceUtils.h"
+#include "nsIWebBrowserStream.h"
+#include "nsIURI.h"
+#include "nsNetUtil.h" // NS_NewURI()
+#include "pref/nsIPref.h"
 
 #include "nsIWebBrowser.h"
 #include "nsIWebNavigation.h"
@@ -72,18 +76,79 @@ using namespace std;
 #include "ContentListener.h"
 
 
+
+MozApp::MozApp()
+{
+  InitEmbedding();
+}
+
+MozApp::~MozApp()
+{
+}
+
+nsresult MozApp::SetCharPref(const char *name, const char *value)
+{
+    nsresult rv;
+	
+    nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
+    if (NS_FAILED (rv)) return rv;
+    
+    rv = pref->SetCharPref (name, value);
+    
+    return rv;
+}
+
+nsresult MozApp::SetBoolPref(const char *name, PRBool value)
+{
+    nsresult rv;
+	
+    nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
+    if (NS_FAILED (rv)) return rv;
+    
+    rv = pref->SetBoolPref (name, value);
+    
+    return rv;
+}
+
+
 class MozView::Private{
 public:
   Private() : parentWindow(NULL), pListener(NULL) {}
 
+  MozApp* app;
   MozViewListener* pListener;
   void* parentWindow;
+
   nsCOMPtr<nsIWebBrowser> webBrowser;
   nsCOMPtr<nsIWebNavigation> webNavigation;
   nsCOMPtr<nsIWebBrowserChrome> chrome;
   nsCOMPtr<nsIURIContentListener> contentListener;
 };
 
+
+MozView::MozView()
+{
+  mPrivate = new Private();
+  mPrivate->app = MozApp::Instance();
+}
+
+MozView::~MozView()
+{
+  // release browser and chrome
+  nsCOMPtr<nsIBaseWindow> baseWindow;
+  baseWindow = do_QueryInterface(mPrivate->webBrowser);
+  if(baseWindow)
+    baseWindow->Destroy();
+  if(mPrivate->chrome)
+    mPrivate->chrome->SetWebBrowser(NULL);
+
+  baseWindow = NULL;
+
+  mPrivate->webBrowser = NULL;
+  mPrivate->chrome = NULL;
+  mPrivate->contentListener = NULL;
+  delete mPrivate;
+}
 
 nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
 {
@@ -132,31 +197,6 @@ nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y, PRInt
   return 0;
 }
 
-MozView::MozView()
-{
-  mPrivate = new Private();
-  InitEmbedding();
-
-}
-
-MozView::~MozView()
-{
-  // release browser and chrome
-  nsCOMPtr<nsIBaseWindow> baseWindow;
-  baseWindow = do_QueryInterface(mPrivate->webBrowser);
-  if(baseWindow)
-    baseWindow->Destroy();
-  if(mPrivate->chrome)
-    mPrivate->chrome->SetWebBrowser(NULL);
-
-  baseWindow = NULL;
-
-  mPrivate->webBrowser = NULL;
-  mPrivate->chrome = NULL;
-  mPrivate->contentListener = NULL;
-  delete mPrivate;
-}
-
 nsresult MozView::SetPositionAndSize(PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
 {
   nsresult rv;
@@ -176,6 +216,38 @@ nsresult MozView::LoadURI(const char* uri)
     nsIWebNavigation::LOAD_FLAGS_NONE, 0, 0, 0);
   return rv;
 }
+
+nsresult MozView::LoadData(const PRUint8 *data,
+			   PRUint32       len,
+			   const char    *base_url,
+			   const char    *content_type)
+{
+  nsresult rv;
+
+  nsCOMPtr<nsIWebBrowserStream> wbStream = do_QueryInterface(mPrivate->webBrowser);
+  if (!wbStream) 
+    return NS_ERROR_FAILURE;
+
+  nsCOMPtr<nsIURI> uri;
+  rv = NS_NewURI(getter_AddRefs(uri), base_url);
+  if (NS_FAILED(rv)) 
+    return rv;
+
+  rv = wbStream->OpenStream(uri, nsDependentCString(content_type));
+  if (NS_FAILED(rv)) 
+    return rv;
+
+  rv = wbStream->AppendToStream(data, len);
+  if (NS_FAILED(rv)) 
+    return rv;
+
+  rv = wbStream->CloseStream();
+  if (NS_FAILED(rv)) 
+    return rv;
+
+  return NS_OK;
+}
+
 
 nsresult MozView::SetFocus(PRBool focus)
 {
@@ -255,6 +327,10 @@ void MozViewListener::LocationChanged(const char* newLocation)
 PRBool MozViewListener::OpenURI(const char* newLocation)
 {
   return false;
+}
+
+void MozViewListener::DocumentLoaded()
+{
 }
 
 void MozViewListener::SetMozView(MozView *pAMozView)
