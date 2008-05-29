@@ -81,8 +81,12 @@ QMozView::QMozView(QWidget *parent)
 : QWidget(parent)
 {
   mPrivate = new Private(this);
-
-  mPrivate->mozView.CreateBrowser(winId(), 0, 0, 100, 100);
+#ifdef WIN32
+  mPrivate->mozView.CreateBrowser((void*)winId(), 0, 0, 100, 100);
+#else
+  // TODO: Hmmm what if we are not using a mozilla with Qt backend
+  mPrivate->mozView.CreateBrowser(this, 0, 0, 0, 0);
+#endif
 }
 
 QMozView::~QMozView()

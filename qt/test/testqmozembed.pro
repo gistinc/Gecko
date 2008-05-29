@@ -9,18 +9,21 @@ TARGET = testqmozembed
 CONFIG += qt
 debug:CONFIG += console
 
+unix:QMAKE_CXXFLAGS += -fshort-wchar -fno-rtti
+
 INCLUDEPATH += ..
 
 debug:LIBS += -L../debug
 release:LIBS += -L../release
+unix:LIBS += -L..
 
 LIBS += -lqmozembed
 
 
 # needed because using static lib for now
-DEFINES += XPCOM_GLUE=1 XP_WIN=1
+DEFINES += XPCOM_GLUE=1
+win32:DEFINES += XP_WIN=1
 
-win32 {
 INCLUDEPATH += $(GRE_HOME)/../include/xulapp \
 	$(GRE_HOME)/../include/nspr \
 	$(GRE_HOME)/../include/xpcom \
@@ -40,10 +43,10 @@ INCLUDEPATH += $(GRE_HOME)/../include/xulapp \
 	$(GRE_HOME)/../include/gfx \
 	../common
 
-LIBS += -L$(GRE_HOME)/../lib \
-	-L$(GRE_HOME)/../../profile/dirserviceprovider/standalone
+LIBS += -L$(GRE_HOME)/../lib
 
-LIBS += -ladvapi32
-}
+win32:LIBS += -L$(GRE_HOME)/../../profile/dirserviceprovider/standalone
 
-LIBS += -lxpcomglue -lprofdirserviceprovidersa_s
+win32:LIBS += -ladvapi32 -lprofdirserviceprovidersa_s
+
+LIBS += -lxpcomglue

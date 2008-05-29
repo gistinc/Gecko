@@ -12,10 +12,13 @@ TARGET = qmozembed
 
 CONFIG += qt static
 
-DEFINES += XPCOM_GLUE=1 XP_WIN=1
+unix:QMAKE_CXXFLAGS += -fshort-wchar -fno-rtti
+unix:DEFINES += MOZ_WIDGET_GTK2
+
+DEFINES += XPCOM_GLUE=1
+win32:DEFINES += XP_WIN=1
 CONFIG(dll):DEFINES += Q_MOZVIEW_EXPORT=Q_DECL_EXPORT
 
-win32 {
 INCLUDEPATH = $(GRE_HOME)/../include/xulapp \
 	$(GRE_HOME)/../include/nspr \
 	$(GRE_HOME)/../include/xpcom \
@@ -35,10 +38,10 @@ INCLUDEPATH = $(GRE_HOME)/../include/xulapp \
 	$(GRE_HOME)/../include/gfx \
 	../common
 
-LIBS += -L$(GRE_HOME)/../lib \
-	-L$(GRE_HOME)/../../profile/dirserviceprovider/standalone
+LIBS += -L$(GRE_HOME)/../lib
 
-LIBS += -ladvapi32
-}
+win32:LIBS += -L$(GRE_HOME)/../../profile/dirserviceprovider/standalone
 
-LIBS += -lxpcomglue -lprofdirserviceprovidersa_s
+win32:LIBS += -ladvapi32 -lprofdirserviceprovidersa_s
+
+LIBS += -lxpcomglue 
