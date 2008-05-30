@@ -128,8 +128,8 @@ nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y, PRInt
 
 MozView::MozView()
 {
-  mPrivate = new Private();
   InitEmbedding();
+  mPrivate = new Private();
 }
 
 MozView::~MozView()
@@ -147,6 +147,7 @@ MozView::~MozView()
   mPrivate->webBrowser = NULL;
   mPrivate->chrome = NULL;
   delete mPrivate;
+  TermEmbedding();
 }
 
 nsresult MozView::SetPositionAndSize(PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)

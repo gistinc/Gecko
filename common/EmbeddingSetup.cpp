@@ -70,6 +70,8 @@ using namespace std;
 XRE_InitEmbeddingType XRE_InitEmbedding = NULL;
 XRE_TermEmbeddingType XRE_TermEmbedding = NULL;
 
+static int gInitCount = 0;
+
 #ifdef MOZ_WIDGET_GTK2
 #include "nsIDirectoryService.h"
 #include "nsAppDirectoryServiceDefs.h"
@@ -162,28 +164,14 @@ nsresult StartupProfile()
 #endif
 }
 
-class SetupEmbedding
-{
-private:
-  SetupEmbedding() {initResult = InitEmbedding();}
-  ~SetupEmbedding() {TermEmbedding();}
-  nsresult InitEmbedding();
-  void TermEmbedding();
-  nsresult initResult;
-public:
-  static nsresult Init();
-};
 
-nsresult SetupEmbedding::Init()
-{
-  static SetupEmbedding singleton;
-  return singleton.initResult;
-}
-
-
-nsresult SetupEmbedding::InitEmbedding()
+nsresult InitEmbedding()
 {
     nsresult rv;
+
+    ++gInitCount;
+    if(gInitCount > 1)
+      return NS_OK;
 
     // Find the GRE (xul shared lib). We are only using frozen interfaces, so we
     // should be compatible all the way up to (but not including) mozilla 2.0
@@ -211,6 +199,9 @@ nsresult SetupEmbedding::InitEmbedding()
         cerr << "Couldn't start XPCOM glue" << endl;
         return 2;
     }
+
+    // get rid of the bogus TLS warnings
+    NS_LogInit();
 
     // load XUL functions
     nsDynamicFunctionLoad nsFuncs[] = {
@@ -280,34 +271,47 @@ nsresult SetupEmbedding::InitEmbedding()
         return 9;
     }
 
+    NS_LogTerm();
     // profile
     rv = StartupProfile();
     if (NS_FAILED(rv)) {
         return 10;
     }
-
     return NS_OK;
 }
 
-void SetupEmbedding::TermEmbedding()
+nsresult TermEmbedding()
 {
+  --gInitCount;
+  if(gInitCount > 0)
+    return NS_OK;
+
   nsresult rv;
+
+  // get rid of the bogus TLS warnings
+  NS_LogInit();
+
   // terminate embedding
   if (!XRE_TermEmbedding) {
     cerr << "XRE_TermEmbedding not set" << endl;
-    return;
+    return NS_ERROR_ABORT;
   }
   XRE_TermEmbedding();
+
+#ifndef MOZ_DIGET_GTK2
+  // make sure this is freed before shutting down xpcom
+  sProfileDir = nsnull;
+#endif
 
   // shutdown xpcom
   rv = XPCOMGlueShutdown();
   if (NS_FAILED(rv)) {
     fprintf(stderr, "Couldn't shutdown XPCOM glue\n");
-    return;
-  }    
+    return rv;
+  }
+
+  NS_LogTerm();
+
+  return NS_OK;
 }
 
-nsresult InitEmbedding()
-{
-  return SetupEmbedding::Init();
-}
