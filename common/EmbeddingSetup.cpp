@@ -298,7 +298,7 @@ nsresult TermEmbedding()
   }
   XRE_TermEmbedding();
 
-#ifndef MOZ_DIGET_GTK2
+#ifdef MOZ_WIDGET_GTK2
   // make sure this is freed before shutting down xpcom
   sProfileDir = nsnull;
 #endif
