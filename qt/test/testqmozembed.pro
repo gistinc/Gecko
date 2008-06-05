@@ -45,8 +45,6 @@ INCLUDEPATH += $(GRE_HOME)/../include/xulapp \
 
 LIBS += -L$(GRE_HOME)/../lib
 
-win32:LIBS += -L$(GRE_HOME)/../../profile/dirserviceprovider/standalone
-
-win32:LIBS += -ladvapi32 -lprofdirserviceprovidersa_s
+win32:LIBS += -ladvapi32
 
 LIBS += -lxpcomglue

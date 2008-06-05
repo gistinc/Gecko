@@ -72,13 +72,12 @@ XRE_TermEmbeddingType XRE_TermEmbedding = NULL;
 
 static int gInitCount = 0;
 
-#ifdef MOZ_WIDGET_GTK2
 #include "nsIDirectoryService.h"
 #include "nsAppDirectoryServiceDefs.h"
 nsIDirectoryServiceProvider *sAppFileLocProvider = nsnull;
 nsCOMPtr<nsILocalFile> sProfileDir = nsnull;
 
-class GTKEmbedDirectoryProvider : public nsIDirectoryServiceProvider2
+class MozEmbedDirectoryProvider : public nsIDirectoryServiceProvider2
 {
 public:
   NS_DECL_ISUPPORTS_INHERITED
@@ -86,26 +85,26 @@ public:
   NS_DECL_NSIDIRECTORYSERVICEPROVIDER2
 };
 
-static const GTKEmbedDirectoryProvider kDirectoryProvider;
+static const MozEmbedDirectoryProvider kDirectoryProvider;
 
-NS_IMPL_QUERY_INTERFACE2(GTKEmbedDirectoryProvider,
+NS_IMPL_QUERY_INTERFACE2(MozEmbedDirectoryProvider,
                          nsIDirectoryServiceProvider,
                          nsIDirectoryServiceProvider2)
 
 NS_IMETHODIMP_(nsrefcnt)
-GTKEmbedDirectoryProvider::AddRef()
+MozEmbedDirectoryProvider::AddRef()
 {
   return 1;
 }
 
 NS_IMETHODIMP_(nsrefcnt)
-GTKEmbedDirectoryProvider::Release()
+MozEmbedDirectoryProvider::Release()
 {
   return 1;
 }
 
 NS_IMETHODIMP
-GTKEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
+MozEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
                                    nsIFile* *aResult)
 {
   if (sAppFileLocProvider) {
@@ -124,7 +123,7 @@ GTKEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
 }
 
 NS_IMETHODIMP
-GTKEmbedDirectoryProvider::GetFiles(const char *aKey,
+MozEmbedDirectoryProvider::GetFiles(const char *aKey,
                                     nsISimpleEnumerator* *aResult)
 {
   nsCOMPtr<nsIDirectoryServiceProvider2>
@@ -135,7 +134,6 @@ GTKEmbedDirectoryProvider::GetFiles(const char *aKey,
 
   return dp2->GetFiles(aKey, aResult);
 }
-#endif
 
 nsresult StartupProfile()
 {
@@ -147,21 +145,8 @@ nsresult StartupProfile()
     appDataDir->AppendNative(nsCString("embedTest"));
     nsCOMPtr<nsILocalFile> localAppDataDir(do_QueryInterface(appDataDir));
 
-#ifdef MOZ_WIDGET_GTK2
     sProfileDir = localAppDataDir;
     return NS_OK;
-#else
-    nsCOMPtr<nsProfileDirServiceProvider> locProvider;
-    NS_NewProfileDirServiceProvider(PR_TRUE, getter_AddRefs(locProvider));
-    if (!locProvider)
-        return NS_ERROR_FAILURE;
-
-    rv = locProvider->Register();
-    if (NS_FAILED(rv))
-        return rv;
-
-    return locProvider->SetProfileDir(localAppDataDir);
-#endif
 }
 
 
@@ -238,6 +223,7 @@ nsresult InitEmbedding()
 #ifdef WIN32
     GetModuleFileNameA(GetModuleHandle(NULL), self, sizeof(self));
 #else
+    // TODO: works on linux, need solution for unices which don't support this
     ssize_t len;
     if ((len = readlink("/proc/self/exe", self, sizeof(self)-1)) != -1)
       self[len] = '\0';
@@ -261,11 +247,7 @@ nsresult InitEmbedding()
     }
 
     // init embedding
-#ifdef WIN32
-    rv = XRE_InitEmbedding(xuldir, appdir, nsnull, nsnull, 0);
-#else
-    rv = XRE_InitEmbedding(xuldir, appdir, const_cast<GTKEmbedDirectoryProvider*>(&kDirectoryProvider), nsnull, 0);
-#endif
+    rv = XRE_InitEmbedding(xuldir, appdir, const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider), nsnull, 0);
     if (NS_FAILED(rv)) {
         cerr << "XRE_InitEmbedding failed" << endl;
         return 9;
@@ -298,10 +280,8 @@ nsresult TermEmbedding()
   }
   XRE_TermEmbedding();
 
-#ifdef MOZ_WIDGET_GTK2
   // make sure this is freed before shutting down xpcom
   sProfileDir = nsnull;
-#endif
 
   // shutdown xpcom
   rv = XPCOMGlueShutdown();
