@@ -1,6 +1,8 @@
 syntax: regexp
 ^win32/.*debug/
 ^win32/.*Debug/
+^win32/.*release/
+^win32/.*Release/
 ^win32/.*\.suo
 \.ncb
 \.\#
@@ -9,6 +11,7 @@ syntax: regexp
 Cache/
 \.orig$
 ^qt/.*debug/
+^qt/.*release/
 ^qt/.*\.sln
 ^qt/.*\.suo
 ^qt/.*\.vcproj.*
