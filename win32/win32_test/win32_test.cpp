@@ -15,6 +15,8 @@ class MyListener : public MozViewListener
   void SetTitle(const char* newTitle);
   void StatusChanged(const char* newStatus, PRUint32 statusType);
   void LocationChanged(const char* newLocation);
+  PRBool OpenURI(const char* newLocation);
+  void DocumentLoaded();
 };
 
 void MyListener::SetTitle(const char *newTitle)
@@ -31,6 +33,17 @@ void MyListener::StatusChanged(const char *newStatus, PRUint32 statusType)
 void MyListener::LocationChanged(const char *newLocation)
 {
   cout << "LOCATION:" << newLocation << endl;
+}
+
+PRBool MyListener::OpenURI(const char* newLocation)
+{
+  cout << "OPEN URI:" << newLocation << endl;
+  return false;
+}
+
+void MyListener::DocumentLoaded()
+{
+  cout << "FINISHED" << endl;
 }
 
 
