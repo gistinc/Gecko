@@ -217,10 +217,10 @@ nsresult MozView::LoadURI(const char* uri)
   return rv;
 }
 
-nsresult MozView::LoadData(const PRUint8 *data,
-			   PRUint32       len,
-			   const char    *base_url,
-			   const char    *content_type)
+nsresult MozView::LoadData(const char    *base_url,
+			   const char    *content_type,
+			   const PRUint8 *data,
+			   PRUint32       len)
 {
   nsresult rv;
 

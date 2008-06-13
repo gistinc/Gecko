@@ -34,10 +34,10 @@ public:
   nsresult SetPositionAndSize(PRInt32 x, PRInt32 y,
     PRInt32 width, PRInt32 height);
   nsresult LoadURI(const char* uri);
-  nsresult LoadData(const PRUint8 *data,
-		    PRUint32       len,
-		    const char    *base_url,
-		    const char    *content_type);
+  nsresult LoadData(const char    *base_url,
+		    const char    *content_type,
+		    const PRUint8 *data,
+		    PRUint32       len);
 
   nsresult SetFocus(PRBool focus);
 
