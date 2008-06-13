@@ -62,19 +62,22 @@ using namespace std;
 #  undef MAX_PATH
 #  define MAX_PATH _MAX_PATH
 #else
+#  include <unistd.h>
+#  include <string.h>
 #  define MAX_PATH PATH_MAX
 #endif
 
 XRE_InitEmbeddingType XRE_InitEmbedding = NULL;
 XRE_TermEmbeddingType XRE_TermEmbedding = NULL;
 
-#ifdef MOZ_WIDGET_GTK2
+static int gInitCount = 0;
+
 #include "nsIDirectoryService.h"
 #include "nsAppDirectoryServiceDefs.h"
 nsIDirectoryServiceProvider *sAppFileLocProvider = nsnull;
 nsCOMPtr<nsILocalFile> sProfileDir = nsnull;
 
-class GTKEmbedDirectoryProvider : public nsIDirectoryServiceProvider2
+class MozEmbedDirectoryProvider : public nsIDirectoryServiceProvider2
 {
 public:
   NS_DECL_ISUPPORTS_INHERITED
@@ -82,26 +85,26 @@ public:
   NS_DECL_NSIDIRECTORYSERVICEPROVIDER2
 };
 
-static const GTKEmbedDirectoryProvider kDirectoryProvider;
+static const MozEmbedDirectoryProvider kDirectoryProvider;
 
-NS_IMPL_QUERY_INTERFACE2(GTKEmbedDirectoryProvider,
+NS_IMPL_QUERY_INTERFACE2(MozEmbedDirectoryProvider,
                          nsIDirectoryServiceProvider,
                          nsIDirectoryServiceProvider2)
 
 NS_IMETHODIMP_(nsrefcnt)
-GTKEmbedDirectoryProvider::AddRef()
+MozEmbedDirectoryProvider::AddRef()
 {
   return 1;
 }
 
 NS_IMETHODIMP_(nsrefcnt)
-GTKEmbedDirectoryProvider::Release()
+MozEmbedDirectoryProvider::Release()
 {
   return 1;
 }
 
 NS_IMETHODIMP
-GTKEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
+MozEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
                                    nsIFile* *aResult)
 {
   if (sAppFileLocProvider) {
@@ -120,7 +123,7 @@ GTKEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
 }
 
 NS_IMETHODIMP
-GTKEmbedDirectoryProvider::GetFiles(const char *aKey,
+MozEmbedDirectoryProvider::GetFiles(const char *aKey,
                                     nsISimpleEnumerator* *aResult)
 {
   nsCOMPtr<nsIDirectoryServiceProvider2>
@@ -131,7 +134,6 @@ GTKEmbedDirectoryProvider::GetFiles(const char *aKey,
 
   return dp2->GetFiles(aKey, aResult);
 }
-#endif
 
 nsresult StartupProfile()
 {
@@ -143,45 +145,18 @@ nsresult StartupProfile()
     appDataDir->AppendNative(nsCString("embedTest"));
     nsCOMPtr<nsILocalFile> localAppDataDir(do_QueryInterface(appDataDir));
 
-#ifdef MOZ_WIDGET_GTK2
     sProfileDir = localAppDataDir;
     return NS_OK;
-#else
-    nsCOMPtr<nsProfileDirServiceProvider> locProvider;
-    NS_NewProfileDirServiceProvider(PR_TRUE, getter_AddRefs(locProvider));
-    if (!locProvider)
-        return NS_ERROR_FAILURE;
-
-    rv = locProvider->Register();
-    if (NS_FAILED(rv))
-        return rv;
-
-    return locProvider->SetProfileDir(localAppDataDir);
-#endif
-}
-
-class SetupEmbedding
-{
-private:
-  SetupEmbedding() {initResult = InitEmbedding();}
-  ~SetupEmbedding() {TermEmbedding();}
-  nsresult InitEmbedding();
-  void TermEmbedding();
-  nsresult initResult;
-public:
-  static nsresult Init();
-};
-
-nsresult SetupEmbedding::Init()
-{
-  static SetupEmbedding singleton;
-  return singleton.initResult;
 }
 
 
-nsresult SetupEmbedding::InitEmbedding()
+nsresult InitEmbedding()
 {
     nsresult rv;
+
+    ++gInitCount;
+    if(gInitCount > 1)
+      return NS_OK;
 
     // Find the GRE (xul shared lib). We are only using frozen interfaces, so we
     // should be compatible all the way up to (but not including) mozilla 2.0
@@ -209,6 +184,9 @@ nsresult SetupEmbedding::InitEmbedding()
         cerr << "Couldn't start XPCOM glue" << endl;
         return 2;
     }
+
+    // get rid of the bogus TLS warnings
+    NS_LogInit();
 
     // load XUL functions
     nsDynamicFunctionLoad nsFuncs[] = {
@@ -240,10 +218,16 @@ nsresult SetupEmbedding::InitEmbedding()
         return 6;
     }
 
-#ifdef WIN32
-    // create nsILocalFile pointing to appdir (WIN32)
+    // create nsILocalFile pointing to appdir
     char self[MAX_PATH];
+#ifdef WIN32
     GetModuleFileNameA(GetModuleHandle(NULL), self, sizeof(self));
+#else
+    // TODO: works on linux, need solution for unices which don't support this
+    ssize_t len;
+    if ((len = readlink("/proc/self/exe", self, sizeof(self)-1)) != -1)
+      self[len] = '\0';
+#endif
     string selfPath(self);
     lastslash = selfPath.find_last_of("/\\");
     if (lastslash == string::npos) {
@@ -252,10 +236,6 @@ nsresult SetupEmbedding::InitEmbedding()
     }
 
     selfPath = selfPath.substr(0, lastslash);
-#else
-    // XXX: crap!
-    string selfPath = "/home/dave/moz/embed/linux";
-#endif
 
     nsCOMPtr<nsILocalFile> binDir;
     nsCOMPtr<nsILocalFile> appdir;
@@ -267,44 +247,51 @@ nsresult SetupEmbedding::InitEmbedding()
     }
 
     // init embedding
-#ifdef WIN32
-    rv = XRE_InitEmbedding(xuldir, appdir, nsnull, nsnull, 0);
-#else
-    rv = XRE_InitEmbedding(xuldir, appdir, const_cast<GTKEmbedDirectoryProvider*>(&kDirectoryProvider), nsnull, 0);
-#endif
+    rv = XRE_InitEmbedding(xuldir, appdir, const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider), nsnull, 0);
     if (NS_FAILED(rv)) {
         cerr << "XRE_InitEmbedding failed" << endl;
         return 9;
     }
 
+    NS_LogTerm();
     // profile
     rv = StartupProfile();
     if (NS_FAILED(rv)) {
         return 10;
     }
-
     return NS_OK;
 }
 
-void SetupEmbedding::TermEmbedding()
+nsresult TermEmbedding()
 {
+  --gInitCount;
+  if(gInitCount > 0)
+    return NS_OK;
+
   nsresult rv;
+
+  // get rid of the bogus TLS warnings
+  NS_LogInit();
+
   // terminate embedding
   if (!XRE_TermEmbedding) {
     cerr << "XRE_TermEmbedding not set" << endl;
-    return;
+    return NS_ERROR_ABORT;
   }
   XRE_TermEmbedding();
+
+  // make sure this is freed before shutting down xpcom
+  sProfileDir = nsnull;
 
   // shutdown xpcom
   rv = XPCOMGlueShutdown();
   if (NS_FAILED(rv)) {
     fprintf(stderr, "Couldn't shutdown XPCOM glue\n");
-    return;
-  }    
+    return rv;
+  }
+
+  NS_LogTerm();
+
+  return NS_OK;
 }
 
-nsresult InitEmbedding()
-{
-  return SetupEmbedding::Init();
-}

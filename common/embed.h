@@ -11,22 +11,13 @@ class MozViewListener;
 class MozApp
 {
 public:
-  static MozApp *Instance()
-  {
-    static MozApp singleton;
-    return &singleton;
-  }
+  MozApp();
   virtual ~MozApp();
 
   nsresult SetCharPref(const char *name, const char *value);
   nsresult SetBoolPref(const char *name, PRBool value);
 
  private:
-  // Private constructor and various singleton black magick
-  MozApp();
-  MozApp(const MozApp&);            // Prevent copy-construction
-  MozApp& operator=(const MozApp&); // Prevent assignment
-
   class Private;
   Private *mPrivate;
 };

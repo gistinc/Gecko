@@ -84,6 +84,7 @@ MozApp::MozApp()
 
 MozApp::~MozApp()
 {
+  TermEmbedding();
 }
 
 nsresult MozApp::SetCharPref(const char *name, const char *value)
@@ -115,7 +116,6 @@ class MozView::Private{
 public:
   Private() : parentWindow(NULL), pListener(NULL) {}
 
-  MozApp* app;
   MozViewListener* pListener;
   void* parentWindow;
 
@@ -125,11 +125,10 @@ public:
   nsCOMPtr<nsIURIContentListener> contentListener;
 };
 
-
 MozView::MozView()
 {
+  InitEmbedding();
   mPrivate = new Private();
-  mPrivate->app = MozApp::Instance();
 }
 
 MozView::~MozView()
@@ -148,6 +147,7 @@ MozView::~MozView()
   mPrivate->chrome = NULL;
   mPrivate->contentListener = NULL;
   delete mPrivate;
+  TermEmbedding();
 }
 
 nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
