@@ -59,7 +59,7 @@ using namespace std;
 #include "nsIWebBrowserStream.h"
 #include "nsIURI.h"
 #include "nsNetUtil.h" // NS_NewURI()
-#include "pref/nsIPref.h"
+#include "nsIPref.h"
 
 #include "nsIWebBrowser.h"
 #include "nsIWebNavigation.h"

@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(GRE_HOME)\..\include\xulapp&quot;;&quot;$(GRE_HOME)\..\include\nspr&quot;;&quot;$(GRE_HOME)\..\include\xpcom&quot;;&quot;$(GRE_HOME)\..\include\string&quot;;&quot;$(GRE_HOME)\..\include\profdirserviceprovider&quot;;&quot;$(GRE_HOME)\..\include\embed_base&quot;;&quot;$(GRE_HOME)\..\include\windowwatcher&quot;;&quot;$(GRE_HOME)\..\include\webbrwsr&quot;;&quot;$(GRE_HOME)\..\include\shistory&quot;;&quot;$(GRE_HOME)\..\include\uriloader&quot;;&quot;$(GRE_HOME)\..\include\dom&quot;;&quot;$(GRE_HOME)\..\include\necko&quot;;&quot;$(GRE_HOME)\..\include\widget&quot;;&quot;$(GRE_HOME)\..\include\docshell&quot;;&quot;$(GRE_HOME)\..\include\profile&quot;;&quot;$(GRE_HOME)\..\include&quot;;&quot;$(GRE_HOME)\..\include\gfx&quot;;..\..\common"
+				AdditionalIncludeDirectories="&quot;$(GRE_HOME)\..\include\xulapp&quot;;&quot;$(GRE_HOME)\..\include\nspr&quot;;&quot;$(GRE_HOME)\..\include\xpcom&quot;;&quot;$(GRE_HOME)\..\include\string&quot;;&quot;$(GRE_HOME)\..\include\profdirserviceprovider&quot;;&quot;$(GRE_HOME)\..\include\embed_base&quot;;&quot;$(GRE_HOME)\..\include\windowwatcher&quot;;&quot;$(GRE_HOME)\..\include\webbrwsr&quot;;&quot;$(GRE_HOME)\..\include\shistory&quot;;&quot;$(GRE_HOME)\..\include\uriloader&quot;;&quot;$(GRE_HOME)\..\include\dom&quot;;&quot;$(GRE_HOME)\..\include\necko&quot;;&quot;$(GRE_HOME)\..\include\widget&quot;;&quot;$(GRE_HOME)\..\include\docshell&quot;;&quot;$(GRE_HOME)\..\include\profile&quot;;&quot;$(GRE_HOME)\..\include&quot;;&quot;$(GRE_HOME)\..\include\gfx&quot;;&quot;$(GRE_HOME)\..\include\pref&quot;;..\..\common"
 				PreprocessorDefinitions="XPCOM_GLUE=1;XP_WIN=1"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -119,7 +119,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(GRE_HOME)\..\include\xulapp&quot;;&quot;$(GRE_HOME)\..\include\nspr&quot;;&quot;$(GRE_HOME)\..\include\xpcom&quot;;&quot;$(GRE_HOME)\..\include\string&quot;;&quot;$(GRE_HOME)\..\include\profdirserviceprovider&quot;;&quot;$(GRE_HOME)\..\include\embed_base&quot;;&quot;$(GRE_HOME)\..\include\windowwatcher&quot;;&quot;$(GRE_HOME)\..\include\webbrwsr&quot;;&quot;$(GRE_HOME)\..\include\shistory&quot;;&quot;$(GRE_HOME)\..\include\uriloader&quot;;&quot;$(GRE_HOME)\..\include\dom&quot;;&quot;$(GRE_HOME)\..\include\necko&quot;;&quot;$(GRE_HOME)\..\include\widget&quot;;&quot;$(GRE_HOME)\..\include\docshell&quot;;&quot;$(GRE_HOME)\..\include\profile&quot;;&quot;$(GRE_HOME)\..\include&quot;;&quot;$(GRE_HOME)\..\include\gfx&quot;;..\..\common"
+				AdditionalIncludeDirectories="&quot;$(GRE_HOME)\..\include\xulapp&quot;;&quot;$(GRE_HOME)\..\include\nspr&quot;;&quot;$(GRE_HOME)\..\include\xpcom&quot;;&quot;$(GRE_HOME)\..\include\string&quot;;&quot;$(GRE_HOME)\..\include\profdirserviceprovider&quot;;&quot;$(GRE_HOME)\..\include\embed_base&quot;;&quot;$(GRE_HOME)\..\include\windowwatcher&quot;;&quot;$(GRE_HOME)\..\include\webbrwsr&quot;;&quot;$(GRE_HOME)\..\include\shistory&quot;;&quot;$(GRE_HOME)\..\include\uriloader&quot;;&quot;$(GRE_HOME)\..\include\dom&quot;;&quot;$(GRE_HOME)\..\include\necko&quot;;&quot;$(GRE_HOME)\..\include\widget&quot;;&quot;$(GRE_HOME)\..\include\docshell&quot;;&quot;$(GRE_HOME)\..\include\profile&quot;;&quot;$(GRE_HOME)\..\include&quot;;&quot;$(GRE_HOME)\..\include\gfx&quot;;&quot;$(GRE_HOME)\..\include\pref&quot;;..\..\common"
 				PreprocessorDefinitions="XPCOM_GLUE=1;XP_WIN=1"
 				RuntimeLibrary="2"
 				TreatWChar_tAsBuiltInType="false"

@@ -37,6 +37,7 @@ INCLUDEPATH = $(GRE_HOME)/../include/xulapp \
 	$(GRE_HOME)/../include/profile \
 	$(GRE_HOME)/../include \
 	$(GRE_HOME)/../include/gfx \
+	$(GRE_HOME)/../include/pref \
 	../common
 
 LIBS += -L$(GRE_HOME)/../lib
