@@ -119,6 +119,16 @@ MozEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
     return sProfileDir->Clone(aResult);
   }
 
+  if (sProfileDir && !strcmp(aKey, NS_APP_PROFILE_DIR_STARTUP)) {
+    *aPersist = PR_TRUE;
+    return sProfileDir->Clone(aResult);
+  }
+
+  if (sProfileDir && !strcmp(aKey, NS_APP_CACHE_PARENT_DIR)) {
+    *aPersist = PR_TRUE;
+    return sProfileDir->Clone(aResult);
+  }
+
   return NS_ERROR_FAILURE;
 }
 
@@ -134,21 +144,6 @@ MozEmbedDirectoryProvider::GetFiles(const char *aKey,
 
   return dp2->GetFiles(aKey, aResult);
 }
-
-nsresult StartupProfile()
-{
-    nsCOMPtr<nsIFile> appDataDir;
-    nsresult rv = NS_GetSpecialDirectory(NS_APP_APPLICATION_REGISTRY_DIR, getter_AddRefs(appDataDir));
-    if (NS_FAILED(rv))
-        return rv;
-
-    appDataDir->AppendNative(nsCString("embedTest"));
-    nsCOMPtr<nsILocalFile> localAppDataDir(do_QueryInterface(appDataDir));
-
-    sProfileDir = localAppDataDir;
-    return NS_OK;
-}
-
 
 nsresult InitEmbedding()
 {
@@ -237,13 +232,28 @@ nsresult InitEmbedding()
 
     selfPath = selfPath.substr(0, lastslash);
 
-    nsCOMPtr<nsILocalFile> binDir;
     nsCOMPtr<nsILocalFile> appdir;
     rv = NS_NewNativeLocalFile(nsCString(selfPath.c_str()), PR_FALSE,
                                getter_AddRefs(appdir));
     if (NS_FAILED(rv)) {
         cerr << "Unable to create nsILocalFile for appdir" << endl;
         return 8;
+    }
+
+    // setup profile dir
+    // for now use a subdir under appdir
+    nsCOMPtr<nsIFile> profFile;
+    rv = appdir->Clone(getter_AddRefs(profFile));
+    NS_ENSURE_SUCCESS(rv, rv);
+    sProfileDir = do_QueryInterface(profFile);
+    sProfileDir->AppendNative(NS_LITERAL_CSTRING("mozembed"));
+
+    // create dir if needed
+    PRBool dirExists;
+    rv = sProfileDir->Exists(&dirExists);
+    NS_ENSURE_SUCCESS(rv, rv);
+    if (!dirExists) {
+      sProfileDir->Create(nsIFile::DIRECTORY_TYPE, 0700);
     }
 
     // init embedding
@@ -254,11 +264,7 @@ nsresult InitEmbedding()
     }
 
     NS_LogTerm();
-    // profile
-    rv = StartupProfile();
-    if (NS_FAILED(rv)) {
-        return 10;
-    }
+
     return NS_OK;
 }
 
