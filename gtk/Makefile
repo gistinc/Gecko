@@ -11,6 +11,7 @@ SRCS = \
 	../common/embed.cpp \
 	../common/WebBrowserChrome.cpp \
 	../common/EmbeddingSetup.cpp \
+	../common/ContentListener.cpp \
 	nsGlueLinkingDlopen.cpp \
 	nsXPCOMGlue.cpp
 
