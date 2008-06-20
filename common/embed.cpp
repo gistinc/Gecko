@@ -77,9 +77,9 @@ using namespace std;
 
 
 
-MozApp::MozApp()
+MozApp::MozApp(const char* aProfilePath)
 {
-  InitEmbedding();
+  InitEmbedding(aProfilePath);
 }
 
 MozApp::~MozApp()

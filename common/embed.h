@@ -11,7 +11,7 @@ class MozViewListener;
 class MozApp
 {
 public:
-  MozApp();
+  MozApp(const char* aProfilePath = 0);
   virtual ~MozApp();
 
   nsresult SetCharPref(const char *name, const char *value);

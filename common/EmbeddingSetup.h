@@ -11,8 +11,11 @@ typedef PRUint32 nsresult;
  * it will only do the initialization once,
  * but be sure to call TermEmbedding a matching number of times.
  *
+ * @param aProfilePath Optional argument to set the path where
+ *  profile data is stored. The directory will be created if it
+ *  doesn't exist.
  */
-nsresult InitEmbedding();
+nsresult InitEmbedding(const char* aProfilePath = 0);
 
 /**
  * Terminates embedding, i.e. does teardown and unloads needed libs.

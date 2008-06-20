@@ -145,7 +145,7 @@ MozEmbedDirectoryProvider::GetFiles(const char *aKey,
   return dp2->GetFiles(aKey, aResult);
 }
 
-nsresult InitEmbedding()
+nsresult InitEmbedding(const char* aProfilePath)
 {
     nsresult rv;
 
@@ -241,12 +241,18 @@ nsresult InitEmbedding()
     }
 
     // setup profile dir
-    // for now use a subdir under appdir
-    nsCOMPtr<nsIFile> profFile;
-    rv = appdir->Clone(getter_AddRefs(profFile));
-    NS_ENSURE_SUCCESS(rv, rv);
-    sProfileDir = do_QueryInterface(profFile);
-    sProfileDir->AppendNative(NS_LITERAL_CSTRING("mozembed"));
+    if(aProfilePath) {
+      rv = NS_NewNativeLocalFile(nsCString(aProfilePath), PR_FALSE,
+        getter_AddRefs(sProfileDir));
+      NS_ENSURE_SUCCESS(rv, rv);
+    } else {
+      // for now use a subdir under appdir
+      nsCOMPtr<nsIFile> profFile;
+      rv = appdir->Clone(getter_AddRefs(profFile));
+      NS_ENSURE_SUCCESS(rv, rv);
+      sProfileDir = do_QueryInterface(profFile);
+      sProfileDir->AppendNative(NS_LITERAL_CSTRING("mozembed"));
+    }
 
     // create dir if needed
     PRBool dirExists;
