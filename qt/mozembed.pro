@@ -1,11 +1,13 @@
 TEMPLATE = lib
 
 HEADERS = QMozView.h \
+	QMozApp.h \
 	../common/embed.h ../common/EmbeddingSetup.h \
 	../common/WebBrowserChrome.h \
 	../common/ContentListener.h
 
 SOURCES = QMozView.cpp \
+	QMozApp.cpp \
 	../common/embed.cpp ../common/EmbeddingSetup.cpp \
 	../common/WebBrowserChrome.cpp \
 	../common/ContentListener.cpp
