@@ -111,6 +111,53 @@ nsresult MozApp::SetBoolPref(const char *name, PRBool value)
     return rv;
 }
 
+nsresult MozApp::SetIntPref(const char *name, int value)
+{
+    nsresult rv;
+	
+    nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
+    if (NS_FAILED (rv)) return rv;
+    
+    rv = pref->SetIntPref (name, value);
+    
+    return rv;
+}
+
+nsresult MozApp::GetCharPref(const char *name, char **value)
+{
+    nsresult rv;
+	
+    nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
+    if (NS_FAILED (rv)) return rv;
+    
+    rv = pref->GetCharPref(name, value);
+    
+    return rv;
+}
+
+nsresult MozApp::GetBoolPref(const char *name, PRBool *value)
+{
+    nsresult rv;
+	
+    nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
+    if (NS_FAILED (rv)) return rv;
+    
+    rv = pref->GetBoolPref (name, value);
+    
+    return rv;
+}
+
+nsresult MozApp::GetIntPref(const char *name, int *value)
+{
+    nsresult rv;
+	
+    nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
+    if (NS_FAILED (rv)) return rv;
+    
+    rv = pref->GetIntPref (name, value);
+    
+    return rv;
+}
 
 class MozView::Private{
 public:

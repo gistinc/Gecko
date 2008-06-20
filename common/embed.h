@@ -16,6 +16,11 @@ public:
 
   nsresult SetCharPref(const char *name, const char *value);
   nsresult SetBoolPref(const char *name, PRBool value);
+  nsresult SetIntPref(const char *name, int value);
+
+  nsresult GetCharPref(const char *name, char **value);
+  nsresult GetBoolPref(const char *name, PRBool *value);
+  nsresult GetIntPref(const char *name, int *value);
 
  private:
   class Private;
