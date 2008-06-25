@@ -49,9 +49,18 @@ public:
   void SetTitle(const char* newTitle);
   void StatusChanged(const char* newStatus, PRUint32 statusType);
   void LocationChanged(const char* newLocation);
+  MozView* OpenWindow(PRUint32 flags);
 
 private:
   QMozView* pQMozView;
+};
+
+class QMozView::Private
+{
+public:
+  Private(QMozView* aQMozView) : listener(aQMozView) {mozView.SetListener(&listener);}
+  MozView mozView;
+  QMozViewListener listener;
 };
 
 void QMozViewListener::SetTitle(const char* newTitle)
@@ -69,13 +78,13 @@ void QMozViewListener::LocationChanged(const char* newLocation)
   pQMozView->locationChanged(newLocation);
 }
 
-class QMozView::Private
+MozView* QMozViewListener::OpenWindow(PRUint32 flags)
 {
-public:
-  Private(QMozView* aQMozView) : listener(aQMozView) {mozView.SetListener(&listener);}
-  MozView mozView;
-  QMozViewListener listener;
-};
+  QMozView* newQMozView = pQMozView->openWindow(flags);
+  if(!newQMozView)
+    return 0;
+  return &(newQMozView->mPrivate->mozView);
+}
 
 QMozView::QMozView(QWidget *parent)
 : QWidget(parent)
@@ -102,4 +111,9 @@ void QMozView::resizeEvent(QResizeEvent* event)
 void QMozView::loadUri(const QString &uri)
 {
   mPrivate->mozView.LoadURI(uri.toUtf8());
+}
+
+QMozView* QMozView::openWindow(int flags)
+{
+  return 0;
 }

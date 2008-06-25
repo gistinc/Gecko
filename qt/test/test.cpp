@@ -7,8 +7,21 @@
 #include <QUrl>
 #include <QDebug>
 
-#include "QMozView.h"
 #include "QMozApp.h"
+
+MyQMozView::MyQMozView(QWidget *parent)
+: QMozView(parent)
+{
+}
+
+QMozView* MyQMozView::openWindow(int flags)
+{
+  MyBrowser* newBrowser = new MyBrowser();
+  newBrowser->resize(400, 400);
+  newBrowser->show();
+  newBrowser->setAttribute(Qt::WA_DeleteOnClose);
+  return newBrowser->getQMozView();
+}
 
 MyBrowser::MyBrowser(QWidget *parent)
 : QWidget(parent)
@@ -18,9 +31,8 @@ MyBrowser::MyBrowser(QWidget *parent)
   location = new QLineEdit(this);
   layout->addWidget(location);
 
-  mozView = new QMozView(this);
+  mozView = new MyQMozView(this);
   layout->addWidget(mozView, 1);
-  mozView->loadUri("http://mozilla.org");
   
   status = new QLabel(this);
   layout->addWidget(status);
@@ -40,6 +52,12 @@ MyBrowser::MyBrowser(QWidget *parent)
   //webView->page()->mainFrame()->evaluateJavaScript("alert('embed');");
 }
 
+void MyBrowser::loadUri(const QString& uri)
+{
+  location->setText(uri);
+  mozView->loadUri(uri);
+}
+
 void MyBrowser::go()
 {
   mozView->loadUri(location->text());
@@ -53,6 +71,11 @@ int main(int argc, char *argv[])
   
   window.resize(400, 400);
   window.show();
+
+  if(argc > 1)
+    window.loadUri(argv[argc - 1]);
+  else
+    window.loadUri("http://mozilla.org");
 
   return app.exec();
 }

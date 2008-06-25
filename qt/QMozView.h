@@ -26,6 +26,7 @@ signals:
 
 protected:
   void resizeEvent(QResizeEvent* event);
+  virtual QMozView* openWindow(int flags);
 
 private:
   class Private;
