@@ -67,6 +67,8 @@ using namespace std;
 
 #include "nsIWebBrowserFocus.h"
 #include "nsIWidget.h"
+#include "nsIWindowCreator.h"
+#include "nsIWindowWatcher.h"
 
 // Non-Frozen
 #include "nsIBaseWindow.h"
@@ -75,6 +77,8 @@ using namespace std;
 #include "WebBrowserChrome.h"
 #include "ContentListener.h"
 
+// globals
+static nsCOMPtr<WindowCreator> sWindowCreator;
 
 
 MozApp::MozApp(const char* aProfilePath)
@@ -172,10 +176,66 @@ public:
   nsCOMPtr<nsIURIContentListener> contentListener;
 };
 
+class WindowCreator :
+  public nsIWindowCreator
+{
+public:
+  WindowCreator() {};
+  virtual ~WindowCreator() {};
+
+  NS_DECL_ISUPPORTS
+  NS_DECL_NSIWINDOWCREATOR
+};
+
+NS_IMPL_ISUPPORTS1(WindowCreator, nsIWindowCreator)
+
+NS_IMETHODIMP
+WindowCreator::CreateChromeWindow(nsIWebBrowserChrome *parent,
+  PRUint32 chromeFlags,
+  nsIWebBrowserChrome **_retval)
+{
+  NS_ENSURE_ARG_POINTER(_retval);
+
+  // get the listener from parent
+  WebBrowserChrome* chrome = dynamic_cast<WebBrowserChrome*>(parent);
+  if(!chrome)
+    return NS_ERROR_FAILURE;
+
+
+  MozViewListener* pListener = chrome->GetMozView()->GetListener();
+  if(!pListener)
+    return NS_ERROR_FAILURE;
+
+  MozView* mozView = pListener->OpenWindow(chromeFlags);
+  if(!mozView)
+    return NS_ERROR_FAILURE;
+
+  *_retval = mozView->mPrivate->chrome;
+  NS_IF_ADDREF(*_retval);
+  return NS_OK;
+}
+
 MozView::MozView()
 {
   InitEmbedding();
   mPrivate = new Private();
+
+  // TODO: should probably deal with WindowCreator in InitEmbedding
+  //       or maybe in mozapp
+  if(sWindowCreator)
+    return;
+
+  // create an nsWindowCreator and give it to the WindowWatcher service
+  sWindowCreator = new WindowCreator();
+  if (!sWindowCreator)
+      return;// NS_ERROR_OUT_OF_MEMORY;
+
+  nsCOMPtr<nsIWindowWatcher> wwatch(do_GetService(NS_WINDOWWATCHER_CONTRACTID));
+  if (!wwatch)
+      return;// NS_ERROR_UNEXPECTED;
+
+  wwatch->SetWindowCreator(sWindowCreator);
+
 }
 
 MozView::~MozView()
@@ -185,8 +245,9 @@ MozView::~MozView()
   baseWindow = do_QueryInterface(mPrivate->webBrowser);
   if(baseWindow)
     baseWindow->Destroy();
-  if(mPrivate->chrome)
+  if(mPrivate->chrome) {
     mPrivate->chrome->SetWebBrowser(NULL);
+  }
 
   baseWindow = NULL;
 
@@ -216,7 +277,7 @@ nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y, PRInt
 
   nsIWebBrowserChrome **aNewWindow = getter_AddRefs(mPrivate->chrome);
   CallQueryInterface(static_cast<nsIWebBrowserChrome*>(new WebBrowserChrome(this)), aNewWindow);
-  mPrivate->webBrowser->SetContainerWindow(mPrivate->chrome.get());
+  mPrivate->webBrowser->SetContainerWindow(mPrivate->chrome);
   mPrivate->chrome->SetWebBrowser(mPrivate->webBrowser);
 
   rv = baseWindow->Create();
@@ -383,4 +444,9 @@ void MozViewListener::DocumentLoaded()
 void MozViewListener::SetMozView(MozView *pAMozView)
 {
   pMozView = pAMozView;
+}
+
+MozView* MozViewListener::OpenWindow(PRUint32 flags)
+{
+  return 0;
 }

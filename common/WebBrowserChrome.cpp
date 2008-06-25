@@ -19,17 +19,12 @@ WebBrowserChrome::~WebBrowserChrome()
     /* destructor code */
 }
 
-NS_IMPL_ADDREF(WebBrowserChrome)
-NS_IMPL_RELEASE(WebBrowserChrome)
-
-NS_INTERFACE_MAP_BEGIN(WebBrowserChrome)
-   NS_INTERFACE_MAP_ENTRY_AMBIGUOUS(nsISupports, nsIWebBrowserChrome)
-   NS_INTERFACE_MAP_ENTRY(nsIInterfaceRequestor)
-   NS_INTERFACE_MAP_ENTRY(nsIWebBrowserChrome)
-   NS_INTERFACE_MAP_ENTRY(nsIEmbeddingSiteWindow)
-   NS_INTERFACE_MAP_ENTRY(nsIWebProgressListener)
-   NS_INTERFACE_MAP_ENTRY(nsISupportsWeakReference)
-NS_INTERFACE_MAP_END
+NS_IMPL_ISUPPORTS5(WebBrowserChrome,
+  nsIWebBrowserChrome,
+  nsIInterfaceRequestor,
+  nsIEmbeddingSiteWindow,
+  nsIWebProgressListener,
+  nsISupportsWeakReference)
 
 NS_IMETHODIMP WebBrowserChrome::GetInterface(const nsIID &aIID, void** aInstancePtr)
 {

@@ -7,6 +7,7 @@
 typedef PRUint32 nsresult;
 
 class MozViewListener;
+class WindowCreator;
 
 class MozApp
 {
@@ -58,6 +59,8 @@ public:
 private:
   class Private;
   Private *mPrivate;
+
+  friend WindowCreator;
 };
 
 /**
@@ -83,6 +86,7 @@ public:
   virtual void LocationChanged(const char* newLocation);
   virtual PRBool OpenURI(const char* newLocation);
   virtual void DocumentLoaded();
+  virtual MozView* OpenWindow(PRUint32 flags);
 
 protected:
   MozView* pMozView;
