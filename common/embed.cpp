@@ -197,10 +197,8 @@ WindowCreator::CreateChromeWindow(nsIWebBrowserChrome *parent,
   NS_ENSURE_ARG_POINTER(_retval);
 
   // get the listener from parent
-  WebBrowserChrome* chrome = dynamic_cast<WebBrowserChrome*>(parent);
-  if(!chrome)
-    return NS_ERROR_FAILURE;
-
+  // we assume parent is a WebBrowserChrome
+  WebBrowserChrome* chrome = static_cast<WebBrowserChrome*>(parent);
 
   MozViewListener* pListener = chrome->GetMozView()->GetListener();
   if(!pListener)

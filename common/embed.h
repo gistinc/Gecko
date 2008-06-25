@@ -60,7 +60,7 @@ private:
   class Private;
   Private *mPrivate;
 
-  friend WindowCreator;
+  friend class WindowCreator;
 };
 
 /**
