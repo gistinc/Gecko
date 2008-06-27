@@ -318,7 +318,7 @@ nsresult MozView::SetPositionAndSize(PRInt32 x, PRInt32 y, PRInt32 width, PRInt3
 nsresult MozView::LoadURI(const char* uri)
 {
   nsresult rv;
-  rv = mPrivate->webNavigation->LoadURI(NS_ConvertASCIItoUTF16(uri).get(),
+  rv = mPrivate->webNavigation->LoadURI(NS_ConvertUTF8toUTF16(uri).get(),
     nsIWebNavigation::LOAD_FLAGS_NONE, 0, 0, 0);
   return rv;
 }

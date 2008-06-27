@@ -65,17 +65,17 @@ public:
 
 void QMozViewListener::SetTitle(const char* newTitle)
 {
-  pQMozView->titleChanged(newTitle);
+  pQMozView->titleChanged(QString::fromUtf8(newTitle));
 }
 
 void QMozViewListener::StatusChanged(const char* newStatus, PRUint32 statusType)
 {
-  pQMozView->statusChanged(newStatus);
+  pQMozView->statusChanged(QString::fromUtf8(newStatus));
 }
 
 void QMozViewListener::LocationChanged(const char* newLocation)
 {
-  pQMozView->locationChanged(newLocation);
+  pQMozView->locationChanged(QString::fromUtf8(newLocation));
 }
 
 MozView* QMozViewListener::OpenWindow(PRUint32 flags)
