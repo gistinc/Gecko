@@ -22,7 +22,7 @@ public:
    * @param aProfilePath used to set a path to where all
    *  profile data are stored. By default a subdir named
    *  mozembed of the application dir (where the executable
-   *  recides). <b>NOTE:<b> Must be set before any MozView
+   *  recides). <b>NOTE:</b> Must be set before any MozView
    *  is created, otherwise the default is used.
    */
   MozApp(const char* aProfilePath = 0);
