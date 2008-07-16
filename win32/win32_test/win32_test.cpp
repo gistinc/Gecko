@@ -92,8 +92,16 @@ MozView* MyListener::OpenWindow(PRUint32 flags)
 
 void MyListener::SizeTo(PRUint32 width, PRUint32 height)
 {
-  HWND hWnd = (HWND)pMozView->GetParentWindow();
-  ::SetWindowPos(hWnd, 0, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
+  HWND hParentWnd = (HWND)pMozView->GetParentWindow();
+  HWND hWnd = (HWND)pMozView->GetNativeWindow();
+  RECT parentRect;
+  RECT rect;
+  ::GetWindowRect(hParentWnd, &parentRect);
+  ::GetWindowRect(hWnd, &rect);
+  ::SetWindowPos(hParentWnd, 0, 0, 0,
+    width + (parentRect.right - parentRect.left) - (rect.right - rect.left),
+    height + (parentRect.bottom - parentRect.top) - (rect.bottom - rect.top),
+    SWP_NOMOVE | SWP_NOZORDER);
 }
 
 // Forward declarations of functions included in this code module:
