@@ -11,16 +11,16 @@ class QLabel;
 class MyQMozView : public QMozView
 {
 public:
-  MyQMozView(QWidget *parent = 0);
+  MyQMozView(QWidget *parent = 0, unsigned int flags = 0);
 protected:
-  QMozView* openWindow(int flags);
+  QMozView* openWindow(unsigned int flags);
 };
 
 class MyBrowser : public QWidget
 {
 Q_OBJECT
 public:
-  MyBrowser(QWidget *parent = 0);
+  MyBrowser(QWidget *parent = 0, unsigned int flags = 0);
   QMozView* getQMozView() {return mozView;}
   void loadUri(const QString& uri);
 public slots:

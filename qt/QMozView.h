@@ -14,7 +14,7 @@ class Q_MOZVIEW_EXPORT QMozView : public QWidget
   Q_OBJECT
 
 public:
-  QMozView(QWidget *parent = 0);
+  QMozView(QWidget *parent = 0, unsigned int flags = 0);
   virtual ~QMozView();
 
   void loadUri(const QString& uri);
@@ -26,7 +26,7 @@ signals:
 
 protected:
   void resizeEvent(QResizeEvent* event);
-  virtual QMozView* openWindow(int flags);
+  virtual QMozView* openWindow(unsigned int flags);
 
 private:
   class Private;

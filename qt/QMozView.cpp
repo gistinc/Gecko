@@ -86,15 +86,15 @@ MozView* QMozViewListener::OpenWindow(PRUint32 flags)
   return &(newQMozView->mPrivate->mozView);
 }
 
-QMozView::QMozView(QWidget *parent)
+QMozView::QMozView(QWidget *parent, unsigned int flags)
 : QWidget(parent)
 {
   mPrivate = new Private(this);
 #ifdef WIN32
-  mPrivate->mozView.CreateBrowser((void*)winId(), 0, 0, 100, 100);
+  mPrivate->mozView.CreateBrowser((void*)winId(), 0, 0, 100, 100, flags);
 #else
   // TODO: Hmmm what if we are not using a mozilla with Qt backend
-  mPrivate->mozView.CreateBrowser(this, 0, 0, 0, 0);
+  mPrivate->mozView.CreateBrowser(this, 0, 0, 0, 0, flags);
 #endif
 }
 
@@ -113,7 +113,7 @@ void QMozView::loadUri(const QString &uri)
   mPrivate->mozView.LoadURI(uri.toUtf8());
 }
 
-QMozView* QMozView::openWindow(int flags)
+QMozView* QMozView::openWindow(unsigned int flags)
 {
   return 0;
 }

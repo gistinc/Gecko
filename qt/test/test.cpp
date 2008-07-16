@@ -9,21 +9,21 @@
 
 #include "QMozApp.h"
 
-MyQMozView::MyQMozView(QWidget *parent)
-: QMozView(parent)
+MyQMozView::MyQMozView(QWidget *parent, unsigned int flags)
+  : QMozView(parent, flags)
 {
 }
 
-QMozView* MyQMozView::openWindow(int flags)
+QMozView* MyQMozView::openWindow(unsigned int flags)
 {
-  MyBrowser* newBrowser = new MyBrowser();
+  MyBrowser* newBrowser = new MyBrowser(0, flags);
   newBrowser->resize(400, 400);
   newBrowser->show();
   newBrowser->setAttribute(Qt::WA_DeleteOnClose);
   return newBrowser->getQMozView();
 }
 
-MyBrowser::MyBrowser(QWidget *parent)
+MyBrowser::MyBrowser(QWidget *parent, unsigned int flags)
 : QWidget(parent)
 {
   QVBoxLayout* layout = new QVBoxLayout(this);
@@ -31,7 +31,7 @@ MyBrowser::MyBrowser(QWidget *parent)
   location = new QLineEdit(this);
   layout->addWidget(location);
 
-  mozView = new MyQMozView(this);
+  mozView = new MyQMozView(this, flags);
   layout->addWidget(mozView, 1);
   
   status = new QLabel(this);
