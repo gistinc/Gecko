@@ -467,3 +467,7 @@ MozView* MozViewListener::OpenWindow(PRUint32 flags)
 {
   return 0;
 }
+
+void MozViewListener::SizeTo(PRUint32 width, PRUint32 height)
+{
+}

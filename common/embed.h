@@ -194,6 +194,7 @@ public:
 
   /**
    * Get parent window of the browser view.
+   * I.e. the window provided by the embedding app.
    *
    * @return native pointer/handle to parent window
    */
@@ -201,6 +202,7 @@ public:
 
   /**
    * Get native window of the browser view.
+   * I.e. the window used by the browser itself.
    *
    * @return native pointer/handle to parent window
    */
@@ -290,7 +292,8 @@ public:
    *
    * @param flags various flags for the new window, see
    *  <a href="http://developer.mozilla.org/en/docs/nsIWebBrowserChrome#Constants">
-   *  chromeFlags</a>.
+   *  chromeFlags</a>. These should also be passed on to
+   *  MozView::CreateBrowser
    * @return Pointer to a newly created MozView or 0 to
    *  disallow openning of the new window.
    *  <b>NOTE:</b> It is the applications responsibility
@@ -298,6 +301,15 @@ public:
    *  when no longer needed.
    */
   virtual MozView* OpenWindow(PRUint32 flags);
+
+  /**
+   * Ask to change the size of the bowser, and therefore the
+   * enclosing window.
+   *
+   * @param width in pixels
+   * @param height in pixels
+   */
+  virtual void SizeTo(PRUint32 width, PRUint32 height);
 
 protected:
   MozView* pMozView;

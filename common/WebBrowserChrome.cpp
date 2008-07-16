@@ -90,7 +90,14 @@ NS_IMETHODIMP WebBrowserChrome::DestroyBrowserWindow()
 /* void sizeBrowserTo (in long aCX, in long aCY); */
 NS_IMETHODIMP WebBrowserChrome::SizeBrowserTo(PRInt32 aCX, PRInt32 aCY)
 {
+  MozViewListener* pListener = pMozView->GetListener();
+  if(pListener) {
+    pListener->SizeTo(aCX, aCY);
+    return NS_OK;
+  }
+  else {
     return NS_ERROR_NOT_IMPLEMENTED;
+  }
 }
 
 /* void showAsModal (); */

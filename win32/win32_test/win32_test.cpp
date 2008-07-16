@@ -20,18 +20,19 @@ public:
   PRBool OpenURI(const char* newLocation);
   void DocumentLoaded();
   MozView* OpenWindow(PRUint32 flags);
+  void SizeTo(PRUint32 width, PRUint32 height);
 };
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
-HWND hWnd;
+HWND hMainWnd;
 set<MozView*> gViews;
 
 void MyListener::SetTitle(const char *newTitle)
 {
-  HWND hWnd = (HWND)pMozView->GetNativeWindow();
+  HWND hWnd = (HWND)pMozView->GetParentWindow();
   ::SetWindowTextA(hWnd, newTitle);
 }
 
@@ -81,12 +82,18 @@ MozView* MyListener::OpenWindow(PRUint32 flags)
   if(res)
       return 0;
 
-  pNewView->SetListener(this);
+  pNewView->SetListener(new MyListener());
 
   SetWindowLongPtr(hWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(pNewView));
 
   gViews.insert(pNewView);
   return pNewView;
+}
+
+void MyListener::SizeTo(PRUint32 width, PRUint32 height)
+{
+  HWND hWnd = (HWND)pMozView->GetParentWindow();
+  ::SetWindowPos(hWnd, 0, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
 }
 
 // Forward declarations of functions included in this code module:
@@ -121,10 +128,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WIN32_TEST));
 
     RECT rect;
-    GetClientRect(hWnd, &rect);
+    GetClientRect(hMainWnd, &rect);
 
     MozView mozView;
-    int res = mozView.CreateBrowser(hWnd, rect.left, rect.top,
+    int res = mozView.CreateBrowser(hMainWnd, rect.left, rect.top,
         rect.right - rect.left, rect.bottom - rect.top);
 
     if(res)
@@ -133,10 +140,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     MyListener myListener;
     mozView.SetListener(&myListener);
 
-    SetWindowLongPtr(hWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(&mozView));
+    SetWindowLongPtr(hMainWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(&mozView));
 
-    mozView.LoadURI("http://google.com");
-    //mozView.LoadURI("file:///C:/mozilla/test/test.html");
+    //mozView.LoadURI("http://google.com");
+    mozView.LoadURI("file:///C:/mozilla/test/test.html");
     //mozView.LoadURI("chrome://test/content");
 
 	// Main message loop:
@@ -230,16 +237,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   hMainWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
-   if (!hWnd)
+   if (!hMainWnd)
    {
       return FALSE;
    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+   ShowWindow(hMainWnd, nCmdShow);
+   UpdateWindow(hMainWnd);
 
    return TRUE;
 }
@@ -274,6 +281,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
       if(gViews.erase(pMozView) > 0) {
+        delete pMozView->GetListener();
         delete pMozView;
       }
 			break;
@@ -286,6 +294,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
       if(gViews.erase(pMozView) > 0) {
         LRESULT res = DefWindowProc(hWnd, message, wParam, lParam);
+        delete pMozView->GetListener();
         delete pMozView;
         return res;
       }
