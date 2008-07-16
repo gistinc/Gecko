@@ -218,8 +218,8 @@ WindowCreator::CreateChromeWindow(nsIWebBrowserChrome *parent,
 NS_IMETHODIMP
 WindowCreator::CreateChromeWindow2(nsIWebBrowserChrome *parent,
   PRUint32 chromeFlags, PRUint32 contextFlags,
-  nsIURI *uri, PRBool *cancel NS_OUTPARAM,
-  nsIWebBrowserChrome **_retval NS_OUTPARAM)
+  nsIURI *uri, PRBool *cancel,
+  nsIWebBrowserChrome **_retval)
 {
   return CreateChromeWindow(parent, chromeFlags, _retval);
 }
