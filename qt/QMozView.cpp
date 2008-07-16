@@ -50,6 +50,7 @@ public:
   void StatusChanged(const char* newStatus, PRUint32 statusType);
   void LocationChanged(const char* newLocation);
   MozView* OpenWindow(PRUint32 flags);
+  void SizeTo(PRUint32 width, PRUint32 height);
 
 private:
   QMozView* pQMozView;
@@ -61,6 +62,7 @@ public:
   Private(QMozView* aQMozView) : listener(aQMozView) {mozView.SetListener(&listener);}
   MozView mozView;
   QMozViewListener listener;
+  QSize preferredSize;
 };
 
 void QMozViewListener::SetTitle(const char* newTitle)
@@ -84,6 +86,13 @@ MozView* QMozViewListener::OpenWindow(PRUint32 flags)
   if(!newQMozView)
     return 0;
   return &(newQMozView->mPrivate->mozView);
+}
+
+void QMozViewListener::SizeTo(PRUint32 width, PRUint32 height)
+{
+  pQMozView->mPrivate->preferredSize = QSize(width, height);
+  pQMozView->updateGeometry();
+  pQMozView->parentWidget()->adjustSize();
 }
 
 QMozView::QMozView(QWidget *parent, unsigned int flags)
@@ -116,4 +125,9 @@ void QMozView::loadUri(const QString &uri)
 QMozView* QMozView::openWindow(unsigned int flags)
 {
   return 0;
+}
+
+QSize QMozView::sizeHint() const
+{
+  return mPrivate->preferredSize;
 }

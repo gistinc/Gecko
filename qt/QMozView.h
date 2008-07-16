@@ -19,6 +19,8 @@ public:
 
   void loadUri(const QString& uri);
 
+  virtual QSize sizeHint() const;
+
 signals:
   void locationChanged(const QString& newUri);
   void titleChanged(const QString& newTitle);
