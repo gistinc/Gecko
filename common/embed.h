@@ -118,10 +118,12 @@ public:
    * @param y position relative to native window
    * @param width size
    * @param height size
+   * @param chromeFlags optional flags, e.g. those parsed in to
+   *  MozViewListener::OpenWindow
    * @return 0 on success
    */
   nsresult CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y,
-    PRInt32 width, PRInt32 height);
+    PRInt32 width, PRInt32 height, PRUint32 chromeFlags = 0);
 
   /**
    * Sets location and dimension of the browser window.

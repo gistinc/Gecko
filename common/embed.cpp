@@ -67,11 +67,12 @@ using namespace std;
 
 #include "nsIWebBrowserFocus.h"
 #include "nsIWidget.h"
-#include "nsIWindowCreator.h"
+#include "nsIWindowCreator2.h"
 #include "nsIWindowWatcher.h"
 
 // Non-Frozen
 #include "nsIBaseWindow.h"
+#include "nsIDocShellTreeItem.h"
 
 // our stuff
 #include "WebBrowserChrome.h"
@@ -177,7 +178,7 @@ public:
 };
 
 class WindowCreator :
-  public nsIWindowCreator
+  public nsIWindowCreator2
 {
 public:
   WindowCreator() {};
@@ -185,9 +186,10 @@ public:
 
   NS_DECL_ISUPPORTS
   NS_DECL_NSIWINDOWCREATOR
+  NS_DECL_NSIWINDOWCREATOR2
 };
 
-NS_IMPL_ISUPPORTS1(WindowCreator, nsIWindowCreator)
+NS_IMPL_ISUPPORTS2(WindowCreator, nsIWindowCreator, nsIWindowCreator2)
 
 NS_IMETHODIMP
 WindowCreator::CreateChromeWindow(nsIWebBrowserChrome *parent,
@@ -211,6 +213,15 @@ WindowCreator::CreateChromeWindow(nsIWebBrowserChrome *parent,
   *_retval = mozView->mPrivate->chrome;
   NS_IF_ADDREF(*_retval);
   return NS_OK;
+}
+
+NS_IMETHODIMP
+WindowCreator::CreateChromeWindow2(nsIWebBrowserChrome *parent,
+  PRUint32 chromeFlags, PRUint32 contextFlags,
+  nsIURI *uri, PRBool *cancel NS_OUTPARAM,
+  nsIWebBrowserChrome **_retval NS_OUTPARAM)
+{
+  return CreateChromeWindow(parent, chromeFlags, _retval);
 }
 
 MozView::MozView()
@@ -256,7 +267,8 @@ MozView::~MozView()
   TermEmbedding();
 }
 
-nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y, PRInt32 width, PRInt32 height)
+nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y,
+  PRInt32 width, PRInt32 height, PRUint32 chromeFlags)
 {
   mPrivate->parentWindow = aParentWindow;
 
@@ -275,8 +287,15 @@ nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y, PRInt
 
   nsIWebBrowserChrome **aNewWindow = getter_AddRefs(mPrivate->chrome);
   CallQueryInterface(static_cast<nsIWebBrowserChrome*>(new WebBrowserChrome(this)), aNewWindow);
+
   mPrivate->webBrowser->SetContainerWindow(mPrivate->chrome);
   mPrivate->chrome->SetWebBrowser(mPrivate->webBrowser);
+
+  if(chromeFlags & (nsIWebBrowserChrome::CHROME_OPENAS_CHROME |
+    nsIWebBrowserChrome::CHROME_OPENAS_DIALOG) ) {
+    nsCOMPtr<nsIDocShellTreeItem> docShellItem(do_QueryInterface(baseWindow));
+    docShellItem->SetItemType(nsIDocShellTreeItem::typeChromeWrapper);
+  }
 
   rv = baseWindow->Create();
   if (NS_FAILED(rv)) {

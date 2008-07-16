@@ -76,7 +76,7 @@ MozView* MyListener::OpenWindow(PRUint32 flags)
 
   MozView* pNewView = new MozView();
   int res = pNewView->CreateBrowser(hWnd, rect.left, rect.top,
-      rect.right - rect.left, rect.bottom - rect.top);
+      rect.right - rect.left, rect.bottom - rect.top, flags);
 
   if(res)
       return 0;
@@ -137,6 +137,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
     mozView.LoadURI("http://google.com");
     //mozView.LoadURI("file:///C:/mozilla/test/test.html");
+    //mozView.LoadURI("chrome://test/content");
 
 	// Main message loop:
 	while (GetMessage(&msg, NULL, 0, 0))
