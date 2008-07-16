@@ -171,7 +171,15 @@ NS_IMETHODIMP WebBrowserChrome::OnSecurityChange(nsIWebProgress *aWebProgress, n
 /* void setDimensions (in unsigned long flags, in long x, in long y, in long cx, in long cy); */
 NS_IMETHODIMP WebBrowserChrome::SetDimensions(PRUint32 flags, PRInt32 x, PRInt32 y, PRInt32 cx, PRInt32 cy)
 {
+  // TODO: currently only does size
+  MozViewListener* pListener = pMozView->GetListener();
+  if(pListener) {
+    pListener->SizeTo(cx, cy);
+    return NS_OK;
+  }
+  else {
     return NS_ERROR_NOT_IMPLEMENTED;
+  }
 }
 
 /* void getDimensions (in unsigned long flags, out long x, out long y, out long cx, out long cy); */
