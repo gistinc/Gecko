@@ -311,6 +311,13 @@ public:
    */
   virtual void SizeTo(PRUint32 width, PRUint32 height);
 
+  /**
+   * Ask to set the visibility of the brower window.
+   *
+   * @param visible true to show, false to hide
+   */
+  virtual void SetVisibility(PRBool visible);
+
 protected:
   MozView* pMozView;
 };

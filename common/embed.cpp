@@ -290,6 +290,7 @@ nsresult MozView::CreateBrowser(void* aParentWindow, PRInt32 x, PRInt32 y,
 
   mPrivate->webBrowser->SetContainerWindow(mPrivate->chrome);
   mPrivate->chrome->SetWebBrowser(mPrivate->webBrowser);
+  mPrivate->chrome->SetChromeFlags(chromeFlags);
 
   if(chromeFlags & (nsIWebBrowserChrome::CHROME_OPENAS_CHROME |
     nsIWebBrowserChrome::CHROME_OPENAS_DIALOG) ) {
@@ -469,5 +470,9 @@ MozView* MozViewListener::OpenWindow(PRUint32 flags)
 }
 
 void MozViewListener::SizeTo(PRUint32 width, PRUint32 height)
+{
+}
+
+void MozViewListener::SetVisibility(PRBool visible)
 {
 }

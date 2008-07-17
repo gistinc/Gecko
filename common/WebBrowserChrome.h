@@ -33,6 +33,7 @@ protected:
     /* additional members */
     nsCOMPtr<nsIWebBrowser> mWebBrowser;
     PRUint32 mChromeFlags;
+    PRBool mSizeSet;
     MozView* pMozView;
 
 };

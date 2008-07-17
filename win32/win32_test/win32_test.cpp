@@ -21,6 +21,7 @@ public:
   void DocumentLoaded();
   MozView* OpenWindow(PRUint32 flags);
   void SizeTo(PRUint32 width, PRUint32 height);
+  void SetVisibility(PRBool visible);
 };
 
 // Global Variables:
@@ -102,6 +103,12 @@ void MyListener::SizeTo(PRUint32 width, PRUint32 height)
     width + (parentRect.right - parentRect.left) - (rect.right - rect.left),
     height + (parentRect.bottom - parentRect.top) - (rect.bottom - rect.top),
     SWP_NOMOVE | SWP_NOZORDER);
+}
+
+void MyListener::SetVisibility(PRBool visible)
+{
+  HWND hWnd = (HWND)pMozView->GetParentWindow();
+  ::ShowWindow(hWnd, visible ? SW_SHOW : SW_HIDE);
 }
 
 // Forward declarations of functions included in this code module:

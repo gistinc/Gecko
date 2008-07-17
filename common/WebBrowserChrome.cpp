@@ -9,7 +9,7 @@
 using namespace std;
 
 WebBrowserChrome::WebBrowserChrome(MozView* pAMozView)
-: mChromeFlags(0), pMozView(pAMozView)
+: mChromeFlags(0), pMozView(pAMozView), mSizeSet(PR_FALSE)
 {
     /* member initializers and constructor code */
 }
@@ -93,6 +93,7 @@ NS_IMETHODIMP WebBrowserChrome::SizeBrowserTo(PRInt32 aCX, PRInt32 aCY)
   MozViewListener* pListener = pMozView->GetListener();
   if(pListener) {
     pListener->SizeTo(aCX, aCY);
+    mSizeSet = PR_TRUE;
     return NS_OK;
   }
   else {
@@ -124,13 +125,23 @@ NS_IMETHODIMP WebBrowserChrome::ExitModalEventLoop(nsresult aStatus)
 /* void onStateChange (in nsIWebProgress aWebProgress, in nsIRequest aRequest, in unsigned long aStateFlags, in nsresult aStatus); */
 NS_IMETHODIMP WebBrowserChrome::OnStateChange(nsIWebProgress *aWebProgress, nsIRequest *aRequest, PRUint32 aStateFlags, nsresult aStatus)
 {
-    MozViewListener* pListener = pMozView->GetListener();
+  MozViewListener* pListener = pMozView->GetListener();
 
-    if ((aStateFlags & STATE_STOP) && (aStateFlags & STATE_IS_DOCUMENT)) {
-	pListener->DocumentLoaded();
+  if ((aStateFlags & STATE_STOP) && (aStateFlags & STATE_IS_DOCUMENT)) {
+    // if it was a chrome window and no one has already specified a size,
+    // size to content
+    if (!mSizeSet && (mChromeFlags & nsIWebBrowserChrome::CHROME_OPENAS_CHROME)) {
+    nsCOMPtr<nsIDOMWindow> contentWin;
+    mWebBrowser->GetContentDOMWindow(getter_AddRefs(contentWin));
+    if (contentWin)
+      contentWin->SizeToContent();
+      SetVisibility(PR_TRUE);
     }
 
-    return NS_OK;
+    pListener->DocumentLoaded();
+  }
+
+  return NS_OK;
 }
 
 /* void onProgressChange (in nsIWebProgress aWebProgress, in nsIRequest aRequest, in long aCurSelfProgress, in long aMaxSelfProgress, in long aCurTotalProgress, in long aMaxTotalProgress); */
@@ -175,6 +186,7 @@ NS_IMETHODIMP WebBrowserChrome::SetDimensions(PRUint32 flags, PRInt32 x, PRInt32
   MozViewListener* pListener = pMozView->GetListener();
   if(pListener) {
     pListener->SizeTo(cx, cy);
+    mSizeSet = PR_TRUE;
     return NS_OK;
   }
   else {
@@ -201,6 +213,11 @@ NS_IMETHODIMP WebBrowserChrome::GetVisibility(PRBool *aVisibility)
 }
 NS_IMETHODIMP WebBrowserChrome::SetVisibility(PRBool aVisibility)
 {
+    MozViewListener* pListener = pMozView->GetListener();
+    if(pListener) {
+        pListener->SetVisibility(aVisibility);
+        return NS_OK;
+    }
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
@@ -224,7 +241,9 @@ NS_IMETHODIMP WebBrowserChrome::SetTitle(const PRUnichar * aTitle)
 /* [noscript] readonly attribute voidPtr siteWindow; */
 NS_IMETHODIMP WebBrowserChrome::GetSiteWindow(void * *aSiteWindow)
 {
-    return NS_ERROR_NOT_IMPLEMENTED;
+  NS_ENSURE_ARG_POINTER(aSiteWindow);
+  *aSiteWindow = pMozView->GetParentWindow();
+  return NS_OK;
 }
 
 
