@@ -6,18 +6,28 @@
 #include "embed.h"
 
 #include <iostream>
+#include <set>
 using namespace std;
 
 #define MAX_LOADSTRING 100
 
 class MyListener : public MozViewListener
 {
+public:
   void SetTitle(const char* newTitle);
   void StatusChanged(const char* newStatus, PRUint32 statusType);
   void LocationChanged(const char* newLocation);
   PRBool OpenURI(const char* newLocation);
   void DocumentLoaded();
+  MozView* OpenWindow(PRUint32 flags);
 };
+
+// Global Variables:
+HINSTANCE hInst;								// current instance
+TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
+TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
+HWND hWnd;
+set<MozView*> gViews;
 
 void MyListener::SetTitle(const char *newTitle)
 {
@@ -46,12 +56,38 @@ void MyListener::DocumentLoaded()
   cout << "FINISHED" << endl;
 }
 
+MozView* MyListener::OpenWindow(PRUint32 flags)
+{
+  HWND hWnd;
 
-// Global Variables:
-HINSTANCE hInst;								// current instance
-TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
-TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
-HWND hWnd;
+  hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+    CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInst, NULL);
+
+  if (!hWnd)
+  {
+    return 0;
+  }
+
+  ShowWindow(hWnd, SW_SHOW);
+  UpdateWindow(hWnd);
+
+  RECT rect;
+  GetClientRect(hWnd, &rect);
+
+  MozView* pNewView = new MozView();
+  int res = pNewView->CreateBrowser(hWnd, rect.left, rect.top,
+      rect.right - rect.left, rect.bottom - rect.top);
+
+  if(res)
+      return 0;
+
+  pNewView->SetListener(this);
+
+  SetWindowLongPtr(hWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(pNewView));
+
+  gViews.insert(pNewView);
+  return pNewView;
+}
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -111,6 +147,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			DispatchMessage(&msg);
 		}
 	}
+
+  // delete extra views
+  set<MozView*>::const_iterator itr;
+  for(itr = gViews.begin(); itr != gViews.end(); ++itr) {
+    delete *itr;
+  }
 
     /*
     HANDLE hFakeEvent = ::CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -215,6 +257,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
 
+  MozView* pMozView = (MozView*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+
 	switch (message)
 	{
 	case WM_COMMAND:
@@ -228,17 +272,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
+      if(gViews.erase(pMozView) > 0) {
+        delete pMozView;
+      }
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		break;
+  case WM_SYSCOMMAND:
+    if (wParam == SC_CLOSE)
+    {
+      if(gViews.erase(pMozView) > 0) {
+        LRESULT res = DefWindowProc(hWnd, message, wParam, lParam);
+        delete pMozView;
+        return res;
+      }
+      return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return DefWindowProc(hWnd, message, wParam, lParam);
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
     case WM_SIZE:
         {
-            MozView* pMozView = (MozView*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+            
             if(pMozView)
             {
                 RECT rect;
@@ -250,7 +308,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_ACTIVATE:
         {
-            MozView* pMozView = (MozView*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
             if(pMozView)
             {
                 switch (wParam)

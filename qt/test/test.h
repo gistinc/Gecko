@@ -2,24 +2,33 @@
 #define __test_h_
 
 #include <QWidget>
+#include "QMozView.h"
 
 class QUrl;
 class QLineEdit;
-class QMozView;
+class QLabel;
+
+class MyQMozView : public QMozView
+{
+public:
+  MyQMozView(QWidget *parent = 0);
+protected:
+  QMozView* openWindow(int flags);
+};
 
 class MyBrowser : public QWidget
 {
 Q_OBJECT
 public:
   MyBrowser(QWidget *parent = 0);
+  QMozView* getQMozView() {return mozView;}
+  void loadUri(const QString& uri);
 public slots:
-  void updateLocation(const QString& url);
-  void updateTitle(const QString& title);
   void go();
-
 private:
   QLineEdit* location;
-  QMozView* mozView;
+  MyQMozView* mozView;
+  QLabel* status;
 };
 
 #endif /* __test_h_ */

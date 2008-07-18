@@ -27,6 +27,7 @@ public:
     WebBrowserChrome(MozView* pAMozView);
 
     virtual ~WebBrowserChrome();
+    MozView* GetMozView() {return pMozView;}
 
 protected:
     /* additional members */

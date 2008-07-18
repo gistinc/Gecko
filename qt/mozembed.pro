@@ -1,12 +1,16 @@
 TEMPLATE = lib
 
 HEADERS = QMozView.h \
+	QMozApp.h \
 	../common/embed.h ../common/EmbeddingSetup.h \
-	../common/WebBrowserChrome.h
+	../common/WebBrowserChrome.h \
+	../common/ContentListener.h
 
 SOURCES = QMozView.cpp \
+	QMozApp.cpp \
 	../common/embed.cpp ../common/EmbeddingSetup.cpp \
-	../common/WebBrowserChrome.cpp
+	../common/WebBrowserChrome.cpp \
+	../common/ContentListener.cpp
 
 TARGET = qmozembed
 
@@ -35,6 +39,7 @@ INCLUDEPATH = $(GRE_HOME)/../include/xulapp \
 	$(GRE_HOME)/../include/profile \
 	$(GRE_HOME)/../include \
 	$(GRE_HOME)/../include/gfx \
+	$(GRE_HOME)/../include/pref \
 	../common
 
 LIBS += -L$(GRE_HOME)/../lib

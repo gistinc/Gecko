@@ -3,9 +3,25 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QLineEdit>
+#include <QLabel>
 #include <QUrl>
+#include <QDebug>
 
-#include "QMozView.h"
+#include "QMozApp.h"
+
+MyQMozView::MyQMozView(QWidget *parent)
+: QMozView(parent)
+{
+}
+
+QMozView* MyQMozView::openWindow(int flags)
+{
+  MyBrowser* newBrowser = new MyBrowser();
+  newBrowser->resize(400, 400);
+  newBrowser->show();
+  newBrowser->setAttribute(Qt::WA_DeleteOnClose);
+  return newBrowser->getQMozView();
+}
 
 MyBrowser::MyBrowser(QWidget *parent)
 : QWidget(parent)
@@ -15,15 +31,20 @@ MyBrowser::MyBrowser(QWidget *parent)
   location = new QLineEdit(this);
   layout->addWidget(location);
 
-  mozView = new QMozView(this);
-  layout->addWidget(mozView);
-  mozView->loadUri("http://mozilla.org");
+  mozView = new MyQMozView(this);
+  layout->addWidget(mozView, 1);
   
+  status = new QLabel(this);
+  layout->addWidget(status);
+
   connect(mozView, SIGNAL(locationChanged(const QString&)),
-    this, SLOT(updateLocation(const QString&)));
+    location, SLOT(setText(const QString&)));
 
   connect(mozView, SIGNAL(titleChanged(const QString&)),
-    this, SLOT(updateTitle(const QString&)));
+    this, SLOT(setWindowTitle(const QString&)));
+
+  connect(mozView, SIGNAL(statusChanged(const QString&)),
+    status, SLOT(setText(const QString&)));
 
   connect(location, SIGNAL(returnPressed()),
     this, SLOT(go()));
@@ -31,14 +52,10 @@ MyBrowser::MyBrowser(QWidget *parent)
   //webView->page()->mainFrame()->evaluateJavaScript("alert('embed');");
 }
 
-void MyBrowser::updateLocation(const QString& url)
+void MyBrowser::loadUri(const QString& uri)
 {
-  location->setText(url);
-}
-
-void MyBrowser::updateTitle(const QString& title)
-{
-  setWindowTitle(title);
+  location->setText(uri);
+  mozView->loadUri(uri);
 }
 
 void MyBrowser::go()
@@ -54,5 +71,11 @@ int main(int argc, char *argv[])
   
   window.resize(400, 400);
   window.show();
+
+  if(argc > 1)
+    window.loadUri(argv[argc - 1]);
+  else
+    window.loadUri("http://mozilla.org");
+
   return app.exec();
 }
