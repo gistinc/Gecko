@@ -1,9 +1,0 @@
-LIBRARY	"mozarea"
-
-EXPORTS
-moz_area_get_type
-moz_area_new
-moz_area_display_url
-moz_area_display_data
-moz_area_get_title
-moz_area_set_user_agent

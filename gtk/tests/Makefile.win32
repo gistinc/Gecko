@@ -12,12 +12,8 @@ GTK_CFLAGS=`pkg-config --cflags gtk+-2.0`
 GTK_LDFLAGS=`pkg-config --libs gtk+-2.0`
 
 
-%.o:%.c
-	gcc -o $@ -c $< -I../ -I../../common  $(GTK_CFLAGS)
-
-test:main.o
-	gcc -o $@ $< $(MOZ_LDFLAGS) $(GTK_LDFLAGS) ../mozarea.lib
-
+test:test.cpp
+	gcc -o $@ $< -I../include $(GTK_CFLAGS) $(MOZ_LDFLAGS) $(GTK_LDFLAGS) ../win32/mozwebview.lib
 
 clean:
-	rm -f test.exe *~ *.o
+	rm -f test.exe

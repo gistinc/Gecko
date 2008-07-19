@@ -24,16 +24,25 @@ struct _MozWebViewClass {
   GtkBinClass parent_class;
 
   /* Signals */
-  void (*title_changed) (MozWebView *view, const char *title);
-  void (*status_changed) (MozWebView *view, const char *status, guint32 statusType);
-  void (*location_changed) (const char *uri);
-
+  void     (*title_changed) (MozWebView *view, const char *title);
+  void     (*status_changed) (MozWebView *view, const char *status, guint32 flags);
+  void     (*location_changed) (const char *uri);
+  gboolean (*uri_requested)   (MozWebView *view, const gchar *uri);
+  void     (*document_loaded) (MozWebView *view);
 };
 
-GType      moz_web_view_get_type (void);
-GtkWidget *moz_web_view_new      (void);
+GType      moz_web_view_get_type  (void);
+GtkWidget *moz_web_view_new       (void);
 
-void       moz_web_view_load_uri (MozWebView *view, const char *uri);
+void       moz_web_view_load_uri       (MozWebView  *view, const char *uri);
+void       moz_web_view_load_data      (MozWebView  *view,
+					const gchar *base_uri,
+					const gchar *content_type,
+					const gchar *data,
+					gsize        len);
+gchar *    moz_web_view_get_title      (MozWebView  *view);
+gboolean   moz_web_view_set_user_agent (MozWebView  *view,
+					const gchar *user_agent);
 
 G_END_DECLS
 
