@@ -12,6 +12,7 @@ OBJECTS = \
 	../../common/WebBrowserChrome.o \
 	../../common/EmbeddingSetup.o \
 	../../common/ContentListener.o \
+	../common/moz-web-view-common.o \
 	../common/moz-web-view-marshal.o \
 	nsGlueLinkingDlopen.o \
 	nsXPCOMGlue.o
