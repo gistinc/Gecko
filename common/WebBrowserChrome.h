@@ -35,6 +35,7 @@ protected:
     PRUint32 mChromeFlags;
     PRBool mSizeSet;
     MozView* pMozView;
+    PRBool mIsModal;
 
 };
 

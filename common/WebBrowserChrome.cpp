@@ -9,7 +9,7 @@
 using namespace std;
 
 WebBrowserChrome::WebBrowserChrome(MozView* pAMozView)
-: mChromeFlags(0), pMozView(pAMozView), mSizeSet(PR_FALSE)
+: mChromeFlags(0), pMozView(pAMozView), mSizeSet(PR_FALSE), mIsModal(PR_FALSE)
 {
     /* member initializers and constructor code */
 }
@@ -84,7 +84,10 @@ NS_IMETHODIMP WebBrowserChrome::SetChromeFlags(PRUint32 aChromeFlags)
 /* void destroyBrowserWindow (); */
 NS_IMETHODIMP WebBrowserChrome::DestroyBrowserWindow()
 {
-    return NS_ERROR_NOT_IMPLEMENTED;
+  if(mIsModal) {
+    ExitModalEventLoop(NS_OK);
+  }
+  return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 /* void sizeBrowserTo (in long aCX, in long aCY); */
@@ -104,19 +107,37 @@ NS_IMETHODIMP WebBrowserChrome::SizeBrowserTo(PRInt32 aCX, PRInt32 aCY)
 /* void showAsModal (); */
 NS_IMETHODIMP WebBrowserChrome::ShowAsModal()
 {
+  MozViewListener* pListener = pMozView->GetListener();
+  if(pListener) {
+    mIsModal = PR_TRUE;
+    pListener->ShowAsModal();
+    return NS_OK;
+  }
+  else {
     return NS_ERROR_NOT_IMPLEMENTED;
+  }
 }
 
 /* boolean isWindowModal (); */
 NS_IMETHODIMP WebBrowserChrome::IsWindowModal(PRBool *_retval)
 {
-    return NS_ERROR_NOT_IMPLEMENTED;
+  NS_ENSURE_ARG_POINTER(_retval);
+  *_retval = mIsModal;
+  return NS_OK;
 }
 
 /* void exitModalEventLoop (in nsresult aStatus); */
 NS_IMETHODIMP WebBrowserChrome::ExitModalEventLoop(nsresult aStatus)
 {
+  MozViewListener* pListener = pMozView->GetListener();
+  if(pListener) {
+    pListener->ExitModal(aStatus);
+    mIsModal = PR_FALSE;
+    return NS_OK;
+  }
+  else {
     return NS_ERROR_NOT_IMPLEMENTED;
+  }
 }
 
 

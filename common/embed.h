@@ -208,6 +208,20 @@ public:
    */
   void *GetNativeWindow();
 
+  /**
+   * Set the parent view, i.e. the view which opened this view.
+   *
+   * @param parent pointer to the parent view.
+   */
+  void SetParentView(MozView* parent);
+
+  /**
+   * Get the parent view, i.e. the view which openedt this view.
+   *
+   * @return pointer to the parent view or null if no parent.
+   */
+  MozView* GetParentView();
+
 private:
   class Private;
   Private *mPrivate;
@@ -317,6 +331,18 @@ public:
    * @param visible true to show, false to hide
    */
   virtual void SetVisibility(PRBool visible);
+
+  /**
+   * Make the corresponding window behave as modal.
+   */
+  virtual void ShowAsModal();
+
+  /**
+   * Exit a modal window.
+   *
+   * @param result as returned from the dialog.
+   */
+  virtual void ExitModal(nsresult result);
 
 protected:
   MozView* pMozView;

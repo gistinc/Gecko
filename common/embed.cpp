@@ -166,10 +166,12 @@ nsresult MozApp::GetIntPref(const char *name, int *value)
 
 class MozView::Private{
 public:
-  Private() : parentWindow(NULL), pListener(NULL) {}
+  Private() : parentWindow(NULL), pListener(NULL),
+    parentView(NULL) {}
 
   MozViewListener* pListener;
   void* parentWindow;
+  MozView* parentView;
 
   nsCOMPtr<nsIWebBrowser> webBrowser;
   nsCOMPtr<nsIWebNavigation> webNavigation;
@@ -428,6 +430,16 @@ void* MozView::GetNativeWindow()
   }
 }
 
+void MozView::SetParentView(MozView* parent)
+{
+  mPrivate->parentView = parent;
+}
+
+MozView* MozView::GetParentView()
+{
+  return mPrivate->parentView;
+}
+
 // ---- MozViewListener ---
 MozViewListener::MozViewListener()
 : pMozView(NULL)
@@ -474,5 +486,13 @@ void MozViewListener::SizeTo(PRUint32 width, PRUint32 height)
 }
 
 void MozViewListener::SetVisibility(PRBool visible)
+{
+}
+
+void MozViewListener::ShowAsModal()
+{
+}
+
+void MozViewListener::ExitModal(nsresult result)
 {
 }
