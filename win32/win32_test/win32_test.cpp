@@ -22,6 +22,8 @@ public:
   MozView* OpenWindow(PRUint32 flags);
   void SizeTo(PRUint32 width, PRUint32 height);
   void SetVisibility(PRBool visible);
+  void ShowAsModal();
+  void ExitModal(nsresult result);
 };
 
 // Global Variables:
@@ -30,6 +32,8 @@ TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 HWND hMainWnd;
 set<MozView*> gViews;
+HACCEL hAccelTable;
+bool gDoModal = false;
 
 void MyListener::SetTitle(const char *newTitle)
 {
@@ -83,6 +87,7 @@ MozView* MyListener::OpenWindow(PRUint32 flags)
   if(res)
       return 0;
 
+  pNewView->SetParentView(pMozView);
   pNewView->SetListener(new MyListener());
 
   SetWindowLongPtr(hWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(pNewView));
@@ -111,6 +116,36 @@ void MyListener::SetVisibility(PRBool visible)
   ::ShowWindow(hWnd, visible ? SW_SHOW : SW_HIDE);
 }
 
+void MyListener::ShowAsModal()
+{
+  gDoModal = true;
+	MSG msg;
+  MozView* parentView = pMozView->GetParentView();
+  ::EnableWindow((HWND)parentView->GetParentWindow(), FALSE);
+  int res;
+	while (gDoModal && (res = GetMessage(&msg, NULL, 0, 0)))
+	{
+    if(res == -1)
+    {
+      printf("ERROR: GetMessage == -1\n");
+      break;
+    }
+		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+}
+
+void MyListener::ExitModal(nsresult result)
+{
+  MozView* parentView = pMozView->GetParentView();
+  ::EnableWindow((HWND)parentView->GetParentWindow(), TRUE);
+  HWND hWnd = (HWND)pMozView->GetParentWindow();
+	DestroyWindow(hWnd);
+}
+
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
@@ -127,7 +162,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
  	// TODO: Place code here.
 	MSG msg;
-	HACCEL hAccelTable;
 
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -145,25 +179,32 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     RECT rect;
     GetClientRect(hMainWnd, &rect);
 
-    MozView mozView;
-    int res = mozView.CreateBrowser(hMainWnd, rect.left, rect.top,
+    MozApp mozApp;
+
+    MozView* mozView = new MozView();
+    gViews.insert(mozView);
+    int res = mozView->CreateBrowser(hMainWnd, rect.left, rect.top,
         rect.right - rect.left, rect.bottom - rect.top);
 
     if(res)
         return res;
 
-    MyListener myListener;
-    mozView.SetListener(&myListener);
+    mozView->SetListener(new MyListener);
 
-    SetWindowLongPtr(hMainWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(&mozView));
+    SetWindowLongPtr(hMainWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(mozView));
 
-    //mozView.LoadURI("http://google.com");
-    mozView.LoadURI("file:///C:/mozilla/test/test.html");
-    //mozView.LoadURI("chrome://test/content");
+    mozView->LoadURI("http://google.com");
+    //mozView->LoadURI("file:///C:/mozilla/test/test.html");
+    //mozView->LoadURI("chrome://test/content");
 
 	// Main message loop:
-	while (GetMessage(&msg, NULL, 0, 0))
+	while ((res = GetMessage(&msg, NULL, 0, 0)))
 	{
+    if (res == -1)
+    {
+      printf("ERROR: GetMessage == -1\n");
+      break;
+    }
 		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 		{
 			TranslateMessage(&msg);
@@ -294,30 +335,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
 		case IDM_EXIT:
-			DestroyWindow(hWnd);
-      if(gViews.erase(pMozView) > 0) {
-        delete pMozView->GetListener();
-        delete pMozView;
+      {
+        MozView* parentView = pMozView->GetParentView();
+        if(parentView && gDoModal)
+          ::EnableWindow((HWND)parentView->GetParentWindow(), TRUE);
       }
+			DestroyWindow(hWnd);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		break;
-  case WM_SYSCOMMAND:
-    if (wParam == SC_CLOSE)
+  case WM_CLOSE:
     {
-      if(gViews.erase(pMozView) > 0) {
-        LRESULT res = DefWindowProc(hWnd, message, wParam, lParam);
-        delete pMozView->GetListener();
-        delete pMozView;
-        return res;
-      }
-      return DefWindowProc(hWnd, message, wParam, lParam);
+      MozView* parentView = pMozView->GetParentView();
+      if(parentView && gDoModal)
+        ::EnableWindow((HWND)parentView->GetParentWindow(), TRUE);
     }
     return DefWindowProc(hWnd, message, wParam, lParam);
+    break;
 	case WM_DESTROY:
-		PostQuitMessage(0);
+    if(gViews.erase(pMozView) > 0) {
+      pMozView->Stop();
+      delete pMozView->GetListener();
+      delete pMozView;
+    }
+
+    if(gDoModal) {
+      gDoModal = false;
+    }
+
+    if(gViews.size() == 0) {
+      PostQuitMessage(0);
+    }
+
 		break;
     case WM_SIZE:
         {
