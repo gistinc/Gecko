@@ -345,6 +345,13 @@ nsresult MozView::LoadURI(const char* uri)
   return rv;
 }
 
+nsresult MozView::Stop()
+{
+  nsresult rv;
+  rv = mPrivate->webNavigation->Stop(nsIWebNavigation::STOP_ALL);
+  return rv;
+}
+
 nsresult MozView::LoadData(const char    *base_url,
 			   const char    *content_type,
 			   const PRUint8 *data,

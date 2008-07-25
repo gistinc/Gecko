@@ -145,6 +145,13 @@ public:
   nsresult LoadURI(const char* uri);
 
   /**
+   * Stops any loading or ongoing processing.
+   *
+   * @return 0 on success
+   */
+  nsresult Stop();
+
+  /**
    * Load content from memory.
    *
    * @param base_url base used for resolving links in the content
