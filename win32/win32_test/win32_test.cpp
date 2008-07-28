@@ -34,6 +34,7 @@ HWND hMainWnd;
 set<MozView*> gViews;
 HACCEL hAccelTable;
 bool gDoModal = false;
+bool gQuit = false;
 
 void MyListener::SetTitle(const char *newTitle)
 {
@@ -198,19 +199,20 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     //mozView->LoadURI("chrome://test/content");
 
 	// Main message loop:
-	while ((res = GetMessage(&msg, NULL, 0, 0)))
-	{
-    if (res == -1)
-    {
-      printf("ERROR: GetMessage == -1\n");
-      break;
+  while (!gQuit) {
+    WaitMessage();
+    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+      if (msg.message == WM_QUIT) {
+        gQuit = true;
+        break;
+      }
+		  if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		  {
+			  TranslateMessage(&msg);
+			  DispatchMessage(&msg);
+		  }
     }
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
+  }
 
   // delete extra views
   set<MozView*>::const_iterator itr;
@@ -367,6 +369,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     if(gViews.size() == 0) {
       PostQuitMessage(0);
+      gQuit = true;
     }
 
 		break;
