@@ -1,7 +1,7 @@
 #ifndef __test_h_
 #define __test_h_
 
-#include <QWidget>
+#include <QDialog>
 #include "QMozView.h"
 
 class QUrl;
@@ -16,7 +16,7 @@ protected:
   QMozView* openWindow(unsigned int flags);
 };
 
-class MyBrowser : public QWidget
+class MyBrowser : public QDialog
 {
 Q_OBJECT
 public:
@@ -25,6 +25,8 @@ public:
   void loadUri(const QString& uri);
 public slots:
   void go();
+  void startModal();
+  void exitModal();
 private:
   QLineEdit* location;
   MyQMozView* mozView;

@@ -110,7 +110,7 @@ NS_IMETHODIMP WebBrowserChrome::ShowAsModal()
   MozViewListener* pListener = pMozView->GetListener();
   if(pListener) {
     mIsModal = PR_TRUE;
-    pListener->ShowAsModal();
+    pListener->StartModal();
     return NS_OK;
   }
   else {

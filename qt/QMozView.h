@@ -25,6 +25,8 @@ signals:
   void locationChanged(const QString& newUri);
   void titleChanged(const QString& newTitle);
   void statusChanged(const QString& newStatus);
+  void startModal();
+  void exitModal();
 
 protected:
   void resizeEvent(QResizeEvent* event);

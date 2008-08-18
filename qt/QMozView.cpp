@@ -51,6 +51,8 @@ public:
   void LocationChanged(const char* newLocation);
   MozView* OpenWindow(PRUint32 flags);
   void SizeTo(PRUint32 width, PRUint32 height);
+  void StartModal();
+  void ExitModal(nsresult result);
 
 private:
   QMozView* pQMozView;
@@ -93,6 +95,16 @@ void QMozViewListener::SizeTo(PRUint32 width, PRUint32 height)
   pQMozView->mPrivate->preferredSize = QSize(width, height);
   pQMozView->updateGeometry();
   pQMozView->parentWidget()->adjustSize();
+}
+
+void QMozViewListener::StartModal()
+{
+  pQMozView->startModal();
+}
+
+void QMozViewListener::ExitModal(nsresult result)
+{
+  pQMozView->exitModal();
 }
 
 QMozView::QMozView(QWidget *parent, unsigned int flags)

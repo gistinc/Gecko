@@ -22,7 +22,7 @@ public:
   MozView* OpenWindow(PRUint32 flags);
   void SizeTo(PRUint32 width, PRUint32 height);
   void SetVisibility(PRBool visible);
-  void ShowAsModal();
+  void StartModal();
   void ExitModal(nsresult result);
 };
 
@@ -117,7 +117,7 @@ void MyListener::SetVisibility(PRBool visible)
   ::ShowWindow(hWnd, visible ? SW_SHOW : SW_HIDE);
 }
 
-void MyListener::ShowAsModal()
+void MyListener::StartModal()
 {
   gDoModal = true;
 	MSG msg;

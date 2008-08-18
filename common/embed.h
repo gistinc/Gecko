@@ -342,7 +342,7 @@ public:
   /**
    * Make the corresponding window behave as modal.
    */
-  virtual void ShowAsModal();
+  virtual void StartModal();
 
   /**
    * Exit a modal window.

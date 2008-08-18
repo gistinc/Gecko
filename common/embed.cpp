@@ -496,7 +496,7 @@ void MozViewListener::SetVisibility(PRBool visible)
 {
 }
 
-void MozViewListener::ShowAsModal()
+void MozViewListener::StartModal()
 {
 }
 

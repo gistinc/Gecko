@@ -24,7 +24,7 @@ QMozView* MyQMozView::openWindow(unsigned int flags)
 }
 
 MyBrowser::MyBrowser(QWidget *parent, unsigned int flags)
-: QWidget(parent)
+: QDialog(parent)
 {
   QVBoxLayout* layout = new QVBoxLayout(this);
   
@@ -46,6 +46,12 @@ MyBrowser::MyBrowser(QWidget *parent, unsigned int flags)
   connect(mozView, SIGNAL(statusChanged(const QString&)),
     status, SLOT(setText(const QString&)));
 
+  connect(mozView, SIGNAL(startModal()),
+    this, SLOT(startModal()));
+
+  connect(mozView, SIGNAL(exitModal()),
+    this, SLOT(exitModal()));
+
   connect(location, SIGNAL(returnPressed()),
     this, SLOT(go()));
   
@@ -61,6 +67,19 @@ void MyBrowser::loadUri(const QString& uri)
 void MyBrowser::go()
 {
   mozView->loadUri(location->text());
+}
+
+void MyBrowser::startModal()
+{
+  hide();
+  exec();
+}
+
+void MyBrowser::exitModal()
+{
+  done(0);
+  // have to delete mozView now to avoid JS context assertions
+  delete mozView;
 }
 
 int main(int argc, char *argv[])
