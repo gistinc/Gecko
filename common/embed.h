@@ -9,6 +9,8 @@ typedef PRUint32 nsresult;
 class MozViewListener;
 class WindowCreator;
 
+class nsIInterfaceRequestor;
+
 /**
  * Provides an interface to application level functionality,
  * i.e. that is shared across all views.
@@ -228,6 +230,17 @@ public:
    * @return pointer to the parent view or null if no parent.
    */
   MozView* GetParentView();
+
+  /**
+   * Get an InterfaceRequestor for accessing the underlying XPCOM API.
+   * Note: implemented using out parameter to avoid including or declaring
+   * already_AddRefed
+   *
+   * @param aRequestor out parameter. Note: it is the callers responsibility
+   *  to release this pointer.
+   * @return NS_OK on success
+   */
+  nsresult GetInterfaceRequestor(nsIInterfaceRequestor** aRequestor);
 
 private:
   class Private;

@@ -447,6 +447,12 @@ MozView* MozView::GetParentView()
   return mPrivate->parentView;
 }
 
+nsresult MozView::GetInterfaceRequestor(nsIInterfaceRequestor** aRequestor)
+{
+  NS_ENSURE_ARG_POINTER(aRequestor);
+  return CallQueryInterface(mPrivate->webBrowser, aRequestor);
+}
+
 // ---- MozViewListener ---
 MozViewListener::MozViewListener()
 : pMozView(NULL)
