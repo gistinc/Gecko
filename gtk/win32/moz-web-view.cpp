@@ -284,17 +284,17 @@ update_property (MozWebView  *view,
 
     switch (prop_id) {
     case PROP_REQUESTED_URI: ptr = &(priv->requested_uri); name = "requested-uri";  break;
-    case PROP_TITLE:         ptr = &(priv->page_title);    name = "title";  break;
+    case PROP_TITLE:         ptr = &(priv->title);         name = "title";  break;
     case PROP_STATUS:        ptr = &(priv->status);        name = "status";  break;
     case PROP_LOCATION:      ptr = &(priv->location);      name = "location";  break;
     default:
-	g_assert_unreached ();
+	g_assert_not_reached ();
 	break;
     }
 
     if (*ptr) g_free (*ptr);
     *ptr = g_strdup (new_value);
-    g_object_notify (G_OBJECT (mView), name);
+    g_object_notify (G_OBJECT (view), name);
 }
 
 /*******************************************************************
