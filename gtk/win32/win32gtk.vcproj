@@ -200,6 +200,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\moz-web-view-common.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\moz-web-view-marshal.h"
 				>
 			</File>

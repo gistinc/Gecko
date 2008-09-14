@@ -40,6 +40,8 @@
 #include "embed.h"
 #include "EmbeddingSetup.h"
 #include "moz-web-view.h"
+#include "moz-web-view-common.h"
+#include "moz-web-view-marshal.h"
 
 static MozApp *app = NULL;
 static gint    init_count = 0;
@@ -78,15 +80,11 @@ moz_web_view_term_embedding (void)
 
 gboolean
 moz_web_view_set_char_pref  (const char  *name, 
-			     const char  *value)
+                             const char  *value)
 {
-    nsresult rv;
-
     g_return_val_if_fail (init_count > 0, FALSE);
 
-    rv = app->SetCharPref (name, value);
-    
-    return !NS_FAILED(rv);
+    return NS_SUCCEEDED (app->SetCharPref (name, value));
 }
 
 
@@ -94,13 +92,9 @@ gboolean
 moz_web_view_set_bool_pref  (const char  *name, 
 			     gboolean     value)
 {
-    nsresult rv;
-
     g_return_val_if_fail (init_count > 0, FALSE);
 
-    rv = app->SetBoolPref (name, value);
-    
-    return !NS_FAILED(rv);
+    return NS_SUCCEEDED (app->SetBoolPref (name, value));
 }
 
 
@@ -108,51 +102,170 @@ gboolean
 moz_web_view_set_int_pref   (const char  *name, 
 			     gint         value)
 {
-    nsresult rv;
-
     g_return_val_if_fail (init_count > 0, FALSE);
 
-    rv = app->SetIntPref (name, value);
-    
-    return !NS_FAILED(rv);
+    return NS_SUCCEEDED (app->SetIntPref (name, value));
 }
 
 gboolean
 moz_web_view_get_char_pref  (const char  *name, 
 			     char       **value)
 {
-    nsresult rv;
-
     g_return_val_if_fail (init_count > 0, FALSE);
 
-    rv = app->GetCharPref (name, value);
-    
-    return !NS_FAILED(rv);
+    return NS_SUCCEEDED (app->GetCharPref (name, value));
 }
 
 gboolean
 moz_web_view_get_bool_pref  (const char  *name, 
 			     gboolean    *value)
 {
-    nsresult rv;
-
     g_return_val_if_fail (init_count > 0, FALSE);
 
-    rv = app->GetBoolPref (name, value);
-    
-    return !NS_FAILED(rv);
+    return NS_SUCCEEDED (app->GetBoolPref (name, value));
 }
 
 gboolean
 moz_web_view_get_int_pref   (const char  *name, 
 			     gint        *value)
 {
-    nsresult rv;
-
     g_return_val_if_fail (init_count > 0, FALSE);
 
-    rv = app->GetIntPref (name, value);
-    
-    return !NS_FAILED(rv);
+    return NS_SUCCEEDED (app->GetIntPref (name, value));
 }
 
+/**********************************************************
+ *                      MozViewableIface                  *
+ **********************************************************/
+static void
+moz_viewable_class_init (gpointer g_iface)
+{
+
+  g_signal_new ("title-changed",
+		MOZ_TYPE_VIEWABLE,
+		G_SIGNAL_RUN_FIRST,
+		G_STRUCT_OFFSET(MozViewableIface, title_changed),
+		NULL, NULL,
+		g_cclosure_marshal_VOID__STRING,
+		G_TYPE_NONE, 1, G_TYPE_STRING);
+  
+  g_signal_new ("status-changed",
+		MOZ_TYPE_VIEWABLE,
+		G_SIGNAL_RUN_FIRST,
+		G_STRUCT_OFFSET(MozViewableIface, status_changed),
+		NULL, NULL,
+		g_cclosure_marshal_VOID__STRING,
+		G_TYPE_NONE, 1, G_TYPE_STRING);
+  
+  g_signal_new ("location-changed",
+		MOZ_TYPE_VIEWABLE,
+		G_SIGNAL_RUN_FIRST,
+		G_STRUCT_OFFSET(MozViewableIface, location_changed),
+		NULL, NULL,
+		g_cclosure_marshal_VOID__STRING,
+		G_TYPE_NONE, 1, G_TYPE_STRING);
+  
+  g_signal_new ("uri-requested",
+		MOZ_TYPE_VIEWABLE,
+		G_SIGNAL_RUN_LAST,
+		G_STRUCT_OFFSET (MozViewableIface, uri_requested),
+		g_signal_accumulator_true_handled, NULL,
+		g_cclosure_user_marshal_BOOLEAN__STRING,
+		G_TYPE_BOOLEAN, 1, G_TYPE_STRING);
+  
+  g_signal_new ("document-loaded",
+		MOZ_TYPE_VIEWABLE,
+		G_SIGNAL_RUN_LAST,
+		G_STRUCT_OFFSET (MozViewableIface, document_loaded),
+		NULL, NULL,
+		g_cclosure_marshal_VOID__VOID,
+		G_TYPE_NONE, 0);
+	
+  g_object_interface_install_property (g_iface,
+				       g_param_spec_string
+				       ("requested-uri",
+					"Requested URI",
+					"The requested uri",
+					NULL,
+					(GParamFlags)G_PARAM_READABLE));
+
+  g_object_interface_install_property (g_iface,
+				       g_param_spec_string
+				       ("title",
+					"Page title",
+					"The current webpage title",
+					NULL,
+					(GParamFlags)G_PARAM_READABLE));
+
+  g_object_interface_install_property (g_iface,
+				       g_param_spec_string
+				       ("status",
+					"Status text",
+					"User feedback text",
+					NULL,
+					(GParamFlags)G_PARAM_READABLE));
+
+  g_object_interface_install_property (g_iface,
+				       g_param_spec_string
+				       ("location",
+					"Location",
+					"Current browser location URI",
+					NULL,
+					(GParamFlags)G_PARAM_READABLE));
+}
+
+GType
+moz_viewable_get_type (void)
+{
+  static GType viewable_type = 0;
+
+  if (!viewable_type)
+    {
+      viewable_type =
+	g_type_register_static_simple (G_TYPE_INTERFACE, "MozViewable",
+				       sizeof (MozViewableIface),
+				       (GClassInitFunc) moz_viewable_class_init,
+				       0, NULL, (GTypeFlags)0);
+
+      g_type_interface_add_prerequisite (viewable_type, G_TYPE_OBJECT);
+    }
+
+  return viewable_type;
+}
+
+
+/*******************************************************
+ *                MozWebView accessors                 *
+ *******************************************************/
+gchar *
+moz_web_view_get_title (MozWebView  *view)
+{
+  gchar *ret = NULL;
+  g_return_val_if_fail (MOZ_IS_WEB_VIEW (view), NULL);
+
+  g_object_get (G_OBJECT (view), "title", &ret, NULL);
+
+  return ret;
+}
+
+gchar *    
+moz_web_view_get_status (MozWebView  *view)
+{
+  gchar *ret = NULL;
+  g_return_val_if_fail (MOZ_IS_WEB_VIEW (view), NULL);
+
+  g_object_get (G_OBJECT (view), "status", &ret, NULL);
+
+  return ret;
+}
+
+gchar *    
+moz_web_view_get_location (MozWebView  *view)
+{
+  gchar *ret = NULL;
+  g_return_val_if_fail (MOZ_IS_WEB_VIEW (view), NULL);
+
+  g_object_get (G_OBJECT (view), "location", &ret, NULL);
+
+  return ret;
+}

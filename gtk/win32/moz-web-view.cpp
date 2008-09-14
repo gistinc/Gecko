@@ -46,15 +46,18 @@
 
 // Local includes
 #include "moz-web-view.h"
-#include "moz-web-view-marshal.h"
+#include "moz-web-view-common.h"
 
 #define GET_PRIV(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), MOZ_TYPE_WEB_VIEW, MozWebViewPriv))
+
+//#define TRACING
 
 #ifdef TRACING
 #  define DBG(x) x
 #else
 #  define DBG(x)
 #endif
+
 
 /* GObjectClass */
 static void     moz_web_view_finalize            (GObject           *object);
@@ -77,6 +80,9 @@ static void     moz_web_view_size_allocate       (GtkWidget         *widget,
 static void     moz_web_view_map                 (GtkWidget         *widget);
 static void     moz_web_view_unmap               (GtkWidget         *widget);
 
+/* MozViewableIface */
+static void     moz_web_view_viewable_init       (MozViewableIface  *iface);
+
 /* various local stubs */
 static gboolean handle_toplevel_configure    (GtkWidget         *toplevel,
 					      GdkEventConfigure *event,
@@ -86,13 +92,16 @@ static LRESULT  window_procedure             (HWND               hwnd,
 					      UINT               message,
 					      WPARAM             wparam,
 					      LPARAM             lparam);
+static void     update_property              (MozWebView        *view,
+					      gint               prop_id,
+					      const gchar       *new_value);
 
-class MOZListener;
+class ViewListener;
 struct _MozWebViewPriv {
     /* Essential api to the gecko */
-    MozApp      *app;
-    MozView     *view;
-    MOZListener *listener;
+    MozApp       *app;
+    MozView      *view;
+    ViewListener *listener;
 
     /* Toplevel native window hack */
     HWND         native_window;
@@ -100,102 +109,61 @@ struct _MozWebViewPriv {
     /* Record some properties here */
     gchar       *requested_uri;
     gchar       *title;
+    gchar       *status;
+    gchar       *location;
 };
-
 
 enum {
     PROP_0,
     PROP_REQUESTED_URI,
-    PROP_TITLE
+    PROP_TITLE,
+    PROP_STATUS,
+    PROP_LOCATION
 };
 
-enum {
-    TITLE_CHANGED,
-    STATUS_CHANGED,
-    LOCATION_CHANGED,
-    URI_REQUESTED,
-    DOCUMENT_LOADED,
-    LAST_SIGNAL
-};
-
-static GHashTable *hwnd_hash = NULL;
-static guint       moz_web_view_signals[LAST_SIGNAL] = { 0 };
-
-static guint
-moz_handle_hash (HANDLE handle)
-{
-    return (guint) handle;
-}
-
-static gint
-moz_handle_equal (HANDLE a,
-		  HANDLE b)
-{
-    return (a == b);
-}
-
-G_DEFINE_TYPE (MozWebView, moz_web_view, GTK_TYPE_BIN)
+G_DEFINE_TYPE_WITH_CODE (MozWebView, moz_web_view, GTK_TYPE_BIN,
+			 G_IMPLEMENT_INTERFACE (MOZ_TYPE_VIEWABLE,
+						moz_web_view_viewable_init))
 
 /*******************************************************************
- *                      MOZListener here                           *
+ *                      ViewListener here                           *
  *******************************************************************/
-class MOZListener : public MozViewListener
-{
-    void SetTitle(const char* newTitle);
-    void StatusChanged(const char* newStatus, PRUint32 statusType);
-    void LocationChanged(const char* newLocation);
-    PRBool OpenURI(const char* newLocation);
-    void DocumentLoaded();
+class ViewListener : public MozViewListener {
+public:
+    ViewListener(MozWebView *view) : mView(view) {}
+    virtual ~ViewListener() {}
+
+    virtual void SetTitle(const char *new_title) {
+	update_property (mView, PROP_TITLE, new_title);
+	g_signal_emit_by_name(G_OBJECT(mView), "title-changed", new_title);
+    }
+
+    virtual void StatusChanged(const char *new_status, PRUint32 flags) {
+	update_property (mView, PROP_STATUS, new_status);
+	g_signal_emit_by_name(G_OBJECT(mView), "status-changed", new_status);
+    }
+
+    virtual void LocationChanged(const char *new_uri) {
+	update_property (mView, PROP_LOCATION, new_uri);
+	g_signal_emit_by_name(G_OBJECT(mView), "location-changed", new_uri);
+    }
+
+    virtual PRBool ViewListener::OpenURI(const char* new_uri) {
+	gboolean   abort_load = FALSE;
+	
+	g_signal_emit_by_name (G_OBJECT(mView), "uri-requested", 
+			       new_uri, &abort_load);
+	
+	return abort_load;
+    }
     
-    GtkWidget *GetWidget();
+    virtual void ViewListener::DocumentLoaded() {
+	g_signal_emit_by_name (G_OBJECT(mView), "document-loaded");
+    }
+    
+private:
+    MozWebView *mView;
 };
-
-void MOZListener::SetTitle(const char *new_title)
-{
-    GtkWidget *widget = this->GetWidget();
-    
-    g_object_set (G_OBJECT (widget), 
-		  "page-title", new_title,
-		  NULL);
-
-    g_signal_emit(widget, moz_web_view_signals[TITLE_CHANGED], 0, new_title);
-}
-
-void MOZListener::StatusChanged(const char *new_status, PRUint32 flags)
-{
-    GtkWidget *widget = this->GetWidget();
-    g_signal_emit(widget, moz_web_view_signals[STATUS_CHANGED], 0, new_status);
-}
-
-void MOZListener::LocationChanged(const char *new_uri)
-{
-    GtkWidget *widget = this->GetWidget();
-    g_signal_emit(widget, moz_web_view_signals[LOCATION_CHANGED], 0, new_uri);
-}
-
-PRBool MOZListener::OpenURI(const char* new_uri)
-{
-    GtkWidget *widget = this->GetWidget();
-    gboolean   abort_load = FALSE;
-    
-    g_signal_emit (widget, moz_web_view_signals[URI_REQUESTED], 0, 
-		   new_uri, &abort_load);
-    
-    return abort_load;
-}
-
-void MOZListener::DocumentLoaded()
-{
-    GtkWidget *widget = this->GetWidget();
-    g_signal_emit (widget, moz_web_view_signals[DOCUMENT_LOADED], 0);
-}
-
-GtkWidget *MOZListener::GetWidget()
-{
-    HWND hwnd = (HWND)pMozView->GetParentWindow();
-    GtkWidget *widget = (GtkWidget *)g_hash_table_lookup (hwnd_hash, hwnd);
-    return widget;
-}
 
 /*******************************************************************
  *                      Class Initialization                       *
@@ -207,7 +175,6 @@ moz_web_view_class_init (MozWebViewClass *klass)
     GtkWidgetClass   *widget_klass = GTK_WIDGET_CLASS (klass);
 
     object_klass->finalize      = moz_web_view_finalize;
-    object_klass->set_property  = moz_web_view_set_property;
     object_klass->get_property  = moz_web_view_get_property;
     
     widget_klass->realize           = moz_web_view_realize;
@@ -216,71 +183,13 @@ moz_web_view_class_init (MozWebViewClass *klass)
     widget_klass->size_allocate     = moz_web_view_size_allocate;
     widget_klass->map               = moz_web_view_map;
     widget_klass->unmap             = moz_web_view_unmap;
-    
-    g_object_class_install_property (object_klass,
-				     PROP_REQUESTED_URI,
-				     g_param_spec_string
-				     ("requested-uri",
-				      "Requested URI",
-				      "the requested uri",
-				      NULL,
-				      (GParamFlags)G_PARAM_READWRITE));
-    
-    g_object_class_install_property (object_klass,
-				     PROP_TITLE,
-				     g_param_spec_string
-				     ("page-title",
-				      "Page title",
-				      "the current webpage title",
-				      NULL,
-				      (GParamFlags)G_PARAM_READWRITE));
-    
 
-    moz_web_view_signals[TITLE_CHANGED] =
-	g_signal_new ("title-changed",
-		      G_TYPE_FROM_CLASS(klass),
-		      G_SIGNAL_RUN_FIRST,
-		      G_STRUCT_OFFSET(MozWebViewClass, title_changed),
-		      NULL, NULL,
-		      g_cclosure_marshal_VOID__STRING,
-		      G_TYPE_NONE, 1, G_TYPE_STRING);
-    
-    moz_web_view_signals[STATUS_CHANGED] =
-	g_signal_new ("status-changed",
-		      G_TYPE_FROM_CLASS(klass),
-		      G_SIGNAL_RUN_FIRST,
-		      G_STRUCT_OFFSET(MozWebViewClass, status_changed),
-		      NULL, NULL,
-		      g_cclosure_marshal_VOID__STRING,
-		      G_TYPE_NONE, 1, G_TYPE_STRING);
-    
-    moz_web_view_signals[LOCATION_CHANGED] =
-	g_signal_new ("location-changed",
-		      G_TYPE_FROM_CLASS(klass),
-		      G_SIGNAL_RUN_FIRST,
-		      G_STRUCT_OFFSET(MozWebViewClass, location_changed),
-		      NULL, NULL,
-		      g_cclosure_marshal_VOID__STRING,
-		      G_TYPE_NONE, 1, G_TYPE_STRING);
-    
-    moz_web_view_signals[URI_REQUESTED] = 
-	g_signal_new ("uri-requested",
-		      G_TYPE_FROM_CLASS (object_klass),
-		      G_SIGNAL_RUN_LAST,
-		      G_STRUCT_OFFSET (MozWebViewClass, uri_requested),
-		      g_signal_accumulator_true_handled, NULL,
-		      g_cclosure_user_marshal_BOOLEAN__STRING,
-		      G_TYPE_BOOLEAN, 1, G_TYPE_STRING);
-    
-    moz_web_view_signals[DOCUMENT_LOADED] = 
-	g_signal_new ("document-loaded",
-		      G_TYPE_FROM_CLASS (object_klass),
-		      G_SIGNAL_RUN_LAST,
-		      G_STRUCT_OFFSET (MozWebViewClass, document_loaded),
-		      NULL, NULL,
-		      g_cclosure_marshal_VOID__VOID,
-		      G_TYPE_NONE, 0);
-    
+    /* Implement MozViewable properties */
+    g_object_class_override_property (object_klass, PROP_REQUESTED_URI, "requested-uri");
+    g_object_class_override_property (object_klass, PROP_TITLE, "title");
+    g_object_class_override_property (object_klass, PROP_STATUS, "status");
+    g_object_class_override_property (object_klass, PROP_LOCATION, "location");
+
     g_type_class_add_private (object_klass, sizeof (MozWebViewPriv));
 }
 
@@ -296,8 +205,14 @@ moz_web_view_init (MozWebView *view)
     
     priv->app = new MozApp ();
     priv->view = new MozView ();
-    priv->listener = new MOZListener ();
+    priv->listener = new ViewListener (view);
     priv->view->SetListener(priv->listener);
+}
+
+static void
+moz_web_view_viewable_init (MozViewableIface *iface)
+{
+
 }
 
 /*******************************************************************
@@ -310,48 +225,29 @@ moz_web_view_finalize (GObject *object)
     
     priv = GET_PRIV (object);
     
-    /* The WebBrowserChrome object will be freed by its 
-     * smart pointer being freed
-     */
+    if (priv->view)
+	delete priv->view;
+
+    if (priv->listener)
+	delete priv->listener;
+
+    if (priv->app)
+	delete priv->app;
+
     if (priv->requested_uri)
 	g_free (priv->requested_uri);
+
     if (priv->title)
 	g_free (priv->title);
     
     (G_OBJECT_CLASS (moz_web_view_parent_class)->finalize) (object);
 }
 
-
-static void 
-moz_web_view_set_property (GObject      *object,
-			   guint         prop_id,
-			   const GValue *value,
-			   GParamSpec   *pspec)
-{
-    MozWebViewPriv *priv;
-
-    priv = GET_PRIV (object);
-	
-    switch (prop_id) {
-    case PROP_REQUESTED_URI:
-	moz_web_view_load_uri (MOZ_WEB_VIEW (object), g_value_get_string (value));
-	break;
-    case PROP_TITLE:
-	if (priv->title)
-	    g_free (priv->title);
-	priv->title = g_value_dup_string (value);
-	break;
-    default:
-	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-	break;
-    }
-}
-
 static void 
 moz_web_view_get_property (GObject     *object,
-		       guint        prop_id,
-		       GValue      *value,
-		       GParamSpec  *pspec)
+			   guint        prop_id,
+			   GValue      *value,
+			   GParamSpec  *pspec)
 { 
     MozWebViewPriv *priv;
     
@@ -364,10 +260,41 @@ moz_web_view_get_property (GObject     *object,
     case PROP_TITLE:
 	g_value_set_string (value, priv->title);
 	break;
+    case PROP_STATUS:
+	g_value_set_string (value, priv->status);
+	break;
+    case PROP_LOCATION:
+	g_value_set_string (value, priv->location);
+	break;
+
     default:
 	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 	break;
     }
+}
+
+static void
+update_property (MozWebView  *view,
+		 gint         prop_id,
+		 const gchar *new_value)
+{
+    MozWebViewPriv *priv = GET_PRIV (view);
+    gchar **ptr;
+    gchar  *name = NULL; 
+
+    switch (prop_id) {
+    case PROP_REQUESTED_URI: ptr = &(priv->requested_uri); name = "requested-uri";  break;
+    case PROP_TITLE:         ptr = &(priv->page_title);    name = "title";  break;
+    case PROP_STATUS:        ptr = &(priv->status);        name = "status";  break;
+    case PROP_LOCATION:      ptr = &(priv->location);      name = "location";  break;
+    default:
+	g_assert_unreached ();
+	break;
+    }
+
+    if (*ptr) g_free (*ptr);
+    *ptr = g_strdup (new_value);
+    g_object_notify (G_OBJECT (mView), name);
 }
 
 /*******************************************************************
@@ -418,12 +345,12 @@ static void
 moz_web_view_unrealize (GtkWidget *widget)
 {
     MozWebViewPriv *priv = GET_PRIV (widget);
-    
+
+    RemoveProp (priv->native_window, "moz-view-widget");
+
     if (!DestroyWindow (priv->native_window))
 	g_warning ("Problems destoying native view window");
-    
-    g_hash_table_remove (hwnd_hash, priv->native_window);
-    
+        
     priv->native_window = NULL;
     
     GTK_WIDGET_CLASS (moz_web_view_parent_class)->unrealize (widget);
@@ -499,9 +426,9 @@ moz_web_view_unmap (GtkWidget *widget)
     ShowWindow (priv->native_window, SW_HIDE);
 }
 
-/*******************************************************************
- *                          Various Stubs                          *
- *******************************************************************/
+/* We handle configure events on the toplevel in order to
+ * reposition our window when the toplevel moves.
+ */
 static gboolean 
 handle_toplevel_configure (GtkWidget         *toplevel,
 			   GdkEventConfigure *event,
@@ -526,6 +453,9 @@ handle_toplevel_configure (GtkWidget         *toplevel,
     return FALSE;
 }
 
+/* Handle the window proceedure by the window class directly
+ * in order to call SetFocus() at the appropriate times.
+ */
 static LRESULT 
 window_procedure (HWND   hwnd,
 		  UINT   message,
@@ -534,22 +464,25 @@ window_procedure (HWND   hwnd,
 {
     GtkWidget *widget;
     MozWebViewPriv *priv;
-
-    widget = (GtkWidget *)g_hash_table_lookup (hwnd_hash, hwnd);
 	
+    widget = (GtkWidget *)GetProp (hwnd, "moz-view-widget");
+
+    DBG(g_print ("Procedure called ! widget %p\n", widget));
+
+
+    /* The first few messages are fired inside CreateWindowEx(), so we
+     * havent set the widget data yet.
+     */
     if (widget)
 	priv = GET_PRIV (widget);
     else {
-	DBG(g_print ("message %d unhandled (no widget data in hash table)\n", message));
 	return DefWindowProcW (hwnd, message, wparam, lparam);
     }
     
     switch (message) {
     case WM_INITDIALOG:
-	DBG(g_print ("InitDialog message..\n"));
-	return TRUE;
     case WM_INITMENU: 
-	DBG(g_print ("InitMenu message..\n"));
+    case WM_DESTROY:
 	return TRUE;
     case WM_SYSCOMMAND:
 	if (wparam == SC_CLOSE) {
@@ -557,8 +490,6 @@ window_procedure (HWND   hwnd,
 	    return TRUE;
 	}
 	break;
-    case WM_DESTROY:
-	return TRUE;
 	
     case WM_ACTIVATE:
 	switch (wparam) {
@@ -577,17 +508,38 @@ window_procedure (HWND   hwnd,
     return DefWindowProcW (hwnd, message, wparam, lparam);
 }
 
+/*****************************************************
+ * Hack ahead !!!
+ *
+ * Problems here have to do with focus handling, i.e.
+ * sharing and passing keyboard focus back and forth from
+ * the gecko window to the rest of the app. The gecko 
+ * wants us to turn focus on and off when we recieve the
+ * WM_ACTIVATE message for our window; Gtk+ does not give 
+ * us an opportunity to act on this message (TODO: patch 
+ * gtk+ to do so and run tests).
+ *
+ * Also tried to turn on and off focus near when activate
+ * messages come (i.e. focus in/out of the toplevel window)
+ * with no luck (works to get started, but the gecko 
+ * will never relinquish focus afterwords).
+ *
+ * The current hack/workaround:
+ *   We are using a native toplevel window, that we reposition
+ * to follow the widget hierarchy on toplevel configure events,
+ * this way we handle the WM_ACTIVATE messages and focus handleing
+ * works, on the other hand accelerators keys tied into the higher
+ * level window wont trigger when the gecko has focus (is that
+ * already the case ?) and the apps toplevel will be painted as
+ * an inactive window.
+ */
 static HWND
 create_native_window (GtkWidget *widget)
 {
     static ATOM klass = 0;
     HWND window_handle, parent_handle;
     DWORD dwStyle, dwExStyle;
-    
-    if (!hwnd_hash)
-	hwnd_hash = g_hash_table_new ((GHashFunc) moz_handle_hash,
-				      (GEqualFunc) moz_handle_equal);
-    
+
     if (!klass) {
 	static WNDCLASSEXW wcl; 
 	
@@ -610,8 +562,6 @@ create_native_window (GtkWidget *widget)
 	wcl.hCursor = LoadCursor (NULL, IDC_ARROW); 
 	wcl.lpszClassName = L"MozWindow";
 	
-	/* for child windows only... */
-	//wcl.style |= CS_PARENTDC; /* MSDN: ... enhances system performance. */
 	klass = RegisterClassExW (&wcl);
 	
     }
@@ -629,8 +579,8 @@ create_native_window (GtkWidget *widget)
 				     NULL,
 				     GetModuleHandle (NULL),
 				     NULL);
-    
-    g_hash_table_insert (hwnd_hash, window_handle, widget);
+
+    SetProp (window_handle, "moz-view-widget", (HANDLE)widget);
     
     return window_handle;
 }
@@ -650,7 +600,7 @@ moz_web_view_load_uri (MozWebView *view, const gchar  *uri)
     MozWebViewPriv *priv; 
     
     g_return_if_fail (MOZ_IS_WEB_VIEW (view));
-    g_return_if_fail (uri != NULL);
+    g_return_if_fail (uri && uri[0]);
 
     priv = GET_PRIV (view);
 
@@ -684,32 +634,4 @@ moz_web_view_load_data (MozWebView  *view,
 
     if (GTK_WIDGET_REALIZED (view))
 	priv->view->LoadData(base_uri, content_type, (PRUint8 *)data, (PRUint32)len);
-}
-
-gchar *
-moz_web_view_get_title (MozWebView *view)
-{
-    MozWebViewPriv *priv; 
-    
-    g_return_val_if_fail (MOZ_IS_WEB_VIEW (view), NULL);
-
-    priv = GET_PRIV (view);
-
-    return g_strdup (priv->title);
-}
-
-gboolean
-moz_web_view_set_user_agent (MozWebView  *view,
-			     const gchar *user_agent)
-{
-    nsresult rv;
-    MozWebViewPriv *priv;
-
-    g_return_val_if_fail (MOZ_IS_WEB_VIEW (view), FALSE);
-    g_return_val_if_fail (user_agent != NULL, FALSE);
-
-    priv = GET_PRIV (view);
-    rv = priv->app->SetCharPref("general.useragent.override", user_agent);
-    
-    return TRUE; //!NS_FAILED (rv);
 }
