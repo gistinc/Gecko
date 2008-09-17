@@ -36,25 +36,41 @@ HACCEL hAccelTable;
 bool gDoModal = false;
 bool gQuit = false;
 
+WCHAR* Utf8ToWchar(const char* str)
+{
+  int len = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
+  WCHAR* result = new WCHAR[len];
+  MultiByteToWideChar(CP_UTF8, 0, str, -1, result, len);
+  return result;
+}
+
 void MyListener::SetTitle(const char *newTitle)
 {
   HWND hWnd = (HWND)pMozView->GetParentWindow();
-  ::SetWindowTextA(hWnd, newTitle);
+  WCHAR* newTitleW = Utf8ToWchar(newTitle);
+  ::SetWindowTextW(hWnd, newTitleW);
+  delete[] newTitleW;
 }
 
 void MyListener::StatusChanged(const char *newStatus, PRUint32 statusType)
 {
-  cout << "STATUS:" << newStatus << endl;
+  WCHAR* newStatusW = Utf8ToWchar(newStatus);
+  wcout << "STATUS:" << newStatusW << endl;
+  delete[] newStatusW;
 }
 
 void MyListener::LocationChanged(const char *newLocation)
 {
-  cout << "LOCATION:" << newLocation << endl;
+  WCHAR* newLocationW = Utf8ToWchar(newLocation);
+  wcout << "LOCATION:" << newLocationW << endl;
+  delete[] newLocationW;
 }
 
 PRBool MyListener::OpenURI(const char* newLocation)
 {
-  cout << "OPEN URI:" << newLocation << endl;
+  WCHAR* newLocationW = Utf8ToWchar(newLocation);
+  wcout << "OPEN URI:" << newLocationW << endl;
+  delete[] newLocationW;
   return false;
 }
 
