@@ -73,6 +73,9 @@ using namespace std;
 // Non-Frozen
 #include "nsIBaseWindow.h"
 #include "nsIDocShellTreeItem.h"
+#include "nsIScriptContext.h"
+#include "nsIScriptGlobalObject.h"
+#include "nsIScriptObjectPrincipal.h"
 
 // our stuff
 #include "WebBrowserChrome.h"
@@ -451,6 +454,25 @@ nsresult MozView::GetInterfaceRequestor(nsIInterfaceRequestor** aRequestor)
 {
   NS_ENSURE_ARG_POINTER(aRequestor);
   return CallQueryInterface(mPrivate->webBrowser, aRequestor);
+}
+
+char* MozView::EvaluateJavaScript(const char* aScript)
+{
+  nsCOMPtr<nsIScriptGlobalObject> sgo =
+    do_GetInterface(mPrivate->webBrowser);
+  nsCOMPtr<nsIScriptContext> ctx = sgo->GetContext();
+  nsString retval;
+  nsCOMPtr<nsIScriptObjectPrincipal> sgoPrincipal = do_QueryInterface(sgo);
+  ctx->EvaluateString(NS_ConvertUTF8toUTF16(aScript), sgo->GetGlobalJSObject(),
+    sgoPrincipal->GetPrincipal(),
+    "mozembed", 0, nsnull, &retval, nsnull);
+
+  NS_ConvertUTF16toUTF8 retvalUtf8(retval);
+  char* temp = new char[retvalUtf8.Length() + 1];
+  strncpy(temp, retvalUtf8.get(), retvalUtf8.Length());
+  temp[retvalUtf8.Length()] = 0;
+ 
+  return temp;
 }
 
 // ---- MozViewListener ---
