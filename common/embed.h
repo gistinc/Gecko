@@ -147,13 +147,6 @@ public:
   nsresult LoadURI(const char* uri);
 
   /**
-   * Stops any loading or ongoing processing.
-   *
-   * @return 0 on success
-   */
-  nsresult Stop();
-
-  /**
    * Load content from memory.
    *
    * @param base_url base used for resolving links in the content
@@ -167,6 +160,48 @@ public:
 		    const PRUint8 *data,
 		    PRUint32       len);
 
+  /**
+   * Stops any loading or ongoing processing.
+   *
+   * @return 0 on success
+   */
+  nsresult Stop();
+
+  /**
+   * Reloads the current content from it's original source.
+   *
+   * @return 0 on success
+   */
+  nsresult Reload();
+
+  /**
+   * Navigate to the previous item in the session history.
+   *
+   * @return 0 on success
+   */
+  nsresult GoBack();
+
+  /**
+   * Navigates to the next item in the session history.
+   *
+   * @return 0 on success
+   */
+  nsresult GoForward();
+
+  /**
+   * Indicates if the browser can go back.
+   *
+   * @return true if the browser can go back, false if not
+   */
+  PRBool CanGoBack();
+
+  /**
+   * Indicates if the browser can go forward.
+   *
+   * @return true if the browser can go forward, false if not
+   */
+  PRBool CanGoForward();
+  
   /**
    * Change focus for the browser view.
    * 

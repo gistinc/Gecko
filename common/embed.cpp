@@ -348,13 +348,6 @@ nsresult MozView::LoadURI(const char* uri)
   return rv;
 }
 
-nsresult MozView::Stop()
-{
-  nsresult rv;
-  rv = mPrivate->webNavigation->Stop(nsIWebNavigation::STOP_ALL);
-  return rv;
-}
-
 nsresult MozView::LoadData(const char    *base_url,
 			   const char    *content_type,
 			   const PRUint8 *data,
@@ -386,6 +379,49 @@ nsresult MozView::LoadData(const char    *base_url,
   return NS_OK;
 }
 
+nsresult MozView::Stop()
+{
+  nsresult rv;
+  rv = mPrivate->webNavigation->Stop(nsIWebNavigation::STOP_ALL);
+  return rv;
+}
+
+nsresult MozView::Reload()
+{
+  nsresult rv;
+  rv = mPrivate->webNavigation->Reload(nsIWebNavigation::LOAD_FLAGS_NONE);
+  return rv;
+}
+
+nsresult MozView::GoBack()
+{
+  nsresult rv;
+  rv = mPrivate->webNavigation->GoBack();
+  return rv;
+}
+
+nsresult MozView::GoForward()
+{
+  nsresult rv;
+  rv = mPrivate->webNavigation->GoForward();
+  return rv;
+}
+
+PRBool MozView::CanGoBack()
+{
+  nsresult rv;
+  PRBool allowBack;
+  rv = mPrivate->webNavigation->GetCanGoBack(&allowBack);
+  return allowBack;
+}
+
+PRBool MozView::CanGoForward()
+{
+  nsresult rv;
+  PRBool allowForward;
+  rv = mPrivate->webNavigation->GetCanGoForward(&allowForward);
+  return allowForward;
+}
 
 nsresult MozView::SetFocus(PRBool focus)
 {

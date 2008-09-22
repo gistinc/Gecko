@@ -27,9 +27,9 @@ public:
 };
 
 // Global Variables:
-HINSTANCE hInst;								// current instance
-TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
-TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
+HINSTANCE hInst;                // current instance
+TCHAR szTitle[MAX_LOADSTRING];          // The title bar text
+TCHAR szWindowClass[MAX_LOADSTRING];      // the main window class name
 HWND hMainWnd;
 set<MozView*> gViews;
 HACCEL hAccelTable;
@@ -86,8 +86,7 @@ MozView* MyListener::OpenWindow(PRUint32 flags)
   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
     CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInst, NULL);
 
-  if (!hWnd)
-  {
+  if (!hWnd) {
     return 0;
   }
 
@@ -101,8 +100,9 @@ MozView* MyListener::OpenWindow(PRUint32 flags)
   int res = pNewView->CreateBrowser(hWnd, rect.left, rect.top,
       rect.right - rect.left, rect.bottom - rect.top, flags);
 
-  if(res)
-      return 0;
+  if (res) {
+    return 0;
+  }
 
   pNewView->SetParentView(pMozView);
   pNewView->SetListener(new MyListener());
@@ -136,23 +136,20 @@ void MyListener::SetVisibility(PRBool visible)
 void MyListener::StartModal()
 {
   gDoModal = true;
-	MSG msg;
+  MSG msg;
   MozView* parentView = pMozView->GetParentView();
   ::EnableWindow((HWND)parentView->GetParentWindow(), FALSE);
   int res;
-	while (gDoModal && (res = GetMessage(&msg, NULL, 0, 0)))
-	{
-    if(res == -1)
-    {
+  while (gDoModal && (res = GetMessage(&msg, NULL, 0, 0))) {
+    if (res == -1) {
       printf("ERROR: GetMessage == -1\n");
       break;
     }
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
+    if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+  }
 }
 
 void MyListener::ExitModal(nsresult result)
@@ -160,61 +157,61 @@ void MyListener::ExitModal(nsresult result)
   MozView* parentView = pMozView->GetParentView();
   ::EnableWindow((HWND)parentView->GetParentWindow(), TRUE);
   HWND hWnd = (HWND)pMozView->GetParentWindow();
-	DestroyWindow(hWnd);
+  DestroyWindow(hWnd);
 }
 
 // Forward declarations of functions included in this code module:
-ATOM				MyRegisterClass(HINSTANCE hInstance);
-BOOL				InitInstance(HINSTANCE, int);
-LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+ATOM MyRegisterClass(HINSTANCE hInstance);
+BOOL InitInstance(HINSTANCE, int);
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(lpCmdLine);
+  UNREFERENCED_PARAMETER(hPrevInstance);
+  UNREFERENCED_PARAMETER(lpCmdLine);
 
- 	// TODO: Place code here.
-	MSG msg;
+   // TODO: Place code here.
+  MSG msg;
 
-	// Initialize global strings
-	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadString(hInstance, IDC_WIN32_TEST, szWindowClass, MAX_LOADSTRING);
-	MyRegisterClass(hInstance);
+  // Initialize global strings
+  LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+  LoadString(hInstance, IDC_WIN32_TEST, szWindowClass, MAX_LOADSTRING);
+  MyRegisterClass(hInstance);
 
-	// Perform application initialization:
-	if (!InitInstance (hInstance, nCmdShow))
-	{
-		return FALSE;
-	}
+  // Perform application initialization:
+  if (!InitInstance (hInstance, nCmdShow)) {
+    return FALSE;
+  }
 
-	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WIN32_TEST));
+  hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WIN32_TEST));
 
-    RECT rect;
-    GetClientRect(hMainWnd, &rect);
+  RECT rect;
+  GetClientRect(hMainWnd, &rect);
 
-    MozApp mozApp;
+  MozApp mozApp;
 
-    MozView* mozView = new MozView();
-    gViews.insert(mozView);
-    int res = mozView->CreateBrowser(hMainWnd, rect.left, rect.top,
-        rect.right - rect.left, rect.bottom - rect.top);
+  MozView* mozView = new MozView();
+  gViews.insert(mozView);
+  int res = mozView->CreateBrowser(hMainWnd, rect.left, rect.top,
+      rect.right - rect.left, rect.bottom - rect.top);
 
-    if(res)
-        return res;
+  if (res) {
+    return res;
+  }
 
-    mozView->SetListener(new MyListener);
+  mozView->SetListener(new MyListener);
 
-    SetWindowLongPtr(hMainWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(mozView));
+  SetWindowLongPtr(hMainWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(mozView));
 
-    mozView->LoadURI("http://google.com");
-    //mozView->LoadURI("file:///C:/mozilla/test/test.html");
-    //mozView->LoadURI("chrome://test/content");
+  mozView->LoadURI("http://google.com");
+  //mozView->LoadURI("file:///C:/mozilla/test/test.html");
+  //mozView->LoadURI("chrome://test/content");
 
-	// Main message loop:
+  // Main message loop:
   while (!gQuit) {
     WaitMessage();
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -222,43 +219,20 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         gQuit = true;
         break;
       }
-		  if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-		  {
-			  TranslateMessage(&msg);
-			  DispatchMessage(&msg);
-		  }
+      if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
     }
   }
 
   // delete extra views
   set<MozView*>::const_iterator itr;
-  for(itr = gViews.begin(); itr != gViews.end(); ++itr) {
+  for (itr = gViews.begin(); itr != gViews.end(); ++itr) {
     delete *itr;
   }
 
-    /*
-    HANDLE hFakeEvent = ::CreateEvent(NULL, TRUE, FALSE, NULL);
-    PRBool aRunCondition = PR_TRUE;
-
-    while (aRunCondition ) {
-        // Process pending messages
-        while (::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
-            if (!::GetMessage(&msg, NULL, 0, 0)) {
-            // WM_QUIT
-                aRunCondition = PR_FALSE;
-                break;
-            }
-            ::TranslateMessage(&msg);
-            ::DispatchMessage(&msg);
-        }
-
-        // Do idle stuff
-        ::MsgWaitForMultipleObjects(1, &hFakeEvent, FALSE, 100, QS_ALLEVENTS);
-    }
-    ::CloseHandle(hFakeEvent);
-    */
-
-	return (int) msg.wParam;
+  return (int) msg.wParam;
 }
 
 
@@ -278,23 +252,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
-	WNDCLASSEX wcex;
+  WNDCLASSEX wcex;
 
-	wcex.cbSize = sizeof(WNDCLASSEX);
+  wcex.cbSize = sizeof(WNDCLASSEX);
 
-	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc	= WndProc;
-	wcex.cbClsExtra		= 0;
-	wcex.cbWndExtra		= 0;
-	wcex.hInstance		= hInstance;
-	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_WIN32_TEST));
-	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_WIN32_TEST);
-	wcex.lpszClassName	= szWindowClass;
-	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+  wcex.style      = CS_HREDRAW | CS_VREDRAW;
+  wcex.lpfnWndProc  = WndProc;
+  wcex.cbClsExtra    = 0;
+  wcex.cbWndExtra    = 0;
+  wcex.hInstance    = hInstance;
+  wcex.hIcon      = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_WIN32_TEST));
+  wcex.hCursor    = LoadCursor(NULL, IDC_ARROW);
+  wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+  wcex.lpszMenuName  = MAKEINTRESOURCE(IDC_WIN32_TEST);
+  wcex.lpszClassName  = szWindowClass;
+  wcex.hIconSm    = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
-	return RegisterClassEx(&wcex);
+  return RegisterClassEx(&wcex);
 }
 
 //
@@ -314,8 +288,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hMainWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
-   if (!hMainWnd)
-   {
+   if (!hMainWnd) {
       return FALSE;
    }
 
@@ -330,129 +303,137 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 //  PURPOSE:  Processes messages for the main window.
 //
-//  WM_COMMAND	- process the application menu
-//  WM_PAINT	- Paint the main window
-//  WM_DESTROY	- post a quit message and return
+//  WM_COMMAND  - process the application menu
+//  WM_PAINT  - Paint the main window
+//  WM_DESTROY  - post a quit message and return
 //
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int wmId, wmEvent;
+  int wmId, wmEvent;
 
   MozView* pMozView = (MozView*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
-	switch (message)
-	{
-	case WM_COMMAND:
-		wmId    = LOWORD(wParam);
-		wmEvent = HIWORD(wParam);
-		// Parse the menu selections:
-		switch (wmId)
-		{
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			break;
-		case IDM_EXIT:
-      {
-        MozView* parentView = pMozView->GetParentView();
-        if(parentView && gDoModal)
-          ::EnableWindow((HWND)parentView->GetParentWindow(), TRUE);
+  switch (message) {
+    case WM_COMMAND:
+      wmId = LOWORD(wParam);
+      wmEvent = HIWORD(wParam);
+      // Parse the menu selections:
+      switch (wmId) {
+        case IDM_ABOUT:
+          DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+          break;
+        case IDM_EXIT:
+        {
+          MozView* parentView = pMozView->GetParentView();
+          if (parentView && gDoModal)
+            ::EnableWindow((HWND)parentView->GetParentWindow(), TRUE);
+          DestroyWindow(hWnd);
+          break;
+        }
+        case IDM_VIEW_STOP:
+          pMozView->Stop();
+          break;
+        case IDM_VIEW_RELOAD:
+          pMozView->Reload();
+          break;
+        case IDM_HISTORY_BACK:
+          pMozView->GoBack();
+          break;
+        case IDM_HISTORY_FORWARD:
+          pMozView->GoForward();
+          break;
+        default:
+          return DefWindowProc(hWnd, message, wParam, lParam);
       }
-			DestroyWindow(hWnd);
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-		break;
-  case WM_CLOSE:
+      break;
+    case WM_CLOSE:
     {
       MozView* parentView = pMozView->GetParentView();
-      if(parentView && gDoModal)
+      if (parentView && gDoModal)
         ::EnableWindow((HWND)parentView->GetParentWindow(), TRUE);
+      return DefWindowProc(hWnd, message, wParam, lParam);
+      break;
     }
-    return DefWindowProc(hWnd, message, wParam, lParam);
-    break;
-	case WM_DESTROY:
-    if(gViews.erase(pMozView) > 0) {
-      pMozView->Stop();
-      delete pMozView->GetListener();
-      delete pMozView;
-    }
+    case WM_DESTROY:
+      if (gViews.erase(pMozView) > 0) {
+        pMozView->Stop();
+        delete pMozView->GetListener();
+        delete pMozView;
+      }
 
-    if(gDoModal) {
-      gDoModal = false;
-    }
+      if (gDoModal) {
+        gDoModal = false;
+      }
 
-    if(gViews.size() == 0) {
-      PostQuitMessage(0);
-      gQuit = true;
-    }
+      if (gViews.size() == 0) {
+        PostQuitMessage(0);
+        gQuit = true;
+      }
 
-		break;
-    case WM_SIZE:
-        {
-            
-            if(pMozView)
-            {
-                RECT rect;
-                GetClientRect(hWnd, &rect);
-                pMozView->SetPositionAndSize(rect.left, rect.top,
-                    rect.right - rect.left, rect.bottom - rect.top);
-            }
+      break;
+      case WM_SIZE:
+        if (pMozView) {
+          RECT rect;
+          GetClientRect(hWnd, &rect);
+          pMozView->SetPositionAndSize(rect.left, rect.top, 
+              rect.right - rect.left, rect.bottom - rect.top);
         }
         break;
-    case WM_ACTIVATE:
-        {
-            if(pMozView)
-            {
-                switch (wParam)
-                {
-                case WA_CLICKACTIVE:
-                case WA_ACTIVE:
-                    pMozView->SetFocus(true);
-                    break;
-                case WA_INACTIVE:
-                    pMozView->SetFocus(false);
-                    break;
-                default:
-                    break;
-                }
-            }
+      case WM_ACTIVATE:
+        if (pMozView) {
+          switch (wParam) {
+            case WA_CLICKACTIVE:
+            case WA_ACTIVE:
+              pMozView->SetFocus(true);
+              break;
+            case WA_INACTIVE:
+              pMozView->SetFocus(false);
+              break;
+            default:
+              break;
+          }
         }
         break;
-    case WM_ERASEBKGND:
+      case WM_INITMENUPOPUP:
+      {
+        HMENU hMenu = (HMENU)wParam;
+        ::EnableMenuItem(hMenu, IDM_HISTORY_BACK, (pMozView->CanGoBack() ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+        ::EnableMenuItem(hMenu, IDM_HISTORY_FORWARD, (pMozView->CanGoForward() ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+        break;
+      }
+      case WM_ERASEBKGND:
         // Reduce flicker by not painting the non-visible background
         return 1;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-	return 0;
+      default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+  }
+  return 0;
 }
 
 // Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	UNREFERENCED_PARAMETER(lParam);
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		return (INT_PTR)TRUE;
+  UNREFERENCED_PARAMETER(lParam);
+  switch (message)
+  {
+    case WM_INITDIALOG:
+      return (INT_PTR)TRUE;
 
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-		{
-			EndDialog(hDlg, LOWORD(wParam));
-			return (INT_PTR)TRUE;
-		}
-		break;
-	}
-	return (INT_PTR)FALSE;
+    case WM_COMMAND:
+      if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
+        EndDialog(hDlg, LOWORD(wParam));
+        return (INT_PTR)TRUE;
+      }
+      break;
+  }
+  return (INT_PTR)FALSE;
 }
 
 
 // for running as console app
 int main(int argc, char *argv[])
 {
-    HINSTANCE hInstanceApp = GetModuleHandle(NULL);
-    _tWinMain(hInstanceApp, NULL, NULL, SW_SHOW);
+  HINSTANCE hInstanceApp = GetModuleHandle(NULL);
+  _tWinMain(hInstanceApp, NULL, NULL, SW_SHOW);
 }
