@@ -8,6 +8,7 @@
 #include <QWidget>
 
 class QMozViewListener;
+class nsIInterfaceRequestor;
 
 class Q_MOZVIEW_EXPORT QMozView : public QWidget
 {
@@ -18,6 +19,8 @@ public:
   virtual ~QMozView();
 
   void loadUri(const QString& uri);
+  void getInterfaceRequestor(nsIInterfaceRequestor** aRequestor);
+  QString evaluateJavaScript(const QString& script);
 
   virtual QSize sizeHint() const;
 

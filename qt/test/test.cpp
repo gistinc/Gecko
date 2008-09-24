@@ -55,7 +55,6 @@ MyBrowser::MyBrowser(QWidget *parent, unsigned int flags)
   connect(location, SIGNAL(returnPressed()),
     this, SLOT(go()));
   
-  //webView->page()->mainFrame()->evaluateJavaScript("alert('embed');");
 }
 
 void MyBrowser::loadUri(const QString& uri)

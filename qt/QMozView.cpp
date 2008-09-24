@@ -134,6 +134,17 @@ void QMozView::loadUri(const QString &uri)
   mPrivate->mozView.LoadURI(uri.toUtf8());
 }
 
+void QMozView::getInterfaceRequestor(nsIInterfaceRequestor** aRequestor)
+{
+  *aRequestor = 0;
+  mPrivate->mozView.GetInterfaceRequestor(aRequestor);
+}
+
+QString QMozView::evaluateJavaScript(const QString& script)
+{
+  return QString::fromUtf8(mPrivate->mozView.EvaluateJavaScript(script.toUtf8()));
+}
+
 QMozView* QMozView::openWindow(unsigned int flags)
 {
   return 0;
