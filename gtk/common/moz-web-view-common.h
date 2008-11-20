@@ -19,14 +19,14 @@ typedef struct _MozViewableIface MozViewableIface;
  * header is not to be published or included in applications.
  */
 struct _MozViewableIface {
-  GTypeInterface base_iface;
+    GTypeInterface base_iface;
 
-  /* Signals */
-  void     (*title_changed) (MozViewable *view, const char *title);
-  void     (*status_changed) (MozViewable *view, const char *status);
-  void     (*location_changed) (MozViewable *view, const char *uri);
-  gboolean (*uri_requested)   (MozViewable *view, const char *uri);
-  void     (*document_loaded) (MozViewable *view);
+    /* Signals */
+    void     (*title_changed) (MozViewable *view, const char *title);
+    void     (*status_changed) (MozViewable *view, const char *status);
+    void     (*location_changed) (MozViewable *view, const char *uri);
+    gboolean (*uri_requested)   (MozViewable *view, const char *uri);
+    void     (*document_loaded) (MozViewable *view);
 };
 
 GType     moz_viewable_get_type               (void) G_GNUC_CONST;

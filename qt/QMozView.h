@@ -12,34 +12,34 @@ class nsIInterfaceRequestor;
 
 class Q_MOZVIEW_EXPORT QMozView : public QWidget
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  QMozView(QWidget *parent = 0, unsigned int flags = 0);
-  virtual ~QMozView();
+    QMozView(QWidget *parent = 0, unsigned int flags = 0);
+    virtual ~QMozView();
 
-  void loadUri(const QString& uri);
-  void getInterfaceRequestor(nsIInterfaceRequestor** aRequestor);
-  QString evaluateJavaScript(const QString& script);
+    void loadUri(const QString& uri);
+    void getInterfaceRequestor(nsIInterfaceRequestor** aRequestor);
+    QString evaluateJavaScript(const QString& script);
 
-  virtual QSize sizeHint() const;
+    virtual QSize sizeHint() const;
 
 signals:
-  void locationChanged(const QString& newUri);
-  void titleChanged(const QString& newTitle);
-  void statusChanged(const QString& newStatus);
-  void startModal();
-  void exitModal();
+    void locationChanged(const QString& newUri);
+    void titleChanged(const QString& newTitle);
+    void statusChanged(const QString& newStatus);
+    void startModal();
+    void exitModal();
 
 protected:
-  void resizeEvent(QResizeEvent* event);
-  virtual QMozView* openWindow(unsigned int flags);
+    void resizeEvent(QResizeEvent* event);
+    virtual QMozView* openWindow(unsigned int flags);
 
 private:
-  class Private;
-  Private* mPrivate;
+    class Private;
+    Private* mPrivate;
 
-  friend class QMozViewListener;
+    friend class QMozViewListener;
 };
 
 #endif /* __QMozView_h_ */

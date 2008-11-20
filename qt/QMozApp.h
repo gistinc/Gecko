@@ -9,23 +9,23 @@
 
 class QMozApp : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  QMozApp();
-  QMozApp(const QString& profilePath);
-  virtual ~QMozApp();
+    QMozApp();
+    QMozApp(const QString& profilePath);
+    virtual ~QMozApp();
 
-  QString stringPref(const QString& name) const;
-  void setStringPref(const QString& name, const QString& value);
-  int intPref(const QString& name) const;
-  void setIntPref(const QString& name, int value);
-  bool boolPref(const QString& name) const;
-  void setBoolPref(const QString& name, bool value);
+    QString stringPref(const QString& name) const;
+    void setStringPref(const QString& name, const QString& value);
+    int intPref(const QString& name) const;
+    void setIntPref(const QString& name, int value);
+    bool boolPref(const QString& name) const;
+    void setBoolPref(const QString& name, bool value);
 
 private:
-  class Private;
-  Private* mPrivate;
+    class Private;
+    Private* mPrivate;
 };
 
 #endif /* __QMozApp_h_ */

@@ -78,10 +78,11 @@ ContentListener::OnStartURIOpen(nsIURI     *aURI,
     return rv;
 
   MozViewListener *listener = mOwner->GetListener ();
-  if (listener) {      
+  if (listener) {
       *aAbortOpen = listener->OpenURI (specString.get());
-  } else
+  } else {
       *aAbortOpen = false;
+  }
 
   return NS_OK;
 }

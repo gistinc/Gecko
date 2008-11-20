@@ -43,114 +43,114 @@
 class QMozViewListener : public MozViewListener
 {
 public:
-  QMozViewListener(QMozView* aQMozView) : pQMozView(aQMozView) {}
-  virtual ~QMozViewListener() {}
+    QMozViewListener(QMozView* aQMozView) : pQMozView(aQMozView) {}
+    virtual ~QMozViewListener() {}
 
-  void SetTitle(const char* newTitle);
-  void StatusChanged(const char* newStatus, PRUint32 statusType);
-  void LocationChanged(const char* newLocation);
-  MozView* OpenWindow(PRUint32 flags);
-  void SizeTo(PRUint32 width, PRUint32 height);
-  void StartModal();
-  void ExitModal(nsresult result);
+    void SetTitle(const char* newTitle);
+    void StatusChanged(const char* newStatus, PRUint32 statusType);
+    void LocationChanged(const char* newLocation);
+    MozView* OpenWindow(PRUint32 flags);
+    void SizeTo(PRUint32 width, PRUint32 height);
+    void StartModal();
+    void ExitModal(nsresult result);
 
 private:
-  QMozView* pQMozView;
+    QMozView* pQMozView;
 };
 
 class QMozView::Private
 {
 public:
-  Private(QMozView* aQMozView) : listener(aQMozView) {mozView.SetListener(&listener);}
-  MozView mozView;
-  QMozViewListener listener;
-  QSize preferredSize;
+    Private(QMozView* aQMozView) : listener(aQMozView) {mozView.SetListener(&listener);}
+    MozView mozView;
+    QMozViewListener listener;
+    QSize preferredSize;
 };
 
 void QMozViewListener::SetTitle(const char* newTitle)
 {
-  pQMozView->titleChanged(QString::fromUtf8(newTitle));
+    pQMozView->titleChanged(QString::fromUtf8(newTitle));
 }
 
 void QMozViewListener::StatusChanged(const char* newStatus, PRUint32 statusType)
 {
-  pQMozView->statusChanged(QString::fromUtf8(newStatus));
+    pQMozView->statusChanged(QString::fromUtf8(newStatus));
 }
 
 void QMozViewListener::LocationChanged(const char* newLocation)
 {
-  pQMozView->locationChanged(QString::fromUtf8(newLocation));
+    pQMozView->locationChanged(QString::fromUtf8(newLocation));
 }
 
 MozView* QMozViewListener::OpenWindow(PRUint32 flags)
 {
-  QMozView* newQMozView = pQMozView->openWindow(flags);
-  if(!newQMozView)
-    return 0;
-  return &(newQMozView->mPrivate->mozView);
+    QMozView* newQMozView = pQMozView->openWindow(flags);
+    if(!newQMozView)
+        return 0;
+    return &(newQMozView->mPrivate->mozView);
 }
 
 void QMozViewListener::SizeTo(PRUint32 width, PRUint32 height)
 {
-  pQMozView->mPrivate->preferredSize = QSize(width, height);
-  pQMozView->updateGeometry();
-  pQMozView->parentWidget()->adjustSize();
+    pQMozView->mPrivate->preferredSize = QSize(width, height);
+    pQMozView->updateGeometry();
+    pQMozView->parentWidget()->adjustSize();
 }
 
 void QMozViewListener::StartModal()
 {
-  pQMozView->startModal();
+    pQMozView->startModal();
 }
 
 void QMozViewListener::ExitModal(nsresult result)
 {
-  pQMozView->exitModal();
+    pQMozView->exitModal();
 }
 
 QMozView::QMozView(QWidget *parent, unsigned int flags)
 : QWidget(parent)
 {
-  mPrivate = new Private(this);
+    mPrivate = new Private(this);
 #ifdef WIN32
-  mPrivate->mozView.CreateBrowser((void*)winId(), 0, 0, 100, 100, flags);
+    mPrivate->mozView.CreateBrowser((void*)winId(), 0, 0, 100, 100, flags);
 #else
-  // TODO: Hmmm what if we are not using a mozilla with Qt backend
-  mPrivate->mozView.CreateBrowser(this, 0, 0, 0, 0, flags);
+    // TODO: Hmmm what if we are not using a mozilla with Qt backend
+    mPrivate->mozView.CreateBrowser(this, 0, 0, 0, 0, flags);
 #endif
 }
 
 QMozView::~QMozView()
 {
-  delete mPrivate;
+    delete mPrivate;
 }
 
 void QMozView::resizeEvent(QResizeEvent* event)
 {
-  mPrivate->mozView.SetPositionAndSize(0, 0, size().width(), size().height());
+    mPrivate->mozView.SetPositionAndSize(0, 0, size().width(), size().height());
 }
 
 void QMozView::loadUri(const QString &uri)
 {
-  mPrivate->mozView.LoadURI(uri.toUtf8());
+    mPrivate->mozView.LoadURI(uri.toUtf8());
 }
 
 void QMozView::getInterfaceRequestor(nsIInterfaceRequestor** aRequestor)
 {
-  *aRequestor = 0;
-  mPrivate->mozView.GetInterfaceRequestor(aRequestor);
+    *aRequestor = 0;
+    mPrivate->mozView.GetInterfaceRequestor(aRequestor);
 }
 
 QString QMozView::evaluateJavaScript(const QString& script)
 {
-  return QString::fromUtf8(mPrivate->mozView.EvaluateJavaScript(script.toUtf8()));
+    return QString::fromUtf8(mPrivate->mozView.EvaluateJavaScript(script.toUtf8()));
 }
 
 QMozView* QMozView::openWindow(unsigned int flags)
 {
-  return 0;
+    return 0;
 }
 
 QSize QMozView::sizeHint() const
 {
-  return mPrivate->preferredSize;
+    return mPrivate->preferredSize;
 }

@@ -10,90 +10,90 @@
 #include "QMozApp.h"
 
 MyQMozView::MyQMozView(QWidget *parent, unsigned int flags)
-  : QMozView(parent, flags)
+    : QMozView(parent, flags)
 {
 }
 
 QMozView* MyQMozView::openWindow(unsigned int flags)
 {
-  MyBrowser* newBrowser = new MyBrowser(0, flags);
-  newBrowser->resize(400, 400);
-  newBrowser->show();
-  newBrowser->setAttribute(Qt::WA_DeleteOnClose);
-  return newBrowser->getQMozView();
+    MyBrowser* newBrowser = new MyBrowser(0, flags);
+    newBrowser->resize(400, 400);
+    newBrowser->show();
+    newBrowser->setAttribute(Qt::WA_DeleteOnClose);
+    return newBrowser->getQMozView();
 }
 
 MyBrowser::MyBrowser(QWidget *parent, unsigned int flags)
 : QDialog(parent)
 {
-  QVBoxLayout* layout = new QVBoxLayout(this);
-  
-  location = new QLineEdit(this);
-  layout->addWidget(location);
+    QVBoxLayout* layout = new QVBoxLayout(this);
 
-  mozView = new MyQMozView(this, flags);
-  layout->addWidget(mozView, 1);
-  
-  status = new QLabel(this);
-  layout->addWidget(status);
+    location = new QLineEdit(this);
+    layout->addWidget(location);
 
-  connect(mozView, SIGNAL(locationChanged(const QString&)),
-    location, SLOT(setText(const QString&)));
+    mozView = new MyQMozView(this, flags);
+    layout->addWidget(mozView, 1);
 
-  connect(mozView, SIGNAL(titleChanged(const QString&)),
-    this, SLOT(setWindowTitle(const QString&)));
+    status = new QLabel(this);
+    layout->addWidget(status);
 
-  connect(mozView, SIGNAL(statusChanged(const QString&)),
-    status, SLOT(setText(const QString&)));
+    connect(mozView, SIGNAL(locationChanged(const QString&)),
+            location, SLOT(setText(const QString&)));
 
-  connect(mozView, SIGNAL(startModal()),
-    this, SLOT(startModal()));
+    connect(mozView, SIGNAL(titleChanged(const QString&)),
+            this, SLOT(setWindowTitle(const QString&)));
 
-  connect(mozView, SIGNAL(exitModal()),
-    this, SLOT(exitModal()));
+    connect(mozView, SIGNAL(statusChanged(const QString&)),
+            status, SLOT(setText(const QString&)));
 
-  connect(location, SIGNAL(returnPressed()),
-    this, SLOT(go()));
-  
+    connect(mozView, SIGNAL(startModal()),
+            this, SLOT(startModal()));
+
+    connect(mozView, SIGNAL(exitModal()),
+            this, SLOT(exitModal()));
+
+    connect(location, SIGNAL(returnPressed()),
+            this, SLOT(go()));
+
 }
 
 void MyBrowser::loadUri(const QString& uri)
 {
-  location->setText(uri);
-  mozView->loadUri(uri);
+    location->setText(uri);
+    mozView->loadUri(uri);
 }
 
 void MyBrowser::go()
 {
-  mozView->loadUri(location->text());
+    mozView->loadUri(location->text());
 }
 
 void MyBrowser::startModal()
 {
-  hide();
-  exec();
+    hide();
+    exec();
 }
 
 void MyBrowser::exitModal()
 {
-  done(0);
-  // have to delete mozView now to avoid JS context assertions
-  delete mozView;
+    done(0);
+    // have to delete mozView now to avoid JS context assertions
+    delete mozView;
 }
 
 int main(int argc, char *argv[])
 {
-  QApplication app(argc, argv);
+    QApplication app(argc, argv);
 
-  MyBrowser window;
-  
-  window.resize(400, 400);
-  window.show();
+    MyBrowser window;
 
-  if(argc > 1)
-    window.loadUri(argv[argc - 1]);
-  else
-    window.loadUri("http://mozilla.org");
+    window.resize(400, 400);
+    window.show();
 
-  return app.exec();
+    if(argc > 1)
+        window.loadUri(argv[argc - 1]);
+    else
+        window.loadUri("http://mozilla.org");
+
+    return app.exec();
 }

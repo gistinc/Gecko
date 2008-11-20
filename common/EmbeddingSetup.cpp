@@ -80,9 +80,9 @@ nsCOMPtr<nsILocalFile> sProfileDir = nsnull;
 class MozEmbedDirectoryProvider : public nsIDirectoryServiceProvider2
 {
 public:
-  NS_DECL_ISUPPORTS_INHERITED
-  NS_DECL_NSIDIRECTORYSERVICEPROVIDER
-  NS_DECL_NSIDIRECTORYSERVICEPROVIDER2
+    NS_DECL_ISUPPORTS_INHERITED
+    NS_DECL_NSIDIRECTORYSERVICEPROVIDER
+    NS_DECL_NSIDIRECTORYSERVICEPROVIDER2
 };
 
 static const MozEmbedDirectoryProvider kDirectoryProvider;
@@ -94,55 +94,55 @@ NS_IMPL_QUERY_INTERFACE2(MozEmbedDirectoryProvider,
 NS_IMETHODIMP_(nsrefcnt)
 MozEmbedDirectoryProvider::AddRef()
 {
-  return 1;
+    return 1;
 }
 
 NS_IMETHODIMP_(nsrefcnt)
 MozEmbedDirectoryProvider::Release()
 {
-  return 1;
+    return 1;
 }
 
 NS_IMETHODIMP
 MozEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
                                    nsIFile* *aResult)
 {
-  if (sAppFileLocProvider) {
-    nsresult rv = sAppFileLocProvider->GetFile(aKey, aPersist,
-                                                             aResult);
-    if (NS_SUCCEEDED(rv))
-      return rv;
-  }
+    if (sAppFileLocProvider) {
+        nsresult rv = sAppFileLocProvider->GetFile(aKey, aPersist,
+                                                   aResult);
+        if (NS_SUCCEEDED(rv))
+            return rv;
+    }
 
-  if (sProfileDir && !strcmp(aKey, NS_APP_USER_PROFILE_50_DIR)) {
-    *aPersist = PR_TRUE;
-    return sProfileDir->Clone(aResult);
-  }
+    if (sProfileDir && !strcmp(aKey, NS_APP_USER_PROFILE_50_DIR)) {
+        *aPersist = PR_TRUE;
+        return sProfileDir->Clone(aResult);
+    }
 
-  if (sProfileDir && !strcmp(aKey, NS_APP_PROFILE_DIR_STARTUP)) {
-    *aPersist = PR_TRUE;
-    return sProfileDir->Clone(aResult);
-  }
+    if (sProfileDir && !strcmp(aKey, NS_APP_PROFILE_DIR_STARTUP)) {
+        *aPersist = PR_TRUE;
+        return sProfileDir->Clone(aResult);
+    }
 
-  if (sProfileDir && !strcmp(aKey, NS_APP_CACHE_PARENT_DIR)) {
-    *aPersist = PR_TRUE;
-    return sProfileDir->Clone(aResult);
-  }
+    if (sProfileDir && !strcmp(aKey, NS_APP_CACHE_PARENT_DIR)) {
+        *aPersist = PR_TRUE;
+        return sProfileDir->Clone(aResult);
+    }
 
-  return NS_ERROR_FAILURE;
+    return NS_ERROR_FAILURE;
 }
 
 NS_IMETHODIMP
 MozEmbedDirectoryProvider::GetFiles(const char *aKey,
                                     nsISimpleEnumerator* *aResult)
 {
-  nsCOMPtr<nsIDirectoryServiceProvider2>
-    dp2(do_QueryInterface(sAppFileLocProvider));
+    nsCOMPtr<nsIDirectoryServiceProvider2>
+      dp2(do_QueryInterface(sAppFileLocProvider));
 
-  if (!dp2)
-    return NS_ERROR_FAILURE;
+    if (!dp2)
+        return NS_ERROR_FAILURE;
 
-  return dp2->GetFiles(aKey, aResult);
+    return dp2->GetFiles(aKey, aResult);
 }
 
 nsresult InitEmbedding(const char* aProfilePath)
@@ -150,8 +150,8 @@ nsresult InitEmbedding(const char* aProfilePath)
     nsresult rv;
 
     ++gInitCount;
-    if(gInitCount > 1)
-      return NS_OK;
+    if (gInitCount > 1)
+        return NS_OK;
 
     // Find the GRE (xul shared lib). We are only using frozen interfaces, so we
     // should be compatible all the way up to (but not including) mozilla 2.0
@@ -209,7 +209,7 @@ nsresult InitEmbedding(const char* aProfilePath)
     rv = NS_NewNativeLocalFile(nsCString(xpcomDir.c_str()), PR_FALSE,
                                getter_AddRefs(xuldir));
     if (NS_FAILED(rv)) {
-      cerr << "Unable to create nsILocalFile for xuldir " << xpcomDir << endl;
+        cerr << "Unable to create nsILocalFile for xuldir " << xpcomDir << endl;
         return 6;
     }
 
@@ -221,7 +221,7 @@ nsresult InitEmbedding(const char* aProfilePath)
     // TODO: works on linux, need solution for unices which don't support this
     ssize_t len;
     if ((len = readlink("/proc/self/exe", self, sizeof(self)-1)) != -1)
-      self[len] = '\0';
+        self[len] = '\0';
 #endif
     string selfPath(self);
     lastslash = selfPath.find_last_of("/\\");
@@ -241,17 +241,17 @@ nsresult InitEmbedding(const char* aProfilePath)
     }
 
     // setup profile dir
-    if(aProfilePath) {
-      rv = NS_NewNativeLocalFile(nsCString(aProfilePath), PR_FALSE,
-        getter_AddRefs(sProfileDir));
-      NS_ENSURE_SUCCESS(rv, rv);
+    if (aProfilePath) {
+        rv = NS_NewNativeLocalFile(nsCString(aProfilePath), PR_FALSE,
+          getter_AddRefs(sProfileDir));
+        NS_ENSURE_SUCCESS(rv, rv);
     } else {
-      // for now use a subdir under appdir
-      nsCOMPtr<nsIFile> profFile;
-      rv = appdir->Clone(getter_AddRefs(profFile));
-      NS_ENSURE_SUCCESS(rv, rv);
-      sProfileDir = do_QueryInterface(profFile);
-      sProfileDir->AppendNative(NS_LITERAL_CSTRING("mozembed"));
+        // for now use a subdir under appdir
+        nsCOMPtr<nsIFile> profFile;
+        rv = appdir->Clone(getter_AddRefs(profFile));
+        NS_ENSURE_SUCCESS(rv, rv);
+        sProfileDir = do_QueryInterface(profFile);
+        sProfileDir->AppendNative(NS_LITERAL_CSTRING("mozembed"));
     }
 
     // create dir if needed
@@ -259,7 +259,7 @@ nsresult InitEmbedding(const char* aProfilePath)
     rv = sProfileDir->Exists(&dirExists);
     NS_ENSURE_SUCCESS(rv, rv);
     if (!dirExists) {
-      sProfileDir->Create(nsIFile::DIRECTORY_TYPE, 0700);
+        sProfileDir->Create(nsIFile::DIRECTORY_TYPE, 0700);
     }
 
     // init embedding
@@ -276,34 +276,34 @@ nsresult InitEmbedding(const char* aProfilePath)
 
 nsresult TermEmbedding()
 {
-  --gInitCount;
-  if(gInitCount > 0)
+    --gInitCount;
+    if (gInitCount > 0)
+        return NS_OK;
+
+    nsresult rv;
+
+    // get rid of the bogus TLS warnings
+    NS_LogInit();
+
+    // terminate embedding
+    if (!XRE_TermEmbedding) {
+        cerr << "XRE_TermEmbedding not set" << endl;
+        return NS_ERROR_ABORT;
+    }
+    XRE_TermEmbedding();
+
+    // make sure this is freed before shutting down xpcom
+    sProfileDir = nsnull;
+
+    // shutdown xpcom
+    rv = XPCOMGlueShutdown();
+    if (NS_FAILED(rv)) {
+        fprintf(stderr, "Couldn't shutdown XPCOM glue\n");
+        return rv;
+    }
+
+    NS_LogTerm();
+
     return NS_OK;
-
-  nsresult rv;
-
-  // get rid of the bogus TLS warnings
-  NS_LogInit();
-
-  // terminate embedding
-  if (!XRE_TermEmbedding) {
-    cerr << "XRE_TermEmbedding not set" << endl;
-    return NS_ERROR_ABORT;
-  }
-  XRE_TermEmbedding();
-
-  // make sure this is freed before shutting down xpcom
-  sProfileDir = nsnull;
-
-  // shutdown xpcom
-  rv = XPCOMGlueShutdown();
-  if (NS_FAILED(rv)) {
-    fprintf(stderr, "Couldn't shutdown XPCOM glue\n");
-    return rv;
-  }
-
-  NS_LogTerm();
-
-  return NS_OK;
 }
 

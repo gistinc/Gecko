@@ -134,31 +134,31 @@ public:
     virtual ~ViewListener() {}
 
     virtual void SetTitle(const char *new_title) {
-	update_property (mView, PROP_TITLE, new_title);
+	update_property(mView, PROP_TITLE, new_title);
 	g_signal_emit_by_name(G_OBJECT(mView), "title-changed", new_title);
     }
 
     virtual void StatusChanged(const char *new_status, PRUint32 flags) {
-	update_property (mView, PROP_STATUS, new_status);
+	update_property(mView, PROP_STATUS, new_status);
 	g_signal_emit_by_name(G_OBJECT(mView), "status-changed", new_status);
     }
 
     virtual void LocationChanged(const char *new_uri) {
-	update_property (mView, PROP_LOCATION, new_uri);
+	update_property(mView, PROP_LOCATION, new_uri);
 	g_signal_emit_by_name(G_OBJECT(mView), "location-changed", new_uri);
     }
 
     virtual PRBool ViewListener::OpenURI(const char* new_uri) {
 	gboolean   abort_load = FALSE;
 	
-	g_signal_emit_by_name (G_OBJECT(mView), "uri-requested", 
-			       new_uri, &abort_load);
+	g_signal_emit_by_name(G_OBJECT(mView), "uri-requested", 
+			      new_uri, &abort_load);
 	
 	return abort_load;
     }
     
     virtual void ViewListener::DocumentLoaded() {
-	g_signal_emit_by_name (G_OBJECT(mView), "document-loaded");
+	g_signal_emit_by_name(G_OBJECT(mView), "document-loaded");
     }
     
 private:
@@ -169,10 +169,10 @@ private:
  *                      Class Initialization                       *
  *******************************************************************/
 static void
-moz_web_view_class_init (MozWebViewClass *klass)
+moz_web_view_class_init(MozWebViewClass *klass)
 {
-    GObjectClass     *object_klass = G_OBJECT_CLASS (klass);
-    GtkWidgetClass   *widget_klass = GTK_WIDGET_CLASS (klass);
+    GObjectClass     *object_klass = G_OBJECT_CLASS(klass);
+    GtkWidgetClass   *widget_klass = GTK_WIDGET_CLASS(klass);
 
     object_klass->finalize      = moz_web_view_finalize;
     object_klass->get_property  = moz_web_view_get_property;
@@ -185,32 +185,32 @@ moz_web_view_class_init (MozWebViewClass *klass)
     widget_klass->unmap             = moz_web_view_unmap;
 
     /* Implement MozViewable properties */
-    g_object_class_override_property (object_klass, PROP_REQUESTED_URI, "requested-uri");
-    g_object_class_override_property (object_klass, PROP_TITLE, "title");
-    g_object_class_override_property (object_klass, PROP_STATUS, "status");
-    g_object_class_override_property (object_klass, PROP_LOCATION, "location");
+    g_object_class_override_property(object_klass, PROP_REQUESTED_URI, "requested-uri");
+    g_object_class_override_property(object_klass, PROP_TITLE, "title");
+    g_object_class_override_property(object_klass, PROP_STATUS, "status");
+    g_object_class_override_property(object_klass, PROP_LOCATION, "location");
 
-    g_type_class_add_private (object_klass, sizeof (MozWebViewPriv));
+    g_type_class_add_private(object_klass, sizeof(MozWebViewPriv));
 }
 
 static void
-moz_web_view_init (MozWebView *view)
+moz_web_view_init(MozWebView *view)
 {
     MozWebViewPriv *priv;
     
-    view->priv = priv = GET_PRIV (view);
+    view->priv = priv = GET_PRIV(view);
     
-    GTK_WIDGET_SET_FLAGS (view, GTK_NO_WINDOW);
-    GTK_WIDGET_SET_FLAGS (view, GTK_CAN_FOCUS);
+    GTK_WIDGET_SET_FLAGS(view, GTK_NO_WINDOW);
+    GTK_WIDGET_SET_FLAGS(view, GTK_CAN_FOCUS);
     
-    priv->app = new MozApp ();
-    priv->view = new MozView ();
-    priv->listener = new ViewListener (view);
+    priv->app = new MozApp();
+    priv->view = new MozView();
+    priv->listener = new ViewListener(view);
     priv->view->SetListener(priv->listener);
 }
 
 static void
-moz_web_view_viewable_init (MozViewableIface *iface)
+moz_web_view_viewable_init(MozViewableIface *iface)
 {
 
 }
@@ -219,11 +219,11 @@ moz_web_view_viewable_init (MozViewableIface *iface)
  *                           GObjectClass                          *
  *******************************************************************/
 static void
-moz_web_view_finalize (GObject *object)
+moz_web_view_finalize(GObject *object)
 {
     MozWebViewPriv *priv;
     
-    priv = GET_PRIV (object);
+    priv = GET_PRIV(object);
     
     if (priv->view)
 	delete priv->view;
@@ -235,50 +235,50 @@ moz_web_view_finalize (GObject *object)
 	delete priv->app;
 
     if (priv->requested_uri)
-	g_free (priv->requested_uri);
+	g_free(priv->requested_uri);
 
     if (priv->title)
-	g_free (priv->title);
+	g_free(priv->title);
     
-    (G_OBJECT_CLASS (moz_web_view_parent_class)->finalize) (object);
+    (G_OBJECT_CLASS(moz_web_view_parent_class)->finalize)(object);
 }
 
 static void 
-moz_web_view_get_property (GObject     *object,
-			   guint        prop_id,
-			   GValue      *value,
-			   GParamSpec  *pspec)
+moz_web_view_get_property(GObject     *object,
+			  guint        prop_id,
+			  GValue      *value,
+			  GParamSpec  *pspec)
 { 
     MozWebViewPriv *priv;
     
-    priv = GET_PRIV (object);
+    priv = GET_PRIV(object);
     
     switch (prop_id) {
     case PROP_REQUESTED_URI:
-	g_value_set_string (value, priv->requested_uri);
+	g_value_set_string(value, priv->requested_uri);
 	break;
     case PROP_TITLE:
-	g_value_set_string (value, priv->title);
+	g_value_set_string(value, priv->title);
 	break;
     case PROP_STATUS:
-	g_value_set_string (value, priv->status);
+	g_value_set_string(value, priv->status);
 	break;
     case PROP_LOCATION:
-	g_value_set_string (value, priv->location);
+	g_value_set_string(value, priv->location);
 	break;
 
     default:
-	G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+	G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 	break;
     }
 }
 
 static void
-update_property (MozWebView  *view,
-		 gint         prop_id,
-		 const gchar *new_value)
+update_property(MozWebView  *view,
+                gint         prop_id,
+                const gchar *new_value)
 {
-    MozWebViewPriv *priv = GET_PRIV (view);
+    MozWebViewPriv *priv = GET_PRIV(view);
     gchar **ptr;
     gchar  *name = NULL; 
 
@@ -288,28 +288,28 @@ update_property (MozWebView  *view,
     case PROP_STATUS:        ptr = &(priv->status);        name = "status";  break;
     case PROP_LOCATION:      ptr = &(priv->location);      name = "location";  break;
     default:
-	g_assert_not_reached ();
+	g_assert_not_reached();
 	break;
     }
 
-    if (*ptr) g_free (*ptr);
-    *ptr = g_strdup (new_value);
-    g_object_notify (G_OBJECT (view), name);
+    if (*ptr) g_free(*ptr);
+    *ptr = g_strdup(new_value);
+    g_object_notify(G_OBJECT(view), name);
 }
 
 /*******************************************************************
  *                            GtkWidgetClass                       *
  *******************************************************************/
 static void
-moz_web_view_realize (GtkWidget *widget)
+moz_web_view_realize(GtkWidget *widget)
 {
     MozWebViewPriv *priv;
     GdkWindowAttr attributes;
     gint attributes_mask;
     
-    priv = GET_PRIV (widget);
+    priv = GET_PRIV(widget);
     
-    GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
+    GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);
     
     attributes.window_type = GDK_WINDOW_CHILD;
     attributes.x = widget->allocation.x;
@@ -317,62 +317,62 @@ moz_web_view_realize (GtkWidget *widget)
     attributes.width = widget->allocation.width;
     attributes.height = widget->allocation.height;
     attributes.wclass = GDK_INPUT_OUTPUT;
-    attributes.visual = gtk_widget_get_visual (widget);
-    attributes.colormap = gtk_widget_get_colormap (widget);
-    attributes.event_mask = gtk_widget_get_events (widget) |  //| GDK_ALL_EVENTS_MASK;
+    attributes.visual = gtk_widget_get_visual(widget);
+    attributes.colormap = gtk_widget_get_colormap(widget);
+    attributes.event_mask = gtk_widget_get_events(widget) |  //| GDK_ALL_EVENTS_MASK;
 	GDK_EXPOSURE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK |
 	GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK |
 	GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_FOCUS_CHANGE_MASK;
     
     attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
     
-    widget->window = gtk_widget_get_parent_window (widget);
-    g_object_ref (widget->window);
+    widget->window = gtk_widget_get_parent_window(widget);
+    g_object_ref(widget->window);
     
-    priv->native_window = create_native_window (widget);
+    priv->native_window = create_native_window(widget);
     
     priv->view->CreateBrowser(priv->native_window, 0, 0,
 			      widget->allocation.width, widget->allocation.height);
     
-    widget->style = gtk_style_attach (widget->style, widget->window);
-    gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
+    widget->style = gtk_style_attach(widget->style, widget->window);
+    gtk_style_set_background(widget->style, widget->window, GTK_STATE_NORMAL);
     
     if (priv->requested_uri)
-	moz_web_view_load_uri (MOZ_WEB_VIEW (widget), priv->requested_uri);
+	moz_web_view_load_uri(MOZ_WEB_VIEW(widget), priv->requested_uri);
 }
 
 static void
-moz_web_view_unrealize (GtkWidget *widget)
+moz_web_view_unrealize(GtkWidget *widget)
 {
-    MozWebViewPriv *priv = GET_PRIV (widget);
+    MozWebViewPriv *priv = GET_PRIV(widget);
 
-    RemoveProp (priv->native_window, "moz-view-widget");
+    RemoveProp(priv->native_window, "moz-view-widget");
 
-    if (!DestroyWindow (priv->native_window))
-	g_warning ("Problems destoying native view window");
+    if (!DestroyWindow(priv->native_window))
+	g_warning("Problems destoying native view window");
         
     priv->native_window = NULL;
     
-    GTK_WIDGET_CLASS (moz_web_view_parent_class)->unrealize (widget);
+    GTK_WIDGET_CLASS(moz_web_view_parent_class)->unrealize(widget);
 }
 
 static void
-moz_web_view_hierarchy_changed (GtkWidget         *widget,
-			    GtkWidget         *previous_toplevel)
+moz_web_view_hierarchy_changed(GtkWidget         *widget,
+                               GtkWidget         *previous_toplevel)
 {
     GtkWidget *toplevel = gtk_widget_get_toplevel(widget);
 
     /* At least toplevel or previous_toplevel should exist */
-    g_assert (toplevel || previous_toplevel);
+    g_assert(toplevel || previous_toplevel);
 
     DBG(g_print("Hierarchy changed ! toplevel %p previous_toplevel %p\n", toplevel, previous_toplevel));
     
-    if (GTK_IS_WINDOW (toplevel)) {
-	g_signal_connect (G_OBJECT (toplevel), "configure-event",
+    if (GTK_IS_WINDOW(toplevel)) {
+	g_signal_connect(G_OBJECT(toplevel), "configure-event",
 			  G_CALLBACK(handle_toplevel_configure), widget);
     }	
     
-    if (GTK_IS_WINDOW (previous_toplevel)) {
+    if (GTK_IS_WINDOW(previous_toplevel)) {
 	g_signal_handlers_disconnect_by_func
 	    (G_OBJECT(previous_toplevel), 
 	     (gpointer)handle_toplevel_configure, widget);
@@ -380,75 +380,75 @@ moz_web_view_hierarchy_changed (GtkWidget         *widget,
 }
 
 static void
-moz_web_view_size_allocate (GtkWidget     *widget,
-			GtkAllocation *allocation)
+moz_web_view_size_allocate(GtkWidget     *widget,
+                           GtkAllocation *allocation)
 {
-    MozWebViewPriv *priv = GET_PRIV (widget);
+    MozWebViewPriv *priv = GET_PRIV(widget);
     
-    g_return_if_fail (allocation != NULL);
+    g_return_if_fail(allocation != NULL);
     
     widget->allocation = *allocation;
     
-    if (GTK_WIDGET_REALIZED (widget)) {
+    if (GTK_WIDGET_REALIZED(widget)) {
 	gint x, y;
 	
-	gdk_window_get_position (widget->window, &x, &y);
+	gdk_window_get_position(widget->window, &x, &y);
 	x += allocation->x;
 	y += allocation->y;
 	
-	SetWindowPos (priv->native_window, NULL,
-		      x, y,
-		      allocation->width, allocation->height,
-		      SWP_NOACTIVATE | SWP_NOZORDER);
+	SetWindowPos(priv->native_window, NULL,
+		     x, y,
+		     allocation->width, allocation->height,
+		     SWP_NOACTIVATE | SWP_NOZORDER);
 	
 	priv->view->SetPositionAndSize(0, 0, allocation->width, allocation->height);
     }
 }
 
 static void
-moz_web_view_map (GtkWidget *widget)
+moz_web_view_map(GtkWidget *widget)
 {
-    MozWebViewPriv *priv = GET_PRIV (widget);
+    MozWebViewPriv *priv = GET_PRIV(widget);
     
     /* This will ensure a realized widget */
-    GTK_WIDGET_CLASS (moz_web_view_parent_class)->map (widget);
+    GTK_WIDGET_CLASS(moz_web_view_parent_class)->map(widget);
     
-    ShowWindow (priv->native_window, SW_SHOW);
+    ShowWindow(priv->native_window, SW_SHOW);
 }
 
 static void
-moz_web_view_unmap (GtkWidget *widget)
+moz_web_view_unmap(GtkWidget *widget)
 {
-    MozWebViewPriv *priv = GET_PRIV (widget);
+    MozWebViewPriv *priv = GET_PRIV(widget);
     
-    GTK_WIDGET_CLASS (moz_web_view_parent_class)->unmap (widget);
+    GTK_WIDGET_CLASS(moz_web_view_parent_class)->unmap(widget);
     
-    ShowWindow (priv->native_window, SW_HIDE);
+    ShowWindow(priv->native_window, SW_HIDE);
 }
 
 /* We handle configure events on the toplevel in order to
  * reposition our window when the toplevel moves.
  */
 static gboolean 
-handle_toplevel_configure (GtkWidget         *toplevel,
-			   GdkEventConfigure *event,
-			   GtkWidget         *widget)
+handle_toplevel_configure(GtkWidget         *toplevel,
+                          GdkEventConfigure *event,
+                          GtkWidget         *widget)
 {
     MozWebViewPriv *priv;
     gint x, y;
 
-    priv = GET_PRIV (widget);
+    priv = GET_PRIV(widget);
 
-    DBG(g_print ("Configure event !\n"));
+    DBG(g_print("Configure event !\n"));
     
-    gdk_window_get_position (widget->window, &x, &y);
+    gdk_window_get_position(widget->window, &x, &y);
     x += widget->allocation.x;
     y += widget->allocation.y;
     
-    SetWindowPos (priv->native_window, NULL,
-		  x, y,
-		  widget->allocation.width, widget->allocation.height,
-		  SWP_NOACTIVATE | SWP_NOZORDER);
+    SetWindowPos(priv->native_window, NULL,
+		 x, y,
+		 widget->allocation.width, widget->allocation.height,
+		 SWP_NOACTIVATE | SWP_NOZORDER);
     
     return FALSE;
 }
@@ -457,7 +457,7 @@ handle_toplevel_configure (GtkWidget         *toplevel,
  * in order to call SetFocus() at the appropriate times.
  */
 static LRESULT 
-window_procedure (HWND   hwnd,
+window_procedure(HWND   hwnd,
 		  UINT   message,
 		  WPARAM wparam,
 		  LPARAM lparam)
@@ -465,18 +465,18 @@ window_procedure (HWND   hwnd,
     GtkWidget *widget;
     MozWebViewPriv *priv;
 	
-    widget = (GtkWidget *)GetProp (hwnd, "moz-view-widget");
+    widget = (GtkWidget *)GetProp(hwnd, "moz-view-widget");
 
-    DBG(g_print ("Procedure called ! widget %p\n", widget));
+    DBG(g_print("Procedure called ! widget %p\n", widget));
 
 
     /* The first few messages are fired inside CreateWindowEx(), so we
      * havent set the widget data yet.
      */
     if (widget)
-	priv = GET_PRIV (widget);
+	priv = GET_PRIV(widget);
     else {
-	return DefWindowProcW (hwnd, message, wparam, lparam);
+	return DefWindowProcW(hwnd, message, wparam, lparam);
     }
     
     switch (message) {
@@ -486,7 +486,7 @@ window_procedure (HWND   hwnd,
 	return TRUE;
     case WM_SYSCOMMAND:
 	if (wparam == SC_CLOSE) {
-	    DBG(g_print ("Close message..\n"));
+	    DBG(g_print("Close message..\n"));
 	    return TRUE;
 	}
 	break;
@@ -505,7 +505,7 @@ window_procedure (HWND   hwnd,
 	}
 	break;
     }
-    return DefWindowProcW (hwnd, message, wparam, lparam);
+    return DefWindowProcW(hwnd, message, wparam, lparam);
 }
 
 /*****************************************************
@@ -534,7 +534,7 @@ window_procedure (HWND   hwnd,
  * an inactive window.
  */
 static HWND
-create_native_window (GtkWidget *widget)
+create_native_window(GtkWidget *widget)
 {
     static ATOM klass = 0;
     HWND window_handle, parent_handle;
@@ -543,7 +543,7 @@ create_native_window (GtkWidget *widget)
     if (!klass) {
 	static WNDCLASSEXW wcl; 
 	
-	wcl.cbSize = sizeof (WNDCLASSEX);
+	wcl.cbSize = sizeof(WNDCLASSEX);
 	wcl.style = 0;
 
 	/* DON'T set CS_<H,V>REDRAW. It causes total redraw
@@ -552,35 +552,35 @@ create_native_window (GtkWidget *widget)
 	wcl.lpfnWndProc = (WNDPROC)window_procedure;
 	wcl.cbClsExtra = 0;
 	wcl.cbWndExtra = 0;
-	wcl.hInstance = GetModuleHandle (NULL);
+	wcl.hInstance = GetModuleHandle(NULL);
 	wcl.hIcon = 0;
 	wcl.hIconSm = 0;
 	wcl.lpszMenuName = NULL;
 	wcl.hIcon = NULL;
 	wcl.hIconSm = NULL;
 	wcl.hbrBackground = NULL;
-	wcl.hCursor = LoadCursor (NULL, IDC_ARROW); 
+	wcl.hCursor = LoadCursor(NULL, IDC_ARROW); 
 	wcl.lpszClassName = L"MozWindow";
 	
-	klass = RegisterClassExW (&wcl);
+	klass = RegisterClassExW(&wcl);
 	
     }
     
     dwExStyle = WS_EX_TOOLWINDOW; // for popup windows 
     dwStyle = WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS; // popup window
     
-    parent_handle = (HWND)GDK_WINDOW_HWND (gtk_widget_get_parent_window (widget));
-    window_handle = CreateWindowExW (dwExStyle,
-				     MAKEINTRESOURCEW (klass),
-				     L"",
-				     dwStyle,
-				     0, 0, 1, 1,
-				     parent_handle,
-				     NULL,
-				     GetModuleHandle (NULL),
-				     NULL);
+    parent_handle = (HWND)GDK_WINDOW_HWND(gtk_widget_get_parent_window(widget));
+    window_handle = CreateWindowExW(dwExStyle,
+				    MAKEINTRESOURCEW(klass),
+				    L"",
+				    dwStyle,
+				    0, 0, 1, 1,
+				    parent_handle,
+				    NULL,
+				    GetModuleHandle(NULL),
+				    NULL);
 
-    SetProp (window_handle, "moz-view-widget", (HANDLE)widget);
+    SetProp(window_handle, "moz-view-widget", (HANDLE)widget);
     
     return window_handle;
 }
@@ -589,49 +589,49 @@ create_native_window (GtkWidget *widget)
  *                                API                              *
  *******************************************************************/
 GtkWidget *
-moz_web_view_new (void)
+moz_web_view_new(void)
 {
-    return GTK_WIDGET (g_object_new (MOZ_TYPE_WEB_VIEW, NULL));
+    return GTK_WIDGET(g_object_new(MOZ_TYPE_WEB_VIEW, NULL));
 }
 
 void
-moz_web_view_load_uri (MozWebView *view, const gchar  *uri)
+moz_web_view_load_uri(MozWebView *view, const gchar  *uri)
 {	
     MozWebViewPriv *priv; 
     
-    g_return_if_fail (MOZ_IS_WEB_VIEW (view));
-    g_return_if_fail (uri && uri[0]);
+    g_return_if_fail(MOZ_IS_WEB_VIEW(view));
+    g_return_if_fail(uri && uri[0]);
 
-    priv = GET_PRIV (view);
+    priv = GET_PRIV(view);
 
     if (priv->requested_uri && priv->requested_uri != uri)
-	g_free (priv->requested_uri);
+	g_free(priv->requested_uri);
     
-    priv->requested_uri = g_strdup (uri);
+    priv->requested_uri = g_strdup(uri);
     
-    if (GTK_WIDGET_REALIZED (view))
-	priv->view->LoadURI (priv->requested_uri);
+    if (GTK_WIDGET_REALIZED(view))
+	priv->view->LoadURI(priv->requested_uri);
     
-    g_object_notify (G_OBJECT (view), "requested-uri");
+    g_object_notify(G_OBJECT(view), "requested-uri");
 }
 
 void
-moz_web_view_load_data (MozWebView  *view,
-			const gchar *base_uri,
-			const gchar *content_type,
-			const gchar *data,
-			gsize        len)
+moz_web_view_load_data(MozWebView  *view,
+                       const gchar *base_uri,
+                       const gchar *content_type,
+                       const gchar *data,
+                       gsize        len)
 {
     MozWebViewPriv *priv; 
     
-    g_return_if_fail (MOZ_IS_WEB_VIEW (view));
-    g_return_if_fail (base_uri != NULL);
-    g_return_if_fail (content_type != NULL);
-    g_return_if_fail (data != NULL);
-    g_return_if_fail (len > 0);
+    g_return_if_fail(MOZ_IS_WEB_VIEW(view));
+    g_return_if_fail(base_uri != NULL);
+    g_return_if_fail(content_type != NULL);
+    g_return_if_fail(data != NULL);
+    g_return_if_fail(len > 0);
 
-    priv = GET_PRIV (view);
+    priv = GET_PRIV(view);
 
-    if (GTK_WIDGET_REALIZED (view))
+    if (GTK_WIDGET_REALIZED(view))
 	priv->view->LoadData(base_uri, content_type, (PRUint8 *)data, (PRUint32)len);
 }
