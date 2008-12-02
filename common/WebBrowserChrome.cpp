@@ -19,12 +19,13 @@ WebBrowserChrome::~WebBrowserChrome()
     /* destructor code */
 }
 
-NS_IMPL_ISUPPORTS5(WebBrowserChrome,
-  nsIWebBrowserChrome,
-  nsIInterfaceRequestor,
-  nsIEmbeddingSiteWindow,
-  nsIWebProgressListener,
-  nsISupportsWeakReference)
+NS_IMPL_ISUPPORTS6(WebBrowserChrome,
+                   nsIWebBrowserChrome,
+                   nsIWebBrowserChromeFocus,
+                   nsIInterfaceRequestor,
+                   nsIEmbeddingSiteWindow,
+                   nsIWebProgressListener,
+                   nsISupportsWeakReference)
 
 NS_IMETHODIMP WebBrowserChrome::GetInterface(const nsIID &aIID, void** aInstancePtr)
 {
@@ -33,11 +34,10 @@ NS_IMETHODIMP WebBrowserChrome::GetInterface(const nsIID &aIID, void** aInstance
     *aInstancePtr = 0;
     if (aIID.Equals(NS_GET_IID(nsIDOMWindow)))
     {
-        if (mWebBrowser)
-        {
-            return mWebBrowser->GetContentDOMWindow((nsIDOMWindow **) aInstancePtr);
-        }
-        return NS_ERROR_NOT_INITIALIZED;
+        if (!mWebBrowser)
+            return NS_ERROR_NOT_INITIALIZED;
+
+        return mWebBrowser->GetContentDOMWindow((nsIDOMWindow **) aInstancePtr);
     }
     return QueryInterface(aIID, aInstancePtr);
 }
@@ -260,5 +260,26 @@ NS_IMETHODIMP WebBrowserChrome::GetSiteWindow(void * *aSiteWindow)
     return NS_OK;
 }
 
+// ----- WebBrowser Chrome Focus
 
+/* void focusNextElement (); */
+NS_IMETHODIMP WebBrowserChrome::FocusNextElement()
+{
+    MozViewListener* pListener = pMozView->GetListener();
+    if (!pListener)
+        return NS_ERROR_NOT_IMPLEMENTED;
 
+    pListener->OnFocusChanged(PR_TRUE);
+    return NS_OK;
+}
+
+/* void focusPrevElement (); */
+NS_IMETHODIMP WebBrowserChrome::FocusPrevElement()
+{
+    MozViewListener* pListener = pMozView->GetListener();
+    if (!pListener)
+        return NS_ERROR_NOT_IMPLEMENTED;
+
+    pListener->OnFocusChanged(PR_FALSE);
+    return NS_OK;
+}

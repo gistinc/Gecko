@@ -409,9 +409,16 @@ public:
      */
     virtual void ExitModal(nsresult result);
 
+    /**
+     * The focus entered or left the browser window.
+     *
+     * @param    aForward if PR_TRUE, the next sibling shall be focused (Tab), otherwise the
+     *                    previous sibling is to be focused (Shift-Tab)
+     */
+    virtual void OnFocusChanged(PRBool aForward);
+
 protected:
     MozView* pMozView;
 };
 
 #endif /* __embed_h_ */
-

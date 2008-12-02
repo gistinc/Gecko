@@ -98,7 +98,7 @@ MozApp::~MozApp()
 nsresult MozApp::SetCharPref(const char *name, const char *value)
 {
     nsresult rv;
-	
+
     nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
     if (NS_FAILED(rv)) return rv;
 
@@ -110,7 +110,7 @@ nsresult MozApp::SetCharPref(const char *name, const char *value)
 nsresult MozApp::SetBoolPref(const char *name, PRBool value)
 {
     nsresult rv;
-	
+
     nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
     if (NS_FAILED(rv)) return rv;
 
@@ -122,7 +122,7 @@ nsresult MozApp::SetBoolPref(const char *name, PRBool value)
 nsresult MozApp::SetIntPref(const char *name, int value)
 {
     nsresult rv;
-	
+
     nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
     if (NS_FAILED(rv)) return rv;
 
@@ -134,7 +134,7 @@ nsresult MozApp::SetIntPref(const char *name, int value)
 nsresult MozApp::GetCharPref(const char *name, char **value)
 {
     nsresult rv;
-	
+
     nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
     if (NS_FAILED(rv)) return rv;
 
@@ -146,7 +146,7 @@ nsresult MozApp::GetCharPref(const char *name, char **value)
 nsresult MozApp::GetBoolPref(const char *name, PRBool *value)
 {
     nsresult rv;
-	
+
     nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
     if (NS_FAILED(rv)) return rv;
 
@@ -158,7 +158,7 @@ nsresult MozApp::GetBoolPref(const char *name, PRBool *value)
 nsresult MozApp::GetIntPref(const char *name, int *value)
 {
     nsresult rv;
-	
+
     nsCOMPtr<nsIPref> pref (do_GetService (NS_PREF_CONTRACTID, &rv));
     if (NS_FAILED(rv)) return rv;
 
@@ -567,5 +567,9 @@ void MozViewListener::StartModal()
 }
 
 void MozViewListener::ExitModal(nsresult result)
+{
+}
+
+void MozViewListener::OnFocusChanged(PRBool aForward)
 {
 }
