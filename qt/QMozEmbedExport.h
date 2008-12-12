@@ -11,15 +11,11 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is mozilla.org code.
- *
- * The Initial Developer of the Original Code is
- * Mozilla Corporation.
- * Portions created by the Initial Developer are Copyright (C) 2007
+ * The Initial Developer of the Original Code is Nokia
+ * Portions created by the Initial Developer are Copyright (C) 2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Pelle Johnsen <pjohnsen@mozilla.com>
  *   Tobias Hunger <tobias.hunger@gmail.com>
  *   Steffen Imhof <steffen.imhof@googlemail.com>
  *
@@ -37,32 +33,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef QMozApp_h
-#define QMozApp_h
+#ifndef QMOZEMBEDEXPORT_H
+#define QMOZEMBEDEXPORT_H
 
-#include "QMozEmbedExport.h"
+#include <QtCore/QGlobalStatic>
 
-#include <QtCore/QObject>
-#include <QtCore/QString>
+#if defined(Q_OS_WIN)
+#    if defined(BUILD_QMOZEMBED)
+#        define Q_MOZEMBED_EXPORT Q_DECL_EXPORT
+#    else
+#        define Q_MOZEMBED_EXPORT Q_DECL_IMPORT
+#    endif
+#endif
 
-class Q_MOZEMBED_EXPORT QMozApp : public QObject
-{
-    Q_OBJECT
+#if !defined(Q_MOZEMBED_EXPORT)
+#define Q_MOZEMBED_EXPORT Q_DECL_EXPORT
+#endif
 
-public:
-    QMozApp(const QString& profilePath = QString());
-    virtual ~QMozApp();
+#endif // Header Guard
 
-    QString stringPref(const QString& name) const;
-    void setStringPref(const QString& name, const QString& value);
-    int intPref(const QString& name) const;
-    void setIntPref(const QString& name, int value);
-    bool boolPref(const QString& name) const;
-    void setBoolPref(const QString& name, bool value);
-
-private:
-    class Private;
-    Private* const mPrivate;
-};
-
-#endif /* QMozApp_h */

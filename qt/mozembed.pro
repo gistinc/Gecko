@@ -1,14 +1,17 @@
 TEMPLATE = lib
 
-HEADERS = QMozView.h \
+HEADERS = QMozEmbedExport.h \
+        QMozView.h \
 	QMozApp.h \
-	../common/embed.h ../common/EmbeddingSetup.h \
+	../common/embed.h \
+        ../common/EmbeddingSetup.h \
 	../common/WebBrowserChrome.h \
 	../common/ContentListener.h
 
 SOURCES = QMozView.cpp \
 	QMozApp.cpp \
-	../common/embed.cpp ../common/EmbeddingSetup.cpp \
+	../common/embed.cpp \
+        ../common/EmbeddingSetup.cpp \
 	../common/WebBrowserChrome.cpp \
 	../common/ContentListener.cpp
 
@@ -20,7 +23,7 @@ unix:QMAKE_CXXFLAGS += -fshort-wchar -fno-rtti
 
 DEFINES += XPCOM_GLUE=1
 win32:DEFINES += XP_WIN=1
-CONFIG(dll):DEFINES += Q_MOZVIEW_EXPORT=Q_DECL_EXPORT
+CONFIG(dll):DEFINES += BUILD_QMOZEMBED
 
 INCLUDEPATH = $(GRE_HOME)/../include/xulapp \
 	$(GRE_HOME)/../include/nspr \

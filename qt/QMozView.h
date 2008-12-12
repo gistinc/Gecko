@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Mozilla Corporation.
- * Portions created by the Initial Developer are Copyright (C) 20007
+ * Portions created by the Initial Developer are Copyright (C) 2007
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -41,16 +41,14 @@
 #ifndef QMozView_h
 #define QMozView_h
 
-#ifndef Q_MOZVIEW_EXPORT
-#define Q_MOZVIEW_EXPORT
-#endif
+#include "QMozEmbedExport.h"
 
 #include <QtGui/QWidget>
 
 class QMozViewListener;
 class nsIInterfaceRequestor;
 
-class Q_MOZVIEW_EXPORT QMozView : public QWidget
+class Q_MOZEMBED_EXPORT QMozView : public QWidget
 {
     Q_OBJECT
 
