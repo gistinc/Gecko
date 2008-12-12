@@ -21,6 +21,8 @@
  * Contributor(s):
  *   Pelle Johnsen <pjohnsen@mozilla.com>
  *   Dave Camp <dcamp@mozilla.com>
+ *   Tobias Hunger <tobias.hunger@gmail.com>
+ *   Steffen Imhof <steffen.imhof@googlemail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -74,6 +76,7 @@ void QMozViewListener::SetTitle(const char* newTitle)
 
 void QMozViewListener::StatusChanged(const char* newStatus, PRUint32 statusType)
 {
+    Q_UNUSED(statusType);
     pQMozView->statusChanged(QString::fromUtf8(newStatus));
 }
 
@@ -104,14 +107,15 @@ void QMozViewListener::StartModal()
 
 void QMozViewListener::ExitModal(nsresult result)
 {
+    Q_UNUSED(result);
     pQMozView->exitModal();
 }
 
-QMozView::QMozView(QWidget *parent, unsigned int flags)
-: QWidget(parent)
+QMozView::QMozView(QWidget *parent, unsigned int flags) :
+    QWidget(parent),
+    mPrivate(new Private(this))
 {
-    mPrivate = new Private(this);
-#ifdef WIN32
+#if defined Q_OS_WIN32
     mPrivate->mozView.CreateBrowser((void*)winId(), 0, 0, 100, 100, flags);
 #else
     // TODO: Hmmm what if we are not using a mozilla with Qt backend
@@ -126,6 +130,7 @@ QMozView::~QMozView()
 
 void QMozView::resizeEvent(QResizeEvent* event)
 {
+    Q_UNUSED(event);
     mPrivate->mozView.SetPositionAndSize(0, 0, size().width(), size().height());
 }
 
@@ -147,6 +152,7 @@ QString QMozView::evaluateJavaScript(const QString& script)
 
 QMozView* QMozView::openWindow(unsigned int flags)
 {
+    Q_UNUSED(flags);
     return 0;
 }
 
