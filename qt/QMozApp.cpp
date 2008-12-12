@@ -20,6 +20,8 @@
  *
  * Contributor(s):
  *   Pelle Johnsen <pjohnsen@mozilla.com>
+ *   Tobias Hunger <tobias.hunger@gmail.com>
+ *   Steffen Imhof <steffen.imhof@googlemail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,6 +38,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "QMozApp.h"
+
 #include "embed.h"
 #include <stdlib.h>
 
@@ -46,14 +49,9 @@ public:
     MozApp mozApp;
 };
 
-QMozApp::QMozApp()
+QMozApp::QMozApp(const QString& profilePath) :
+    mPrivate(new Private(profilePath.toUtf8()))
 {
-    mPrivate = new Private();
-}
-
-QMozApp::QMozApp(const QString& profilePath)
-{
-    mPrivate = new Private(profilePath.toUtf8());
 }
 
 QMozApp::~QMozApp()
@@ -64,12 +62,12 @@ QMozApp::~QMozApp()
 QString QMozApp::stringPref(const QString& name) const
 {
     char* value = 0;
-    nsresult rv = mPrivate->mozApp.GetCharPref(name.toUtf8(), &value);
+    mPrivate->mozApp.GetCharPref(name.toUtf8(), &value);
     // TODO: better error handling
     if (value) {
         QString result;
         result.fromUtf8(value);
-        free(value);
+        free(value); // we really need free here, delete is not OK.
         return result;
     }
     return "";
@@ -77,31 +75,29 @@ QString QMozApp::stringPref(const QString& name) const
 
 void QMozApp::setStringPref(const QString& name, const QString& value)
 {
-    nsresult rv = mPrivate->mozApp.SetCharPref(name.toUtf8(), value.toUtf8());
+    mPrivate->mozApp.SetCharPref(name.toUtf8(), value.toUtf8());
 }
 
 int QMozApp::intPref(const QString& name) const
 {
     int result = 0;
-    nsresult rv = mPrivate->mozApp.GetIntPref(name.toUtf8(), &result);
+    mPrivate->mozApp.GetIntPref(name.toUtf8(), &result);
     return result;
 }
 
 void QMozApp::setIntPref(const QString& name, int value)
 {
-    nsresult rv = mPrivate->mozApp.SetIntPref(name.toUtf8(), value);
+    mPrivate->mozApp.SetIntPref(name.toUtf8(), value);
 }
 
 bool QMozApp::boolPref(const QString& name) const
 {
     PRBool result = 0;
-    nsresult rv = mPrivate->mozApp.GetBoolPref(name.toUtf8(), &result);
+    mPrivate->mozApp.GetBoolPref(name.toUtf8(), &result);
     return result;
 }
 
 void QMozApp::setBoolPref(const QString& name, bool value)
 {
-    nsresult rv = mPrivate->mozApp.SetBoolPref(name.toUtf8(), value);
+    mPrivate->mozApp.SetBoolPref(name.toUtf8(), value);
 }
-
-
