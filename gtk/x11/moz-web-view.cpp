@@ -230,6 +230,7 @@ moz_web_view_class_init(MozWebViewClass *klass)
                      g_cclosure_marshal_VOID__STRING,
                      G_TYPE_NONE, 1, G_TYPE_STRING);
 
+}
 
 static void
 moz_web_view_init(MozWebView *view)
