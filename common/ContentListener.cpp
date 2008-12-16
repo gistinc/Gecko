@@ -54,8 +54,8 @@
 
 ContentListener::ContentListener(MozView *aOwner, nsIWebNavigation *aNavigation)
 {
-  mOwner = aOwner;
-  mNavigation = aNavigation;
+    mOwner = aOwner;
+    mNavigation = aNavigation;
 }
 
 ContentListener::~ContentListener()
@@ -67,90 +67,100 @@ NS_IMPL_ISUPPORTS2(ContentListener,
                    nsISupportsWeakReference)
 
 NS_IMETHODIMP
-ContentListener::OnStartURIOpen(nsIURI     *aURI,
-				PRBool     *aAbortOpen)
+ContentListener::OnStartURIOpen(nsIURI *aURI,
+                                PRBool *aAbortOpen)
 {
-  nsresult rv;
-  nsCAutoString specString;
-  rv = aURI->GetSpec(specString);
+    nsresult rv;
+    nsCAutoString specString;
+    rv = aURI->GetSpec(specString);
+    NS_ENSURE_SUCCESS(rv, rv);
 
-  if (NS_FAILED(rv))
-    return rv;
+    MozViewListener *listener = mOwner->GetListener ();
+    if (listener)
+        *aAbortOpen = listener->OpenURI (specString.get());
+    else
+        *aAbortOpen = false;
 
-  MozViewListener *listener = mOwner->GetListener ();
-  if (listener) {
-      *aAbortOpen = listener->OpenURI (specString.get());
-  } else {
-      *aAbortOpen = false;
-  }
-
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-ContentListener::DoContent(const char         *aContentType,
-			   PRBool             aIsContentPreferred,
-			   nsIRequest         *aRequest,
-			   nsIStreamListener **aContentHandler,
-			   PRBool             *aAbortProcess)
-{
-    return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-ContentListener::IsPreferred(const char        *aContentType,
-			     char             **aDesiredContentType,
-			     PRBool            *aCanHandleContent)
-{
-    return CanHandleContent(aContentType, PR_TRUE, aDesiredContentType,
-			    aCanHandleContent);
-}
-
-NS_IMETHODIMP
-ContentListener::CanHandleContent(const char        *aContentType,
-				  PRBool           aIsContentPreferred,
-				  char             **aDesiredContentType,
-				  PRBool            *_retval)
-{
-    *_retval = PR_FALSE;
-    *aDesiredContentType = nsnull;
-
-    if (aContentType) {
-	nsCOMPtr<nsIWebNavigationInfo> webNavInfo(do_GetService(NS_WEBNAVIGATION_INFO_CONTRACTID));
-	if (webNavInfo) {
-	    PRUint32 canHandle;
-	    nsresult rv =
-		webNavInfo->IsTypeSupported(nsDependentCString(aContentType),
-					    mNavigation ? mNavigation.get() : nsnull,
-					    &canHandle);
-	    NS_ENSURE_SUCCESS(rv, rv);
-	    *_retval = (canHandle != nsIWebNavigationInfo::UNSUPPORTED);
-	}
-    }
     return NS_OK;
 }
 
 NS_IMETHODIMP
-ContentListener::GetLoadCookie(nsISupports **aLoadCookie)
+ContentListener::DoContent(const char * aContentType,
+                           PRBool aIsContentPreferred,
+                           nsIRequest * aRequest,
+                           nsIStreamListener ** aContentHandler,
+                           PRBool * aAbortProcess)
 {
+    MOZ_UNUSED(aContentType);
+    MOZ_UNUSED(aIsContentPreferred);
+    MOZ_UNUSED(aRequest);
+    MOZ_UNUSED(aContentHandler);
+    MOZ_UNUSED(aAbortProcess);
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP
-ContentListener::SetLoadCookie(nsISupports *aLoadCookie)
+ContentListener::IsPreferred(const char * aContentType,
+                             char ** aDesiredContentType,
+                             PRBool * aCanHandleContent)
 {
+    return CanHandleContent(aContentType, PR_TRUE, aDesiredContentType,
+                            aCanHandleContent);
+}
+
+NS_IMETHODIMP
+ContentListener::CanHandleContent(const char * aContentType,
+                                  PRBool aIsContentPreferred,
+                                  char ** aDesiredContentType,
+                                  PRBool * _retval)
+{
+    MOZ_UNUSED(aIsContentPreferred);
+    *_retval = PR_FALSE;
+    *aDesiredContentType = nsnull;
+
+    if (!aContentType)
+        return NS_ERROR_FAILURE;
+
+    nsCOMPtr<nsIWebNavigationInfo> webNavInfo(do_GetService(NS_WEBNAVIGATION_INFO_CONTRACTID));
+    if (!webNavInfo)
+        return NS_ERROR_FAILURE;
+
+    PRUint32 canHandle;
+    nsresult rv =
+        webNavInfo->IsTypeSupported(nsDependentCString(aContentType),
+                                    mNavigation ? mNavigation.get() : nsnull,
+                                    &canHandle);
+    NS_ENSURE_SUCCESS(rv, rv);
+
+    *_retval = (canHandle != nsIWebNavigationInfo::UNSUPPORTED);
+    return NS_OK;
+}
+
+NS_IMETHODIMP
+ContentListener::GetLoadCookie(nsISupports ** aLoadCookie)
+{
+    MOZ_UNUSED(aLoadCookie);
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP
-ContentListener::GetParentContentListener(nsIURIContentListener **aParent)
+ContentListener::SetLoadCookie(nsISupports * aLoadCookie)
 {
+    MOZ_UNUSED(aLoadCookie);
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP
-ContentListener::SetParentContentListener(nsIURIContentListener *aParent)
+ContentListener::GetParentContentListener(nsIURIContentListener ** aParent)
 {
+    MOZ_UNUSED(aParent);
+    return NS_ERROR_NOT_IMPLEMENTED;
+}
+
+NS_IMETHODIMP
+ContentListener::SetParentContentListener(nsIURIContentListener * aParent)
+{
+    MOZ_UNUSED(aParent);
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
