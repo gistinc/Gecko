@@ -1,15 +1,56 @@
-#ifndef __embed_h_
-#define __embed_h_
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is mozilla.org code.
+ *
+ * The Initial Developer of the Original Code is
+ * Mozilla Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 2007
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Pelle Johnsen <pjohnsen@mozilla.com>
+ *   Dave Camp <dcamp@mozilla.com>
+ *   Tobias Hunger <tobias.hunger@gmail.com>
+ *   Steffen Imhof <steffen.imhof@googlemail.com>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+#ifndef MOZEMBED_EMBED_H
+#define MOZEMBED_EMBED_H
 
 #include "prtypes.h"
 
-// XXX
 typedef PRUint32 nsresult;
 
 class MozViewListener;
 class WindowCreator;
 
 class nsIInterfaceRequestor;
+
+#define MOZ_UNUSED(x) (void)x;
 
 /**
  * Provides an interface to application level functionality,
@@ -37,58 +78,58 @@ public:
     /**
      * Set a string preference.
      *
-     * @param name the preference's name
-     * @param value the new value to be set
+     * @param aName the preference's name
+     * @param aValue the new value to be set
      * @return 0 on success
      */
-    nsresult SetCharPref(const char *name, const char *value);
+    nsresult SetCharPref(const char *aName, const char *aValue);
 
     /**
      * Set a boolean preference.
      *
-     * @param name the preference's name
-     * @param value the new value to be set
+     * @param aName the preference's name
+     * @param aValue the new value to be set
      * @return 0 on success
      */
-    nsresult SetBoolPref(const char *name, PRBool value);
+    nsresult SetBoolPref(const char *aName, PRBool aValue);
 
     /**
      * Set an integer preference.
      *
-     * @param name the preference's name
-     * @param value the new value to be set
+     * @param aName the preference's name
+     * @param aValue the new value to be set
      * @return 0 on success
      */
-    nsresult SetIntPref(const char *name, int value);
+    nsresult SetIntPref(const char *aName, int aValue);
 
     /**
      * Get a string preference.
      *
-     * @param name the preference's name
-     * @param value the result is stored here.
+     * @param aName the preference's name
+     * @param aValue the result is stored here.
      *  <b>NOTE:</b> This is allocated on the heap and it is the caller's
      *  responsibility to free it.
      * @return 0 on success
      */
-    nsresult GetCharPref(const char *name, char **value);
+    nsresult GetCharPref(const char *aName, char **aValue);
 
     /**
      * Get a boolean preference.
      *
-     * @param name the preference's name
-     * @param value the result is stored here.
+     * @param aName the preference's name
+     * @param aValue the result is stored here.
      * @return 0 on success
      */
-    nsresult GetBoolPref(const char *name, PRBool *value);
+    nsresult GetBoolPref(const char *aName, PRBool *aValue);
 
     /**
      * Get an integer preference.
      *
-     * @param name the preference's name
-     * @param value the result is stored here.
+     * @param aName the preference's name
+     * @param aValue the result is stored here.
      * @return 0 on success
      */
-    nsresult GetIntPref(const char *name, int *value);
+    nsresult GetIntPref(const char *aName, int *aValue);
 
  private:
     class Private;
@@ -116,49 +157,51 @@ public:
      * Creates a new browser view attached to a native window.
      *
      * @param aNativeWindow pointer or handle to the native window
-     * @param x position relative to native window
-     * @param y position relative to native window
-     * @param width size
-     * @param height size
-     * @param chromeFlags optional flags, e.g. those parsed in to
+     * @param aX position relative to native window
+     * @param aY position relative to native window
+     * @param aWidth size
+     * @param aHeight size
+     * @param aChromeFlags optional flags, e.g. those parsed in to
      *  MozViewListener::OpenWindow
      * @return 0 on success
      */
-    nsresult CreateBrowser(void* aNativeWindow, PRInt32 x, PRInt32 y,
-        PRInt32 width, PRInt32 height, PRUint32 chromeFlags = 0);
+    nsresult CreateBrowser(void* aNativeWindow, PRInt32 aX, PRInt32 aY,
+        PRInt32 aWidth, PRInt32 aHeight, PRUint32 aChromeFlags = 0);
 
     /**
      * Sets location and dimension of the browser window.
      * Call this when resizing.
      *
-     * @param x position relative to native window
-     * @param y position relative to native window
+     * @param aX position relative to native window
+     * @param aY position relative to native window
+     * @param aWidth size
+     * @param aHeight size
      * @return 0 on success
      */
-    nsresult SetPositionAndSize(PRInt32 x, PRInt32 y,
-        PRInt32 width, PRInt32 height);
+    nsresult SetPositionAndSize(PRInt32 aX, PRInt32 aY,
+        PRInt32 aWidth, PRInt32 aHeight);
 
     /**
      * Load content from a specified uri.
      *
-     * @param uri is treated as utf8
+     * @param aUri is treated as utf8
      * @return 0 on success
      */
-    nsresult LoadURI(const char* uri);
+    nsresult LoadURI(const char* aUri);
 
     /**
      * Load content from memory.
      *
-     * @param base_url base used for resolving links in the content
-     * @param content_type mime type
-     * @param data the actual content
-     * @param len length in bytes
+     * @param aBaseUrl base used for resolving links in the content
+     * @param aContentType mime type
+     * @param aData the actual content
+     * @param aLen length in bytes
      * @return 0 on success
      */
-    nsresult LoadData(const char    *base_url,
-                      const char    *content_type,
-                      const PRUint8 *data,
-                      PRUint32       len);
+    nsresult LoadData(const char    *aBaseUrl,
+                      const char    *aContentType,
+                      const PRUint8 *aData,
+                      PRUint32       aLen);
 
     /**
      * Stops any loading or ongoing processing.
@@ -205,10 +248,10 @@ public:
     /**
      * Change focus for the browser view.
      *
-     * @param focus true to give fous, false to take it away
+     * @param aFocus true to give fous, false to take it away
      * @return 0 on success
      */
-    nsresult SetFocus(PRBool focus);
+    nsresult SetFocus(PRBool aFocus);
 
     /**
      * Make the browser view visible.
@@ -225,9 +268,9 @@ public:
      * The listener's methods will be called by the browser
      * when various events occur.
      *
-     * @param pNewListener pointer to the listener
+     * @param aNewListener pointer to the listener
      */
-    void SetListener(MozViewListener* pNewListener);
+    void SetListener(MozViewListener* aNewListener);
 
     /**
      * Get the currently registered listener.
@@ -255,9 +298,9 @@ public:
     /**
      * Set the parent view, i.e. the view which opened this view.
      *
-     * @param parent pointer to the parent view.
+     * @param aParent pointer to the parent view.
      */
-    void SetParentView(MozView* parent);
+    void SetParentView(MozView* aParent);
 
     /**
      * Get the parent view, i.e. the view which openedt this view.
@@ -320,43 +363,43 @@ public:
     /**
      * Set the MozView his listener is attached to.
      *
-     * @param pAMozView pointer to the MozView
+     * @param aMozView pointer to the MozView
      */
-    void SetMozView(MozView* pAMozView);
+    void SetMozView(MozView* aMozView);
 
     // --- methods the embedding app can override ---
     /**
      * Informs the application to set its title
      *
-     * @param newTitle (utf8) title of the document.
+     * @param aNewTitle (utf8) title of the document.
      */
-    virtual void SetTitle(const char* newTitle);
+    virtual void SetTitle(const char* aNewTitle);
 
     /**
      * Informs the application to change its status message
      *
-     * @param newStatus (utf8)
-     * @param statusType <TBD> (should tell if it's caused by
+     * @param aNewStatus (utf8)
+     * @param aStatusType <TBD> (should tell if it's caused by
      *  hovering over a link, or by JavaScript.
      */
-    virtual void StatusChanged(const char* newStatus, PRUint32 statusType);
+    virtual void StatusChanged(const char* aNewStatus, PRUint32 aStatusType);
 
     /**
      * Informs the application that the location of the browser
      * has changed.
      *
-     * @param newLocation (utf8)
+     * @param aNewLocation (utf8)
      */
-    virtual void LocationChanged(const char* newLocation);
+    virtual void LocationChanged(const char* aNewLocation);
 
     /**
      * Called before new content is loaded to allow the application
      * to deny loading.
      *
-     * @param newLocation the requested uri
+     * @param aNewLocation the requested uri
      * @return true to abort the load, false to allow it.
      */
-    virtual PRBool OpenURI(const char* newLocation);
+    virtual PRBool OpenURI(const char* aNewLocation);
 
     /**
      * Informs the application that the document has completed
@@ -369,7 +412,7 @@ public:
      * This happens e.g. if a link has a differnet target,
      * or from JavaScript window.open().
      *
-     * @param flags various flags for the new window, see
+     * @param aFlags various flags for the new window, see
      *  <a href="http://developer.mozilla.org/en/docs/nsIWebBrowserChrome#Constants">
      *  chromeFlags</a>. These should also be passed on to
      *  MozView::CreateBrowser
@@ -379,23 +422,23 @@ public:
      *  to manage this pointer, i.e. free the MozView object
      *  when no longer needed.
      */
-    virtual MozView* OpenWindow(PRUint32 flags);
+    virtual MozView* OpenWindow(PRUint32 aFlags);
 
     /**
      * Ask to change the size of the bowser, and therefore the
      * enclosing window.
      *
-     * @param width in pixels
-     * @param height in pixels
+     * @param aWidth in pixels
+     * @param aHeight in pixels
      */
-    virtual void SizeTo(PRUint32 width, PRUint32 height);
+    virtual void SizeTo(PRUint32 aWidth, PRUint32 aHeight);
 
     /**
      * Ask to set the visibility of the brower window.
      *
-     * @param visible true to show, false to hide
+     * @param aVisible true to show, false to hide
      */
-    virtual void SetVisibility(PRBool visible);
+    virtual void SetVisibility(PRBool aVisible);
 
     /**
      * Make the corresponding window behave as modal.
@@ -405,9 +448,9 @@ public:
     /**
      * Exit a modal window.
      *
-     * @param result as returned from the dialog.
+     * @param aResult as returned from the dialog.
      */
-    virtual void ExitModal(nsresult result);
+    virtual void ExitModal(nsresult aResult);
 
     /**
      * The focus entered or left the browser window.
@@ -418,7 +461,7 @@ public:
     virtual void OnFocusChanged(PRBool aForward);
 
 protected:
-    MozView* pMozView;
+    MozView* mMozView;
 };
 
-#endif /* __embed_h_ */
+#endif /* Header guard */

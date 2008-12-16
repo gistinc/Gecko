@@ -169,8 +169,8 @@ NS_IMETHODIMP WebBrowserChrome::ExitModalEventLoop(nsresult aStatus)
 
 // ----- Progress Listener -----
 
-NS_IMETHODIMP WebBrowserChrome::OnStateChange(nsIWebProgress */*aWebProgress*/,
-                                              nsIRequest */*aRequest*/,
+NS_IMETHODIMP WebBrowserChrome::OnStateChange(nsIWebProgress * /*aWebProgress*/,
+                                              nsIRequest * /*aRequest*/,
                                               PRUint32 aStateFlags,
                                               nsresult /*aStatus*/)
 {
@@ -197,8 +197,8 @@ NS_IMETHODIMP WebBrowserChrome::OnStateChange(nsIWebProgress */*aWebProgress*/,
     return NS_OK;
 }
 
-NS_IMETHODIMP WebBrowserChrome::OnProgressChange(nsIWebProgress */*aWebProgress*/,
-                                                 nsIRequest */*aRequest*/,
+NS_IMETHODIMP WebBrowserChrome::OnProgressChange(nsIWebProgress * /*aWebProgress*/,
+                                                 nsIRequest * /*aRequest*/,
                                                  PRInt32 /*aCurSelfProgress*/,
                                                  PRInt32 /*aMaxSelfProgress*/,
                                                  PRInt32 /*aCurTotalProgress*/,
@@ -207,8 +207,8 @@ NS_IMETHODIMP WebBrowserChrome::OnProgressChange(nsIWebProgress */*aWebProgress*
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
-NS_IMETHODIMP WebBrowserChrome::OnLocationChange(nsIWebProgress */*aWebProgress*/,
-                                                 nsIRequest */*aRequest*/,
+NS_IMETHODIMP WebBrowserChrome::OnLocationChange(nsIWebProgress * /*aWebProgress*/,
+                                                 nsIRequest * /*aRequest*/,
                                                  nsIURI *aLocation)
 {
     NS_ENSURE_ARG_POINTER(aLocation);
@@ -223,16 +223,16 @@ NS_IMETHODIMP WebBrowserChrome::OnLocationChange(nsIWebProgress */*aWebProgress*
     return NS_OK;
 }
 
-NS_IMETHODIMP WebBrowserChrome::OnStatusChange(nsIWebProgress */*aWebProgress*/,
-                                               nsIRequest */*aRequest*/,
+NS_IMETHODIMP WebBrowserChrome::OnStatusChange(nsIWebProgress * /*aWebProgress*/,
+                                               nsIRequest * /*aRequest*/,
                                                nsresult /*aStatus*/,
-                                               const PRUnichar */*aMessage*/)
+                                               const PRUnichar * /*aMessage*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
-NS_IMETHODIMP WebBrowserChrome::OnSecurityChange(nsIWebProgress */*aWebProgress*/,
-                                                 nsIRequest */*aRequest*/,
+NS_IMETHODIMP WebBrowserChrome::OnSecurityChange(nsIWebProgress * /*aWebProgress*/,
+                                                 nsIRequest * /*aRequest*/,
                                                  PRUint32 /*aState*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
@@ -255,8 +255,8 @@ NS_IMETHODIMP WebBrowserChrome::SetDimensions(PRUint32 /*aFlags*/,
 }
 
 NS_IMETHODIMP WebBrowserChrome::GetDimensions(PRUint32 /*aFlags*/,
-                                              PRInt32 */*aX*/, PRInt32 */*aY*/,
-                                              PRInt32 */*aCx*/, PRInt32 */*aCy*/)
+                                              PRInt32 * /*aX*/, PRInt32 * /*aY*/,
+                                              PRInt32 * /*aCx*/, PRInt32 * /*aCy*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
@@ -266,7 +266,7 @@ NS_IMETHODIMP WebBrowserChrome::SetFocus()
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
-NS_IMETHODIMP WebBrowserChrome::GetVisibility(PRBool */*aVisibility*/)
+NS_IMETHODIMP WebBrowserChrome::GetVisibility(PRBool * /*aVisibility*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
@@ -281,7 +281,7 @@ NS_IMETHODIMP WebBrowserChrome::SetVisibility(PRBool aVisibility)
     return NS_OK;
 }
 
-NS_IMETHODIMP WebBrowserChrome::GetTitle(PRUnichar * */*aTitle*/)
+NS_IMETHODIMP WebBrowserChrome::GetTitle(PRUnichar ** /*aTitle*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }

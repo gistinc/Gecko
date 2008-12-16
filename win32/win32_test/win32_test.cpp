@@ -46,7 +46,7 @@ WCHAR* Utf8ToWchar(const char* str)
 
 void MyListener::SetTitle(const char *newTitle)
 {
-    HWND hWnd = (HWND)pMozView->GetParentWindow();
+    HWND hWnd = (HWND)mMozView->GetParentWindow();
     WCHAR* newTitleW = Utf8ToWchar(newTitle);
     ::SetWindowTextW(hWnd, newTitleW);
     delete[] newTitleW;
@@ -104,7 +104,7 @@ MozView* MyListener::OpenWindow(PRUint32 flags)
         return 0;
     }
 
-    pNewView->SetParentView(pMozView);
+    pNewView->SetParentView(mMozView);
     pNewView->SetListener(new MyListener());
 
     SetWindowLongPtr(hWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(pNewView));
@@ -115,8 +115,8 @@ MozView* MyListener::OpenWindow(PRUint32 flags)
 
 void MyListener::SizeTo(PRUint32 width, PRUint32 height)
 {
-    HWND hParentWnd = (HWND)pMozView->GetParentWindow();
-    HWND hWnd = (HWND)pMozView->GetNativeWindow();
+    HWND hParentWnd = (HWND)mMozView->GetParentWindow();
+    HWND hWnd = (HWND)mMozView->GetNativeWindow();
     RECT parentRect;
     RECT rect;
     ::GetWindowRect(hParentWnd, &parentRect);
@@ -129,7 +129,7 @@ void MyListener::SizeTo(PRUint32 width, PRUint32 height)
 
 void MyListener::SetVisibility(PRBool visible)
 {
-    HWND hWnd = (HWND)pMozView->GetParentWindow();
+    HWND hWnd = (HWND)mMozView->GetParentWindow();
     ::ShowWindow(hWnd, visible ? SW_SHOW : SW_HIDE);
 }
 
@@ -137,7 +137,7 @@ void MyListener::StartModal()
 {
     gDoModal = true;
     MSG msg;
-    MozView* parentView = pMozView->GetParentView();
+    MozView* parentView = mMozView->GetParentView();
     ::EnableWindow((HWND)parentView->GetParentWindow(), FALSE);
     int res;
     while (gDoModal && (res = GetMessage(&msg, NULL, 0, 0))) {
@@ -154,9 +154,9 @@ void MyListener::StartModal()
 
 void MyListener::ExitModal(nsresult result)
 {
-    MozView* parentView = pMozView->GetParentView();
+    MozView* parentView = mMozView->GetParentView();
     ::EnableWindow((HWND)parentView->GetParentWindow(), TRUE);
-    HWND hWnd = (HWND)pMozView->GetParentWindow();
+    HWND hWnd = (HWND)mMozView->GetParentWindow();
     DestroyWindow(hWnd);
 }
 
@@ -313,7 +313,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     int wmId, wmEvent;
 
-    MozView* pMozView = (MozView*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+    MozView* mMozView = (MozView*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
     switch (message) {
     case WM_COMMAND:
@@ -326,23 +326,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case IDM_EXIT:
         {
-            MozView* parentView = pMozView->GetParentView();
+            MozView* parentView = mMozView->GetParentView();
             if (parentView && gDoModal)
                 ::EnableWindow((HWND)parentView->GetParentWindow(), TRUE);
             DestroyWindow(hWnd);
             break;
         }
         case IDM_VIEW_STOP:
-            pMozView->Stop();
+            mMozView->Stop();
             break;
         case IDM_VIEW_RELOAD:
-            pMozView->Reload();
+            mMozView->Reload();
             break;
         case IDM_HISTORY_BACK:
-            pMozView->GoBack();
+            mMozView->GoBack();
             break;
         case IDM_HISTORY_FORWARD:
-            pMozView->GoForward();
+            mMozView->GoForward();
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
@@ -350,17 +350,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_CLOSE:
     {
-        MozView* parentView = pMozView->GetParentView();
+        MozView* parentView = mMozView->GetParentView();
         if (parentView && gDoModal)
             ::EnableWindow((HWND)parentView->GetParentWindow(), TRUE);
         return DefWindowProc(hWnd, message, wParam, lParam);
         break;
     }
     case WM_DESTROY:
-        if (gViews.erase(pMozView) > 0) {
-            pMozView->Stop();
-            delete pMozView->GetListener();
-            delete pMozView;
+        if (gViews.erase(mMozView) > 0) {
+            mMozView->Stop();
+            delete mMozView->GetListener();
+            delete mMozView;
         }
 
         if (gDoModal) {
@@ -374,22 +374,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         break;
     case WM_SIZE:
-        if (pMozView) {
+        if (mMozView) {
             RECT rect;
             GetClientRect(hWnd, &rect);
-            pMozView->SetPositionAndSize(rect.left, rect.top, 
+            mMozView->SetPositionAndSize(rect.left, rect.top, 
                     rect.right - rect.left, rect.bottom - rect.top);
         }
         break;
     case WM_ACTIVATE:
-        if (pMozView) {
+        if (mMozView) {
             switch (wParam) {
             case WA_CLICKACTIVE:
             case WA_ACTIVE:
-                pMozView->SetFocus(true);
+                mMozView->SetFocus(true);
                 break;
             case WA_INACTIVE:
-                pMozView->SetFocus(false);
+                mMozView->SetFocus(false);
                 break;
             default:
                 break;
@@ -399,8 +399,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_INITMENUPOPUP:
     {
         HMENU hMenu = (HMENU)wParam;
-        ::EnableMenuItem(hMenu, IDM_HISTORY_BACK, (pMozView->CanGoBack() ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
-        ::EnableMenuItem(hMenu, IDM_HISTORY_FORWARD, (pMozView->CanGoForward() ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+        ::EnableMenuItem(hMenu, IDM_HISTORY_BACK, (mMozView->CanGoBack() ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
+        ::EnableMenuItem(hMenu, IDM_HISTORY_FORWARD, (mMozView->CanGoForward() ? MF_ENABLED : (MF_DISABLED | MF_GRAYED)));
         break;
     }
     case WM_ERASEBKGND:
