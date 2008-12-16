@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Mozilla Corporation.
- * Portions created by the Initial Developer are Copyright (C) 20007
+ * Portions created by the Initial Developer are Copyright (C) 2007
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -36,10 +36,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#include "EmbeddingSetup.h"
+
 #include "xpcom-config.h"
 #include "mozilla-config.h"
 
-#include "EmbeddingSetup.h"
+#include "embed.h"
 
 // CRT headers
 #include <iostream>
@@ -48,13 +50,13 @@ using namespace std;
 
 #include "nsXULAppAPI.h"
 #include "nsXPCOMGlue.h"
-
 #include "nsCOMPtr.h"
 #include "nsStringAPI.h"
-#include "nsILocalFile.h"
-
 #include "nsAppDirectoryServiceDefs.h"
 #include "nsProfileDirServiceProvider.h"
+
+#include "nsIDirectoryService.h"
+#include "nsILocalFile.h"
 
 #ifdef WIN32
   //TODO: make this file fully X platform
@@ -64,16 +66,19 @@ using namespace std;
 #else
 #  include <unistd.h>
 #  include <string.h>
+#  ifndef PATH_MAX
+#    define PATH_MAX 1024
+#  endif
 #  define MAX_PATH PATH_MAX
 #endif
 
-XRE_InitEmbeddingType XRE_InitEmbedding = NULL;
-XRE_TermEmbeddingType XRE_TermEmbedding = NULL;
+XRE_InitEmbeddingType XRE_InitEmbedding = 0;
+XRE_TermEmbeddingType XRE_TermEmbedding = 0;
 
 static int gInitCount = 0;
 
-#include "nsIDirectoryService.h"
-#include "nsAppDirectoryServiceDefs.h"
+// ------------------------------------------------------------------------
+
 nsIDirectoryServiceProvider *sAppFileLocProvider = nsnull;
 nsCOMPtr<nsILocalFile> sProfileDir = nsnull;
 
@@ -108,8 +113,7 @@ MozEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
                                    nsIFile* *aResult)
 {
     if (sAppFileLocProvider) {
-        nsresult rv = sAppFileLocProvider->GetFile(aKey, aPersist,
-                                                   aResult);
+        nsresult rv = sAppFileLocProvider->GetFile(aKey, aPersist, aResult);
         if (NS_SUCCEEDED(rv))
             return rv;
     }
@@ -133,11 +137,9 @@ MozEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
 }
 
 NS_IMETHODIMP
-MozEmbedDirectoryProvider::GetFiles(const char *aKey,
-                                    nsISimpleEnumerator* *aResult)
+MozEmbedDirectoryProvider::GetFiles(const char *aKey, nsISimpleEnumerator* *aResult)
 {
-    nsCOMPtr<nsIDirectoryServiceProvider2>
-      dp2(do_QueryInterface(sAppFileLocProvider));
+    nsCOMPtr<nsIDirectoryServiceProvider2> dp2(do_QueryInterface(sAppFileLocProvider));
 
     if (!dp2)
         return NS_ERROR_FAILURE;
@@ -163,8 +165,7 @@ nsresult InitEmbedding(const char* aProfilePath)
     };
     // find xpcom shared lib (uses GRE_HOME env var if set)
     char temp[MAX_PATH];
-    rv = GRE_GetGREPathWithProperties(&vr, 1, nsnull, 0,
-        temp, sizeof(temp));
+    rv = GRE_GetGREPathWithProperties(&vr, 1, nsnull, 0, temp, sizeof(temp));
     string xpcomPath(temp);
     cout << "xpcom: " << xpcomPath << endl;
 
@@ -243,7 +244,7 @@ nsresult InitEmbedding(const char* aProfilePath)
     // setup profile dir
     if (aProfilePath) {
         rv = NS_NewNativeLocalFile(nsCString(aProfilePath), PR_FALSE,
-          getter_AddRefs(sProfileDir));
+                                   getter_AddRefs(sProfileDir));
         NS_ENSURE_SUCCESS(rv, rv);
     } else {
         // for now use a subdir under appdir
@@ -263,7 +264,9 @@ nsresult InitEmbedding(const char* aProfilePath)
     }
 
     // init embedding
-    rv = XRE_InitEmbedding(xuldir, appdir, const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider), nsnull, 0);
+    rv = XRE_InitEmbedding(xuldir, appdir,
+                           const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider),
+                           nsnull, 0);
     if (NS_FAILED(rv)) {
         cerr << "XRE_InitEmbedding failed" << endl;
         return 9;
@@ -298,7 +301,7 @@ nsresult TermEmbedding()
     // shutdown xpcom
     rv = XPCOMGlueShutdown();
     if (NS_FAILED(rv)) {
-        fprintf(stderr, "Couldn't shutdown XPCOM glue\n");
+        cerr << "Couldn't shutdown XPCOM glue" << endl;
         return rv;
     }
 
@@ -306,4 +309,3 @@ nsresult TermEmbedding()
 
     return NS_OK;
 }
-
