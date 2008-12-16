@@ -1,5 +1,44 @@
-#include "xpcom-config.h"
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is mozilla.org code.
+ *
+ * The Initial Developer of the Original Code is
+ * Mozilla Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 2007
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Tobias Hunger <tobias.hunger@gmail.com>
+ *   Steffen Imhof <steffen.imhof@googlemail.com>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
 #include "WebBrowserChrome.h"
+
+#include "xpcom-config.h"
 #include "embed.h"
 #include "nsIDOMWindow.h"
 #include "nsStringAPI.h"
@@ -8,8 +47,11 @@
 
 using namespace std;
 
-WebBrowserChrome::WebBrowserChrome(MozView* pAMozView)
-: mChromeFlags(0), pMozView(pAMozView), mSizeSet(PR_FALSE), mIsModal(PR_FALSE)
+WebBrowserChrome::WebBrowserChrome(MozView* pAMozView) :
+    mChromeFlags(0),
+    mSizeSet(PR_FALSE),
+    pMozView(pAMozView),
+    mIsModal(PR_FALSE)
 {
     /* member initializers and constructor code */
 }
@@ -42,7 +84,6 @@ NS_IMETHODIMP WebBrowserChrome::GetInterface(const nsIID &aIID, void** aInstance
     return QueryInterface(aIID, aInstancePtr);
 }
 
-/* void setStatus (in unsigned long statusType, in wstring status); */
 NS_IMETHODIMP WebBrowserChrome::SetStatus(PRUint32 statusType, const PRUnichar *status)
 {
     MozViewListener* pListener = pMozView->GetListener();
@@ -53,7 +94,6 @@ NS_IMETHODIMP WebBrowserChrome::SetStatus(PRUint32 statusType, const PRUnichar *
     return NS_OK;
 }
 
-/* attribute nsIWebBrowser webBrowser; */
 NS_IMETHODIMP WebBrowserChrome::GetWebBrowser(nsIWebBrowser * *aWebBrowser)
 {
     NS_ENSURE_ARG_POINTER(aWebBrowser);
@@ -68,28 +108,25 @@ NS_IMETHODIMP WebBrowserChrome::SetWebBrowser(nsIWebBrowser * aWebBrowser)
     return NS_OK;
 }
 
-/* attribute unsigned long chromeFlags; */
 NS_IMETHODIMP WebBrowserChrome::GetChromeFlags(PRUint32 *aChromeFlags)
 {
     *aChromeFlags = mChromeFlags;
     return NS_OK;
 }
+
 NS_IMETHODIMP WebBrowserChrome::SetChromeFlags(PRUint32 aChromeFlags)
 {
     mChromeFlags = aChromeFlags;
     return NS_OK;
 }
 
-/* void destroyBrowserWindow (); */
 NS_IMETHODIMP WebBrowserChrome::DestroyBrowserWindow()
 {
-    if (mIsModal) {
+    if (mIsModal)
         ExitModalEventLoop(NS_OK);
-    }
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
-/* void sizeBrowserTo (in long aCX, in long aCY); */
 NS_IMETHODIMP WebBrowserChrome::SizeBrowserTo(PRInt32 aCX, PRInt32 aCY)
 {
     MozViewListener* pListener = pMozView->GetListener();
@@ -101,7 +138,6 @@ NS_IMETHODIMP WebBrowserChrome::SizeBrowserTo(PRInt32 aCX, PRInt32 aCY)
     return NS_OK;
 }
 
-/* void showAsModal (); */
 NS_IMETHODIMP WebBrowserChrome::ShowAsModal()
 {
     MozViewListener* pListener = pMozView->GetListener();
@@ -113,7 +149,6 @@ NS_IMETHODIMP WebBrowserChrome::ShowAsModal()
     return NS_OK;
 }
 
-/* boolean isWindowModal (); */
 NS_IMETHODIMP WebBrowserChrome::IsWindowModal(PRBool *_retval)
 {
     NS_ENSURE_ARG_POINTER(_retval);
@@ -121,7 +156,6 @@ NS_IMETHODIMP WebBrowserChrome::IsWindowModal(PRBool *_retval)
     return NS_OK;
 }
 
-/* void exitModalEventLoop (in nsresult aStatus); */
 NS_IMETHODIMP WebBrowserChrome::ExitModalEventLoop(nsresult aStatus)
 {
     MozViewListener* pListener = pMozView->GetListener();
@@ -133,11 +167,12 @@ NS_IMETHODIMP WebBrowserChrome::ExitModalEventLoop(nsresult aStatus)
     return NS_OK;
 }
 
-
 // ----- Progress Listener -----
 
-/* void onStateChange (in nsIWebProgress aWebProgress, in nsIRequest aRequest, in unsigned long aStateFlags, in nsresult aStatus); */
-NS_IMETHODIMP WebBrowserChrome::OnStateChange(nsIWebProgress *aWebProgress, nsIRequest *aRequest, PRUint32 aStateFlags, nsresult aStatus)
+NS_IMETHODIMP WebBrowserChrome::OnStateChange(nsIWebProgress */*aWebProgress*/,
+                                              nsIRequest */*aRequest*/,
+                                              PRUint32 aStateFlags,
+                                              nsresult /*aStatus*/)
 {
     MozViewListener* pListener = pMozView->GetListener();
     // XXX no one considered this case
@@ -162,14 +197,19 @@ NS_IMETHODIMP WebBrowserChrome::OnStateChange(nsIWebProgress *aWebProgress, nsIR
     return NS_OK;
 }
 
-/* void onProgressChange (in nsIWebProgress aWebProgress, in nsIRequest aRequest, in long aCurSelfProgress, in long aMaxSelfProgress, in long aCurTotalProgress, in long aMaxTotalProgress); */
-NS_IMETHODIMP WebBrowserChrome::OnProgressChange(nsIWebProgress *aWebProgress, nsIRequest *aRequest, PRInt32 aCurSelfProgress, PRInt32 aMaxSelfProgress, PRInt32 aCurTotalProgress, PRInt32 aMaxTotalProgress)
+NS_IMETHODIMP WebBrowserChrome::OnProgressChange(nsIWebProgress */*aWebProgress*/,
+                                                 nsIRequest */*aRequest*/,
+                                                 PRInt32 /*aCurSelfProgress*/,
+                                                 PRInt32 /*aMaxSelfProgress*/,
+                                                 PRInt32 /*aCurTotalProgress*/,
+                                                 PRInt32 /*aMaxTotalProgress*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
-/* void onLocationChange (in nsIWebProgress aWebProgress, in nsIRequest aRequest, in nsIURI aLocation); */
-NS_IMETHODIMP WebBrowserChrome::OnLocationChange(nsIWebProgress *aWebProgress, nsIRequest *aRequest, nsIURI *aLocation)
+NS_IMETHODIMP WebBrowserChrome::OnLocationChange(nsIWebProgress */*aWebProgress*/,
+                                                 nsIRequest */*aRequest*/,
+                                                 nsIURI *aLocation)
 {
     NS_ENSURE_ARG_POINTER(aLocation);
 
@@ -183,50 +223,54 @@ NS_IMETHODIMP WebBrowserChrome::OnLocationChange(nsIWebProgress *aWebProgress, n
     return NS_OK;
 }
 
-/* void onStatusChange (in nsIWebProgress aWebProgress, in nsIRequest aRequest, in nsresult aStatus, in wstring aMessage); */
-NS_IMETHODIMP WebBrowserChrome::OnStatusChange(nsIWebProgress *aWebProgress, nsIRequest *aRequest, nsresult aStatus, const PRUnichar *aMessage)
+NS_IMETHODIMP WebBrowserChrome::OnStatusChange(nsIWebProgress */*aWebProgress*/,
+                                               nsIRequest */*aRequest*/,
+                                               nsresult /*aStatus*/,
+                                               const PRUnichar */*aMessage*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
-/* void onSecurityChange (in nsIWebProgress aWebProgress, in nsIRequest aRequest, in unsigned long aState); */
-NS_IMETHODIMP WebBrowserChrome::OnSecurityChange(nsIWebProgress *aWebProgress, nsIRequest *aRequest, PRUint32 aState)
+NS_IMETHODIMP WebBrowserChrome::OnSecurityChange(nsIWebProgress */*aWebProgress*/,
+                                                 nsIRequest */*aRequest*/,
+                                                 PRUint32 /*aState*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 // ----- Embedding Site Window
 
-/* void setDimensions (in unsigned long flags, in long x, in long y, in long cx, in long cy); */
-NS_IMETHODIMP WebBrowserChrome::SetDimensions(PRUint32 flags, PRInt32 x, PRInt32 y, PRInt32 cx, PRInt32 cy)
+NS_IMETHODIMP WebBrowserChrome::SetDimensions(PRUint32 /*aFlags*/,
+                                              PRInt32 /*aX*/, PRInt32 /*aY*/,
+                                              PRInt32 aCx, PRInt32 aCy)
 {
     // TODO: currently only does size
     MozViewListener* pListener = pMozView->GetListener();
     if (!pListener)
         return NS_ERROR_NOT_IMPLEMENTED;
 
-    pListener->SizeTo(cx, cy);
+    pListener->SizeTo(aCx, aCy);
     mSizeSet = PR_TRUE;
     return NS_OK;
 }
 
-/* void getDimensions (in unsigned long flags, out long x, out long y, out long cx, out long cy); */
-NS_IMETHODIMP WebBrowserChrome::GetDimensions(PRUint32 flags, PRInt32 *x, PRInt32 *y, PRInt32 *cx, PRInt32 *cy)
+NS_IMETHODIMP WebBrowserChrome::GetDimensions(PRUint32 /*aFlags*/,
+                                              PRInt32 */*aX*/, PRInt32 */*aY*/,
+                                              PRInt32 */*aCx*/, PRInt32 */*aCy*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
-/* void setFocus (); */
 NS_IMETHODIMP WebBrowserChrome::SetFocus()
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
-/* attribute boolean visibility; */
-NS_IMETHODIMP WebBrowserChrome::GetVisibility(PRBool *aVisibility)
+NS_IMETHODIMP WebBrowserChrome::GetVisibility(PRBool */*aVisibility*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
+
 NS_IMETHODIMP WebBrowserChrome::SetVisibility(PRBool aVisibility)
 {
     MozViewListener* pListener = pMozView->GetListener();
@@ -237,12 +281,12 @@ NS_IMETHODIMP WebBrowserChrome::SetVisibility(PRBool aVisibility)
     return NS_OK;
 }
 
-/* attribute wstring title; */
-NS_IMETHODIMP WebBrowserChrome::GetTitle(PRUnichar * *aTitle)
+NS_IMETHODIMP WebBrowserChrome::GetTitle(PRUnichar * */*aTitle*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
-NS_IMETHODIMP WebBrowserChrome::SetTitle(const PRUnichar * aTitle)
+
+NS_IMETHODIMP WebBrowserChrome::SetTitle(const PRUnichar *aTitle)
 {
     MozViewListener* pListener = pMozView->GetListener();
     if (!pListener)
@@ -252,7 +296,6 @@ NS_IMETHODIMP WebBrowserChrome::SetTitle(const PRUnichar * aTitle)
     return NS_OK;
 }
 
-/* [noscript] readonly attribute voidPtr siteWindow; */
 NS_IMETHODIMP WebBrowserChrome::GetSiteWindow(void * *aSiteWindow)
 {
     NS_ENSURE_ARG_POINTER(aSiteWindow);
@@ -262,7 +305,6 @@ NS_IMETHODIMP WebBrowserChrome::GetSiteWindow(void * *aSiteWindow)
 
 // ----- WebBrowser Chrome Focus
 
-/* void focusNextElement (); */
 NS_IMETHODIMP WebBrowserChrome::FocusNextElement()
 {
     MozViewListener* pListener = pMozView->GetListener();
@@ -273,7 +315,6 @@ NS_IMETHODIMP WebBrowserChrome::FocusNextElement()
     return NS_OK;
 }
 
-/* void focusPrevElement (); */
 NS_IMETHODIMP WebBrowserChrome::FocusPrevElement()
 {
     MozViewListener* pListener = pMozView->GetListener();
