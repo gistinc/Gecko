@@ -319,10 +319,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\common\Embedding.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\common\EmbeddingSetup.cpp"
 				>
 				<FileConfiguration
