@@ -50,6 +50,7 @@ libmozwebview_la_SOURCES = \
 	../../common/WebBrowserChrome.cpp \
 	../../common/EmbeddingSetup.cpp \
 	../../common/ContentListener.cpp \
+	../../common/DOMEventListener.cpp \
 	../common/moz-web-view-common.cpp \
 	$(NULL)
 

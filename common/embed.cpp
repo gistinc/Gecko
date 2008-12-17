@@ -56,6 +56,7 @@ using namespace std;
 #include "nsCOMPtr.h"
 #include "nsStringAPI.h"
 #include "nsComponentManagerUtils.h"
+#include "nsIDOMEventTarget.h"
 #include "nsIWeakReference.h"
 #include "nsIWeakReferenceUtils.h"
 #include "nsIWebBrowserStream.h"
@@ -82,6 +83,7 @@ using namespace std;
 // our stuff
 #include "WebBrowserChrome.h"
 #include "ContentListener.h"
+#include "DOMEventListener.h"
 
 // globals
 static nsCOMPtr<WindowCreator> sWindowCreator;
@@ -184,6 +186,7 @@ public:
     nsCOMPtr<nsIWebNavigation> mWebNavigation;
     nsCOMPtr<nsIWebBrowserChrome> mChrome;
     nsCOMPtr<nsIURIContentListener> mContentListener;
+    nsCOMPtr<nsIDOMEventListener> mDOMEventListener;
 };
 
 class WindowCreator : public nsIWindowCreator2
@@ -271,6 +274,7 @@ MozView::~MozView()
     mPrivate->mWebBrowser = 0;
     mPrivate->mChrome = 0;
     mPrivate->mContentListener = 0;
+    mPrivate->mDOMEventListener = 0;
     delete mPrivate;
     TermEmbedding();
 }
@@ -327,6 +331,9 @@ nsresult MozView::CreateBrowser(void* aParentWindow,
     // register the content listener
     mPrivate->mContentListener = new ContentListener(this, mPrivate->mWebNavigation);
     mPrivate->mWebBrowser->SetParentURIContentListener(mPrivate->mContentListener);
+
+    // register the DOM event listener
+    mPrivate->mDOMEventListener = new DOMEventListener(this);
 
     SetFocus(true);
 

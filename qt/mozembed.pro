@@ -4,16 +4,18 @@ HEADERS = QMozEmbedExport.h \
         QMozView.h \
 	QMozApp.h \
 	../common/embed.h \
-        ../common/EmbeddingSetup.h \
+	../common/EmbeddingSetup.h \
 	../common/WebBrowserChrome.h \
-	../common/ContentListener.h
+	../common/ContentListener.h \
+	../common/DOMEventListener.h
 
 SOURCES = QMozView.cpp \
 	QMozApp.cpp \
 	../common/embed.cpp \
-        ../common/EmbeddingSetup.cpp \
+	../common/EmbeddingSetup.cpp \
 	../common/WebBrowserChrome.cpp \
-	../common/ContentListener.cpp
+	../common/ContentListener.cpp \
+	../common/DOMEventListener.cpp
 
 TARGET = qmozembed
 
