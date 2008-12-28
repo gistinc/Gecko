@@ -55,7 +55,6 @@ using namespace std;
 #include "nsAppDirectoryServiceDefs.h"
 #include "nsProfileDirServiceProvider.h"
 
-#include "nsIDirectoryService.h"
 #include "nsILocalFile.h"
 
 #ifdef WIN32
@@ -147,7 +146,9 @@ MozEmbedDirectoryProvider::GetFiles(const char *aKey, nsISimpleEnumerator* *aRes
     return dp2->GetFiles(aKey, aResult);
 }
 
-nsresult InitEmbedding(const char* aProfilePath)
+nsresult InitEmbedding(const char* aProfilePath, 
+                       const nsStaticModuleInfo* aComps, 
+                       int aNumComps)
 {
     nsresult rv;
 
@@ -266,7 +267,7 @@ nsresult InitEmbedding(const char* aProfilePath)
     // init embedding
     rv = XRE_InitEmbedding(xuldir, appdir,
                            const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider),
-                           nsnull, 0);
+                           aComps, aNumComps);
     if (NS_FAILED(rv)) {
         cerr << "XRE_InitEmbedding failed" << endl;
         return 9;
