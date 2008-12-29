@@ -62,6 +62,10 @@ public:
 
     virtual QSize sizeHint() const;
 
+    bool findText(const QString & sub_string,
+                  bool case_sensitive = false, bool wrap = false,
+                  bool entire_word = false, bool backwards = false) const;
+
 Q_SIGNALS:
     void locationChanged(const QString& newUri);
     void titleChanged(const QString& newTitle);

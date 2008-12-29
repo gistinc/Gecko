@@ -61,6 +61,7 @@ using namespace std;
 #include "nsIDocShellTreeItem.h"
 #include "nsIDOMEventTarget.h"
 #include "nsIDOMWindow2.h"
+#include "nsIDOMWindowInternal.h"
 #include "nsIPref.h"
 #include "nsIScriptContext.h"
 #include "nsIScriptGlobalObject.h"
@@ -498,6 +499,23 @@ nsIDOMWindow2 * MozView::GetDOMWindow()
 nsIWebNavigation * MozView::GetNavigation()
 {
     return mPrivate->mWebNavigation;
+}
+
+bool MozView::FindText(const PRUnichar * aSubString,
+                       bool aCaseSensitive, bool aWrap,
+                       bool aEntireWord, bool aBackwards)
+{
+    nsAutoString str(aSubString);
+    PRBool result;
+    nsCOMPtr<nsIDOMWindowInternal> dom_window_internal =
+            do_QueryInterface(mPrivate->mDOMWindow);
+    dom_window_internal->Find(str,
+                              aCaseSensitive ? PR_TRUE : PR_FALSE,
+                              aBackwards ? PR_TRUE : PR_FALSE,
+                              aWrap ? PR_TRUE : PR_FALSE,
+                              aEntireWord ? PR_TRUE : PR_FALSE,
+                              PR_TRUE, PR_FALSE, &result);
+    return result;
 }
 
 // XXX using c++ new as an allocator is generally BAD

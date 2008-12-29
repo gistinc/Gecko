@@ -343,6 +343,21 @@ public:
     nsIWebNavigation * GetNavigation();
 
     /**
+     * Find text in the current web page.
+     * @param aSubString the (sub-)string to search for.
+     * @param aCaseSensitive Shall we be case sensitive (default: no)?
+     * @param aWrap Shall we wrap around at the end of the document
+     *              (default: no)?
+     * @param aEntireWord Does the search string need to match the entire
+     *                    word (default: no)?
+     * @param aBackwards Should we search backwards (default: no)?
+     * @return true if the text was found and false otherwise.
+     */
+    bool FindText(const PRUnichar * aSubString,
+                  bool aCaseSensitive = false, bool aWrap = false,
+                  bool aEntireWord = false, bool aBackwards = false);
+
+    /**
      * Evaluate JavaScript
      *
      * @param aScript the script to evaluate in utf-8

@@ -165,3 +165,12 @@ QSize QMozView::sizeHint() const
 {
     return mPrivate->preferredSize;
 }
+
+bool QMozView::findText(const QString & sub_string,
+                        bool case_sensitive, bool wrap,
+                        bool entire_word, bool backwards) const
+{
+    const PRUnichar * moz_sub_string(reinterpret_cast<const PRUnichar *>(sub_string.utf16()));
+    return mPrivate->mozView.FindText(moz_sub_string, case_sensitive, wrap,
+                                      entire_word, backwards);
+}
