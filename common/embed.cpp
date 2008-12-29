@@ -60,6 +60,7 @@ using namespace std;
 #include "nsIBaseWindow.h"
 #include "nsIDocShellTreeItem.h"
 #include "nsIDOMEventTarget.h"
+#include "nsIDOMWindow2.h"
 #include "nsIPref.h"
 #include "nsIScriptContext.h"
 #include "nsIScriptGlobalObject.h"
@@ -174,6 +175,7 @@ public:
         mContentListener = 0;
         mDOMEventListener = 0;
         mWebNavigation = 0;
+        mDOMWindow = 0;
         mChrome = 0;
         mWebBrowser = 0;
 
@@ -187,6 +189,7 @@ public:
     MozView* mParentView;
 
     nsCOMPtr<nsIWebBrowser> mWebBrowser;
+    nsCOMPtr<nsIDOMWindow2> mDOMWindow;
     nsCOMPtr<nsIWebNavigation> mWebNavigation;
     nsCOMPtr<nsIWebBrowserChrome> mChrome;
     nsCOMPtr<nsIURIContentListener> mContentListener;
@@ -307,6 +310,14 @@ nsresult MozView::CreateBrowser(void* aParentWindow,
         cerr << "Creation of basewindow failed." << endl;
     if (NS_FAILED(baseWindow->SetVisibility(PR_TRUE)))
         cerr << "SetVisibility failed." << endl;
+
+    nsCOMPtr<nsIDOMWindow> domWindow;
+    if (NS_FAILED(mPrivate->mWebBrowser->GetContentDOMWindow(getter_AddRefs(domWindow))))
+        cerr << "Failed to get the content DOM window." << endl;
+
+    mPrivate->mDOMWindow = do_QueryInterface(domWindow);
+    if (!mPrivate->mDOMWindow)
+        cerr << "Got stuck with DOMWindow1!" << endl;
 
     mPrivate->mWebNavigation = do_QueryInterface(baseWindow);
     if (!mPrivate->mWebNavigation)
@@ -472,6 +483,21 @@ nsresult MozView::GetInterfaceRequestor(nsIInterfaceRequestor** aRequestor)
 {
     NS_ENSURE_ARG_POINTER(aRequestor);
     return CallQueryInterface(mPrivate->mWebBrowser, aRequestor);
+}
+
+void * MozView::GetBrowser()
+{
+    return mPrivate->mWebBrowser;
+}
+
+nsIDOMWindow2 * MozView::GetDOMWindow()
+{
+    return mPrivate->mDOMWindow;
+}
+
+nsIWebNavigation * MozView::GetNavigation()
+{
+    return mPrivate->mWebNavigation;
 }
 
 // XXX using c++ new as an allocator is generally BAD

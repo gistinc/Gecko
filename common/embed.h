@@ -48,7 +48,10 @@ typedef PRUint32 nsresult;
 class MozViewListener;
 class WindowCreator;
 
+class nsIDOMWindow2;
+class nsIDOMWindowInternal;
 class nsIInterfaceRequestor;
+class nsIWebNavigation;
 
 /**
  * Provides an interface to application level functionality,
@@ -318,6 +321,26 @@ public:
      */
     nsresult GetInterfaceRequestor(nsIInterfaceRequestor** aRequestor);
 
+    /**
+     * Get the browser object of this view.
+     *
+     * @return A (void-)pointer to the browser object.
+     */
+    void * GetBrowser();
+
+    /**
+     * Convenience method to get the nsIDOMWindow2.
+     *
+     * @return A pointer to the DOMWindow interface.
+     */
+    nsIDOMWindow2 * GetDOMWindow();
+
+    /**
+     * Convenience method to get the nsIWebNavigation.
+     *
+     * @return A pointer to the webnavigation interface.
+     */
+    nsIWebNavigation * GetNavigation();
 
     /**
      * Evaluate JavaScript
