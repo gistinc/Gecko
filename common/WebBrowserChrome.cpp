@@ -37,15 +37,12 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "WebBrowserChrome.h"
-
-#include "xpcom-config.h"
 #include "embed.h"
-#include "nsIDOMWindow.h"
-#include "nsStringAPI.h"
-#include "nsIURI.h"
-#include <iostream>
 
-using namespace std;
+#include "nsStringAPI.h"
+
+#include "nsIDOMWindow.h"
+#include "nsIURI.h"
 
 WebBrowserChrome::WebBrowserChrome(MozView* pAMozView) :
     mChromeFlags(0),

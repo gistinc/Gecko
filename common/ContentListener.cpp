@@ -35,22 +35,19 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "xpcom-config.h"
-#include "mozilla-config.h"
+#include "ContentListener.h"
+#include "embed.h"
 
 #include "nsXULAppAPI.h"
 #include "nsXPCOMGlue.h"
-
-#include "nsCOMPtr.h"
 #include "nsStringAPI.h"
-#include "nsILocalFile.h"
-#include "nsIURI.h"
-#include "nsIWebNavigationInfo.h"
+#include "nsCOMPtr.h"
 #include "nsServiceManagerUtils.h"
 #include "nsDocShellCID.h"
 
-#include "embed.h"
-#include "ContentListener.h"
+#include "nsILocalFile.h"
+#include "nsIURI.h"
+#include "nsIWebNavigationInfo.h"
 
 ContentListener::ContentListener(MozView *aOwner, nsIWebNavigation *aNavigation)
 {
@@ -151,3 +148,4 @@ ContentListener::SetParentContentListener(nsIURIContentListener * /*aParent*/)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
+

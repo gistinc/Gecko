@@ -33,8 +33,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef QMOZEMBEDEXPORT_H
-#define QMOZEMBEDEXPORT_H
+#ifndef QMOZEMBED_QMOZEMBEDEXPORT_H
+#define QMOZEMBED_QMOZEMBEDEXPORT_H
 
 #include <QtCore/QGlobalStatic>
 
@@ -47,8 +47,8 @@
 #endif
 
 #if !defined(Q_MOZEMBED_EXPORT)
-#define Q_MOZEMBED_EXPORT Q_DECL_EXPORT
+#   define Q_MOZEMBED_EXPORT Q_DECL_EXPORT
 #endif
 
-#endif // Header Guard
+#endif /* Header guard */
 

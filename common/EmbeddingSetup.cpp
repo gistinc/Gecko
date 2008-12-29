@@ -37,10 +37,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "EmbeddingSetup.h"
-
-#include "xpcom-config.h"
-#include "mozilla-config.h"
-
 #include "embed.h"
 
 // CRT headers
@@ -136,9 +132,11 @@ MozEmbedDirectoryProvider::GetFile(const char *aKey, PRBool *aPersist,
 }
 
 NS_IMETHODIMP
-MozEmbedDirectoryProvider::GetFiles(const char *aKey, nsISimpleEnumerator* *aResult)
+MozEmbedDirectoryProvider::GetFiles(const char *aKey,
+                                    nsISimpleEnumerator* *aResult)
 {
-    nsCOMPtr<nsIDirectoryServiceProvider2> dp2(do_QueryInterface(sAppFileLocProvider));
+    nsCOMPtr<nsIDirectoryServiceProvider2>
+        dp2(do_QueryInterface(sAppFileLocProvider));
 
     if (!dp2)
         return NS_ERROR_FAILURE;
@@ -171,14 +169,14 @@ nsresult InitEmbedding(const char* aProfilePath,
     cout << "xpcom: " << xpcomPath << endl;
 
     if (NS_FAILED(rv)) {
-        cerr << "Unable to find GRE, try setting GRE_HOME" << endl;
+        cerr << "Unable to find GRE, try setting GRE_HOME." << endl;
         return 1;
     }
 
     // start the glue, i.e. load and link against xpcom shared lib
     rv = XPCOMGlueStartup(xpcomPath.c_str());
     if (NS_FAILED(rv)) {
-        cerr << "Couldn't start XPCOM glue" << endl;
+        cerr << "Could not start XPCOM glue." << endl;
         return 2;
     }
 
@@ -194,14 +192,14 @@ nsresult InitEmbedding(const char* aProfilePath,
 
     rv = XPCOMGlueLoadXULFunctions(nsFuncs);
     if (NS_FAILED(rv)) {
-        cerr << "Couldn't load XUL functions" << endl;
+        cerr << "Could not load XUL functions." << endl;
         return 4;
     }
 
     // strip the filename from xpcom so we have the dir instead
     size_t lastslash = xpcomPath.find_last_of("/\\");
     if (lastslash == string::npos) {
-        cerr << "Invalid path to xpcom: %s" << endl;
+        cerr << "Invalid path to xpcom: %s." << endl;
         return 3;
     }
     string xpcomDir = xpcomPath.substr(0, lastslash);
@@ -211,7 +209,7 @@ nsresult InitEmbedding(const char* aProfilePath,
     rv = NS_NewNativeLocalFile(nsCString(xpcomDir.c_str()), PR_FALSE,
                                getter_AddRefs(xuldir));
     if (NS_FAILED(rv)) {
-        cerr << "Unable to create nsILocalFile for xuldir " << xpcomDir << endl;
+        cerr << "Unable to create nsILocalFile for xuldir " << xpcomDir << "." << endl;
         return 6;
     }
 
@@ -220,7 +218,7 @@ nsresult InitEmbedding(const char* aProfilePath,
 #ifdef WIN32
     GetModuleFileNameA(GetModuleHandle(NULL), self, sizeof(self));
 #else
-    // TODO: works on linux, need solution for unices which don't support this
+    // TODO: works on linux, need solution for unices which do not support this
     ssize_t len;
     if ((len = readlink("/proc/self/exe", self, sizeof(self)-1)) != -1)
         self[len] = '\0';
@@ -228,7 +226,7 @@ nsresult InitEmbedding(const char* aProfilePath,
     string selfPath(self);
     lastslash = selfPath.find_last_of("/\\");
     if (lastslash == string::npos) {
-        cerr << "Invalid module filename: " << self << endl;
+        cerr << "Invalid module filename: " << self << "." << endl;
         return 7;
     }
 
@@ -238,7 +236,7 @@ nsresult InitEmbedding(const char* aProfilePath,
     rv = NS_NewNativeLocalFile(nsCString(selfPath.c_str()), PR_FALSE,
                                getter_AddRefs(appdir));
     if (NS_FAILED(rv)) {
-        cerr << "Unable to create nsILocalFile for appdir" << endl;
+        cerr << "Unable to create nsILocalFile for appdir." << endl;
         return 8;
     }
 
@@ -269,7 +267,7 @@ nsresult InitEmbedding(const char* aProfilePath,
                            const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider),
                            aComps, aNumComps);
     if (NS_FAILED(rv)) {
-        cerr << "XRE_InitEmbedding failed" << endl;
+        cerr << "XRE_InitEmbedding failed." << endl;
         return 9;
     }
 
@@ -291,7 +289,7 @@ nsresult TermEmbedding()
 
     // terminate embedding
     if (!XRE_TermEmbedding) {
-        cerr << "XRE_TermEmbedding not set" << endl;
+        cerr << "XRE_TermEmbedding not set." << endl;
         return NS_ERROR_ABORT;
     }
     XRE_TermEmbedding();
@@ -302,7 +300,7 @@ nsresult TermEmbedding()
     // shutdown xpcom
     rv = XPCOMGlueShutdown();
     if (NS_FAILED(rv)) {
-        cerr << "Couldn't shutdown XPCOM glue" << endl;
+        cerr << "Could not shutdown XPCOM glue." << endl;
         return rv;
     }
 

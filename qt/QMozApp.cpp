@@ -38,9 +38,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "QMozApp.h"
-
 #include "embed.h"
-#include <stdlib.h>
 
 class QMozApp::Private
 {
@@ -63,14 +61,11 @@ QString QMozApp::stringPref(const QString& name) const
 {
     char* value = 0;
     mPrivate->mozApp.GetCharPref(name.toUtf8(), &value);
-    // TODO: better error handling
-    if (value) {
-        QString result;
-        result.fromUtf8(value);
-        free(value); // we really need free here, delete is not OK.
-        return result;
-    }
-    return "";
+    if (!value) { return QString(); }
+
+    QString result(QString::fromUtf8(value,-1));
+    free(value); // value is malloc'ed, so this is right!
+    return result;
 }
 
 void QMozApp::setStringPref(const QString& name, const QString& value)

@@ -38,8 +38,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef QMozView_h
-#define QMozView_h
+#ifndef QMOZEMBED_QMOZVIEW_H
+#define QMOZEMBED_QMOZVIEW_H
 
 #include "QMozEmbedExport.h"
 
@@ -53,7 +53,7 @@ class Q_MOZEMBED_EXPORT QMozView : public QWidget
     Q_OBJECT
 
 public:
-    QMozView(QWidget *parent = 0, unsigned int flags = 0);
+    explicit QMozView(QWidget *parent = 0, unsigned int flags = 0);
     virtual ~QMozView();
 
     void loadUri(const QString& uri);
@@ -62,7 +62,7 @@ public:
 
     virtual QSize sizeHint() const;
 
-signals:
+Q_SIGNALS:
     void locationChanged(const QString& newUri);
     void titleChanged(const QString& newTitle);
     void statusChanged(const QString& newStatus);
@@ -70,7 +70,9 @@ signals:
     void exitModal();
 
 protected:
-    void resizeEvent(QResizeEvent* event);
+    virtual bool event(QEvent *);
+    virtual void resizeEvent(QResizeEvent*);
+
     virtual QMozView* openWindow(unsigned int flags);
 
 private:
@@ -80,5 +82,5 @@ private:
     friend class QMozViewListener;
 };
 
-#endif /* QMozView_h */
+#endif /* Header guard */
 

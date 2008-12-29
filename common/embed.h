@@ -50,8 +50,6 @@ class WindowCreator;
 
 class nsIInterfaceRequestor;
 
-#define MOZ_UNUSED(x) (void)x;
-
 /**
  * Provides an interface to application level functionality,
  * i.e. that is shared across all views.
@@ -138,7 +136,7 @@ public:
 
 /**
  * Class for viewing web content.
- * Should be attached to a native windwow/widget.
+ * Should be attached to a native window/widget.
  */
 class MozView
 {

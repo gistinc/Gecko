@@ -38,52 +38,42 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "xpcom-config.h"
-#include "mozilla-config.h"
-
 #include "embed.h"
 #include "EmbeddingSetup.h"
+#include "WebBrowserChrome.h"
+#include "ContentListener.h"
+#include "DOMEventListener.h"
 
 // CRT headers
 #include <iostream>
 #include <string>
 using namespace std;
 
-// Mozilla Frozen APIs
 #include "nsXULAppAPI.h"
 #include "nsXPCOMGlue.h"
-
 #include "nsCOMPtr.h"
 #include "nsStringAPI.h"
 #include "nsComponentManagerUtils.h"
-#include "nsIDOMEventTarget.h"
-#include "nsIWeakReference.h"
-#include "nsIWeakReferenceUtils.h"
-#include "nsIWebBrowserStream.h"
-#include "nsIURI.h"
 #include "nsNetUtil.h" // NS_NewURI()
-#include "nsIPref.h"
-
-#include "nsIWebBrowser.h"
-#include "nsIWebNavigation.h"
 #include "nsEmbedCID.h"
 
-#include "nsIWebBrowserFocus.h"
-#include "nsIWidget.h"
-#include "nsIWindowCreator2.h"
-#include "nsIWindowWatcher.h"
-
-// Non-Frozen
 #include "nsIBaseWindow.h"
 #include "nsIDocShellTreeItem.h"
+#include "nsIDOMEventTarget.h"
+#include "nsIPref.h"
 #include "nsIScriptContext.h"
 #include "nsIScriptGlobalObject.h"
 #include "nsIScriptObjectPrincipal.h"
-
-// our stuff
-#include "WebBrowserChrome.h"
-#include "ContentListener.h"
-#include "DOMEventListener.h"
+#include "nsIURI.h"
+#include "nsIWeakReference.h"
+#include "nsIWeakReferenceUtils.h"
+#include "nsIWebBrowser.h"
+#include "nsIWebBrowserFocus.h"
+#include "nsIWebBrowserStream.h"
+#include "nsIWebNavigation.h"
+#include "nsIWidget.h"
+#include "nsIWindowCreator2.h"
+#include "nsIWindowWatcher.h"
 
 // globals
 static nsCOMPtr<WindowCreator> sWindowCreator;
@@ -105,21 +95,17 @@ nsresult MozApp::SetCharPref(const char *aName, const char *aValue)
     nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = pref->SetCharPref(aName, aValue);
-
-    return rv;
+    return pref->SetCharPref(aName, aValue);
 }
 
 nsresult MozApp::SetBoolPref(const char *aName, PRBool aValue)
 {
     nsresult rv;
 
-    nsCOMPtr<nsIPref> pref (do_GetService(NS_PREF_CONTRACTID, &rv));
+    nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = pref->SetBoolPref(aName, aValue);
-
-    return rv;
+    return pref->SetBoolPref(aName, aValue);
 }
 
 nsresult MozApp::SetIntPref(const char *aName, int aValue)
@@ -129,9 +115,7 @@ nsresult MozApp::SetIntPref(const char *aName, int aValue)
     nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = pref->SetIntPref(aName, aValue);
-
-    return rv;
+    return pref->SetIntPref(aName, aValue);
 }
 
 nsresult MozApp::GetCharPref(const char *aName, char **aValue)
@@ -141,9 +125,7 @@ nsresult MozApp::GetCharPref(const char *aName, char **aValue)
     nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = pref->GetCharPref(aName, aValue);
-
-    return rv;
+    return pref->GetCharPref(aName, aValue);
 }
 
 nsresult MozApp::GetBoolPref(const char *aName, PRBool *aValue)
@@ -153,9 +135,7 @@ nsresult MozApp::GetBoolPref(const char *aName, PRBool *aValue)
     nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = pref->GetBoolPref(aName, aValue);
-
-    return rv;
+    return pref->GetBoolPref(aName, aValue);
 }
 
 nsresult MozApp::GetIntPref(const char *aName, int *aValue)
@@ -165,18 +145,42 @@ nsresult MozApp::GetIntPref(const char *aName, int *aValue)
     nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = pref->GetIntPref(aName, aValue);
-
-    return rv;
+    return pref->GetIntPref(aName, aValue);
 }
 
-class MozView::Private{
+class MozView::Private
+{
 public:
     Private() :
         mListener(0),
         mParentWindow(0),
         mParentView(0)
-    { }
+    {
+    }
+
+    ~Private()
+    {
+        if (mChrome)
+            mChrome->SetWebBrowser(0);
+        if (mWebBrowser) {
+            mWebBrowser->SetParentURIContentListener(0);
+
+            nsCOMPtr<nsIBaseWindow> baseWindow;
+            baseWindow = do_QueryInterface(mWebBrowser);
+            if (baseWindow)
+                baseWindow->Destroy();
+        }
+
+        mContentListener = 0;
+        mDOMEventListener = 0;
+        mWebNavigation = 0;
+        mChrome = 0;
+        mWebBrowser = 0;
+
+        // no need to delete mListener
+        // no need to delete mParentWindow
+        // no need to delete mParentView
+    }
 
     MozViewListener* mListener;
     void* mParentWindow;
@@ -192,8 +196,13 @@ public:
 class WindowCreator : public nsIWindowCreator2
 {
 public:
-    WindowCreator() {};
-    virtual ~WindowCreator() {};
+    WindowCreator()
+    {
+    }
+
+    virtual ~WindowCreator()
+    {
+    }
 
     NS_DECL_ISUPPORTS
     NS_DECL_NSIWINDOWCREATOR
@@ -215,7 +224,7 @@ WindowCreator::CreateChromeWindow(nsIWebBrowserChrome *aParent,
 
     MozViewListener* pListener = chrome->GetMozView()->GetListener();
     if (!pListener)
-      return NS_ERROR_FAILURE;
+        return NS_ERROR_FAILURE;
 
     MozView* mozView = pListener->OpenWindow(aChromeFlags);
     if (!mozView)
@@ -260,21 +269,6 @@ MozView::MozView()
 
 MozView::~MozView()
 {
-    // release browser and chrome
-    nsCOMPtr<nsIBaseWindow> baseWindow;
-    baseWindow = do_QueryInterface(mPrivate->mWebBrowser);
-    if (baseWindow)
-        baseWindow->Destroy();
-    if (mPrivate->mChrome) {
-        mPrivate->mChrome->SetWebBrowser(0);
-    }
-
-    baseWindow = 0;
-
-    mPrivate->mWebBrowser = 0;
-    mPrivate->mChrome = 0;
-    mPrivate->mContentListener = 0;
-    mPrivate->mDOMEventListener = 0;
     delete mPrivate;
     TermEmbedding();
 }
@@ -288,16 +282,13 @@ nsresult MozView::CreateBrowser(void* aParentWindow,
 
     nsresult rv;
 
-    nsCOMPtr<nsIBaseWindow> baseWindow;
     mPrivate->mWebBrowser = do_CreateInstance(NS_WEBBROWSER_CONTRACTID, &rv);
-    if (NS_FAILED(rv)) {
-        printf("do_CreateInstance webBrowser\n");
-    }
-    baseWindow = do_QueryInterface(mPrivate->mWebBrowser);
-    rv = baseWindow->InitWindow(mPrivate->mParentWindow, 0, aX, aY, aWidth, aHeight);
-    if (NS_FAILED(rv)) {
-        printf("InitWindow failed.\n");
-    }
+    if (NS_FAILED(rv))
+        cerr << "do_CreateInstance webBrowser." << endl;
+
+    nsCOMPtr<nsIBaseWindow> baseWindow = do_QueryInterface(mPrivate->mWebBrowser);
+    if (NS_FAILED(baseWindow->InitWindow(mPrivate->mParentWindow, 0, aX, aY, aWidth, aHeight)))
+        cerr << "InitWindow failed." << endl;
 
     nsIWebBrowserChrome **aNewWindow = getter_AddRefs(mPrivate->mChrome);
     CallQueryInterface(static_cast<nsIWebBrowserChrome*>(new WebBrowserChrome(this)), aNewWindow);
@@ -307,26 +298,24 @@ nsresult MozView::CreateBrowser(void* aParentWindow,
     mPrivate->mChrome->SetChromeFlags(aChromeFlags);
 
     if (aChromeFlags & (nsIWebBrowserChrome::CHROME_OPENAS_CHROME |
-        nsIWebBrowserChrome::CHROME_OPENAS_DIALOG) ) {
+                        nsIWebBrowserChrome::CHROME_OPENAS_DIALOG) ) {
         nsCOMPtr<nsIDocShellTreeItem> docShellItem(do_QueryInterface(baseWindow));
         docShellItem->SetItemType(nsIDocShellTreeItem::typeChromeWrapper);
     }
 
-    rv = baseWindow->Create();
-    if (NS_FAILED(rv)) {
-        printf("Creation of basewindow failed.\n");
-    }
-    rv = baseWindow->SetVisibility(PR_TRUE);
-    if (NS_FAILED(rv)) {
-        printf("SetVisibility failed.\n");
-    }
+    if (NS_FAILED(baseWindow->Create()))
+        cerr << "Creation of basewindow failed." << endl;
+    if (NS_FAILED(baseWindow->SetVisibility(PR_TRUE)))
+        cerr << "SetVisibility failed." << endl;
+
+    mPrivate->mWebNavigation = do_QueryInterface(baseWindow);
+    if (!mPrivate->mWebNavigation)
+        cerr << "Failed to get the web navigation interface." << endl;
 
     // register the progress listener
     nsCOMPtr<nsIWebProgressListener> listener = do_QueryInterface(mPrivate->mChrome);
     nsCOMPtr<nsIWeakReference> thisListener(do_GetWeakReference(listener));
     mPrivate->mWebBrowser->AddWebBrowserListener(thisListener, NS_GET_IID(nsIWebProgressListener));
-
-    mPrivate->mWebNavigation = do_QueryInterface(mPrivate->mWebBrowser);
 
     // register the content listener
     mPrivate->mContentListener = new ContentListener(this, mPrivate->mWebNavigation);
@@ -337,28 +326,21 @@ nsresult MozView::CreateBrowser(void* aParentWindow,
 
     SetFocus(true);
 
-    return 0;
+    return NS_OK;
 }
 
 nsresult MozView::SetPositionAndSize(PRInt32 aX, PRInt32 aY,
                                      PRInt32 aWidth, PRInt32 aHeight)
 {
-    nsresult rv;
-    nsCOMPtr<nsIBaseWindow> baseWindow;
-    baseWindow = do_QueryInterface(mPrivate->mWebBrowser);
-    rv = baseWindow->SetPositionAndSize(aX, aY, aWidth, aHeight, PR_TRUE);
-    if (NS_FAILED(rv))
-        return 1;
-
-    return 0;
+    nsCOMPtr<nsIBaseWindow> baseWindow = do_QueryInterface(mPrivate->mWebBrowser);
+    return baseWindow->SetPositionAndSize(aX, aY, aWidth, aHeight, PR_TRUE);
 }
 
 nsresult MozView::LoadURI(const char *aUri)
 {
-    nsresult rv =
-      mPrivate->mWebNavigation->LoadURI(NS_ConvertUTF8toUTF16(aUri).get(),
-        nsIWebNavigation::LOAD_FLAGS_NONE, 0, 0, 0);
-    return rv;
+    return mPrivate->mWebNavigation->LoadURI(NS_ConvertUTF8toUTF16(aUri).get(),
+                                             nsIWebNavigation::LOAD_FLAGS_NONE,
+                                             0, 0, 0);
 }
 
 nsresult MozView::LoadData(const char *aBaseUrl,
@@ -390,26 +372,22 @@ nsresult MozView::LoadData(const char *aBaseUrl,
 
 nsresult MozView::Stop()
 {
-    nsresult rv = mPrivate->mWebNavigation->Stop(nsIWebNavigation::STOP_ALL);
-    return rv;
+    return mPrivate->mWebNavigation->Stop(nsIWebNavigation::STOP_ALL);
 }
 
 nsresult MozView::Reload()
 {
-    nsresult rv = mPrivate->mWebNavigation->Reload(nsIWebNavigation::LOAD_FLAGS_NONE);
-    return rv;
+    return mPrivate->mWebNavigation->Reload(nsIWebNavigation::LOAD_FLAGS_NONE);
 }
 
 nsresult MozView::GoBack()
 {
-    nsresult rv = mPrivate->mWebNavigation->GoBack();
-    return rv;
+    return mPrivate->mWebNavigation->GoBack();
 }
 
 nsresult MozView::GoForward()
 {
-    nsresult rv = mPrivate->mWebNavigation->GoForward();
-    return rv;
+    return mPrivate->mWebNavigation->GoForward();
 }
 
 PRBool MozView::CanGoBack()
@@ -431,9 +409,9 @@ nsresult MozView::SetFocus(PRBool aFocus)
     nsCOMPtr<nsIWebBrowserFocus> browserFocus;
     browserFocus = do_QueryInterface(mPrivate->mWebBrowser);
     if (aFocus)
-      browserFocus->Activate();
+        browserFocus->Activate();
     else
-      browserFocus->Deactivate();
+        browserFocus->Deactivate();
     return NS_OK;
 }
 
@@ -474,8 +452,7 @@ void* MozView::GetNativeWindow()
     nsCOMPtr<nsIBaseWindow> baseWindow = do_QueryInterface(mPrivate->mWebBrowser);
     nsCOMPtr<nsIWidget> mozWidget;
 
-    nsresult rv = baseWindow->GetMainWidget(getter_AddRefs(mozWidget));
-    if (NS_FAILED(rv))
+    if (NS_FAILED(baseWindow->GetMainWidget(getter_AddRefs(mozWidget))))
         return 0;
 
     return mozWidget->GetNativeData(NS_NATIVE_WINDOW);
@@ -501,13 +478,13 @@ nsresult MozView::GetInterfaceRequestor(nsIInterfaceRequestor** aRequestor)
 char* MozView::EvaluateJavaScript(const char* aScript)
 {
     nsCOMPtr<nsIScriptGlobalObject> sgo =
-      do_GetInterface(mPrivate->mWebBrowser);
+        do_GetInterface(mPrivate->mWebBrowser);
     nsCOMPtr<nsIScriptContext> ctx = sgo->GetContext();
     nsString retval;
     nsCOMPtr<nsIScriptObjectPrincipal> sgoPrincipal = do_QueryInterface(sgo);
     ctx->EvaluateString(NS_ConvertUTF8toUTF16(aScript), sgo->GetGlobalJSObject(),
-      sgoPrincipal->GetPrincipal(),
-      "mozembed", 0, nsnull, &retval, nsnull);
+                        sgoPrincipal->GetPrincipal(),
+                        "mozembed", 0, nsnull, &retval, nsnull);
 
     NS_ConvertUTF16toUTF8 retvalUtf8(retval);
     char* temp = new char[retvalUtf8.Length() + 1];
@@ -530,7 +507,8 @@ void MozViewListener::SetTitle(const char * /*aNewTitle*/)
 {
 }
 
-void MozViewListener::StatusChanged(const char * /*aNewStatus*/, PRUint32 /*aStatusType*/)
+void MozViewListener::StatusChanged(const char * /*aNewStatus*/,
+                                    PRUint32 /*aStatusType*/)
 {
 }
 

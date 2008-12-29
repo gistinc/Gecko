@@ -453,7 +453,7 @@ handle_toplevel_configure(GtkWidget         *toplevel,
     return FALSE;
 }
 
-/* Handle the window proceedure by the window class directly
+/* Handle the window procedure by the window class directly
  * in order to call SetFocus() at the appropriate times.
  */
 static LRESULT 
@@ -514,7 +514,7 @@ window_procedure(HWND   hwnd,
  * Problems here have to do with focus handling, i.e.
  * sharing and passing keyboard focus back and forth from
  * the gecko window to the rest of the app. The gecko 
- * wants us to turn focus on and off when we recieve the
+ * wants us to turn focus on and off when we receive the
  * WM_ACTIVATE message for our window; Gtk+ does not give 
  * us an opportunity to act on this message (TODO: patch 
  * gtk+ to do so and run tests).

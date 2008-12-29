@@ -32,8 +32,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef DOMEventListener_h_
-#define DOMEventListener_h_
+#ifndef MOZEMBED_DOMEVENTLISTENER_H
+#define MOZEMBED_DOMEVENTLISTENER_H
 
 #include "nsIDOMEventListener.h"
 
@@ -52,4 +52,4 @@ private:
     MozView *mOwner;
 };
 
-#endif /* Header Guard */
+#endif /* Header guard */

@@ -37,8 +37,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef QMozApp_h
-#define QMozApp_h
+#ifndef QMOZEMBED_QMOZAPP_H
+#define QMOZEMBED_QMOZAPP_H
 
 #include "QMozEmbedExport.h"
 
@@ -50,7 +50,7 @@ class Q_MOZEMBED_EXPORT QMozApp : public QObject
     Q_OBJECT
 
 public:
-    QMozApp(const QString& profilePath = QString());
+    explicit QMozApp(const QString& profilePath = QString());
     virtual ~QMozApp();
 
     QString stringPref(const QString& name) const;
@@ -65,4 +65,4 @@ private:
     Private* const mPrivate;
 };
 
-#endif /* QMozApp_h */
+#endif /* Header guard */

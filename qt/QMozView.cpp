@@ -63,7 +63,12 @@ private:
 class QMozView::Private
 {
 public:
-    Private(QMozView* aQMozView) : listener(aQMozView) {mozView.SetListener(&listener);}
+    Private(QMozView* aQMozView) :
+        listener(aQMozView)
+    {
+        mozView.SetListener(&listener);
+    }
+
     MozView mozView;
     QMozViewListener listener;
     QSize preferredSize;
@@ -115,7 +120,7 @@ QMozView::QMozView(QWidget *parent, unsigned int flags) :
     QWidget(parent),
     mPrivate(new Private(this))
 {
-#if defined Q_OS_WIN32
+#if defined Q_OS_WIN
     mPrivate->mozView.CreateBrowser((void*)winId(), 0, 0, 100, 100, flags);
 #else
     // TODO: Hmmm what if we are not using a mozilla with Qt backend

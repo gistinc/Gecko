@@ -32,11 +32,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "nsIDOMEvent.h"
-
-#include "embed.h"
 #include "DOMEventListener.h"
+#include "embed.h"
 
+#include "nsIDOMEvent.h"
 
 NS_IMPL_ISUPPORTS1(DOMEventListener,
                    nsIDOMEventListener)
