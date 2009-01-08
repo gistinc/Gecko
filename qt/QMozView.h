@@ -74,7 +74,6 @@ Q_SIGNALS:
     void exitModal();
 
 protected:
-    virtual bool event(QEvent *);
     virtual void resizeEvent(QResizeEvent*);
 
     virtual QMozView* openWindow(unsigned int flags);
