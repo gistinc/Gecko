@@ -21,6 +21,7 @@
  * Contributor(s):
  *   Pelle Johnsen <pjohnsen@mozilla.com>
  *   Dave Camp <dcamp@mozilla.com>
+ *   Tobias Hunger <tobias.hunger@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -69,13 +70,16 @@ using namespace std;
 
 XRE_InitEmbeddingType XRE_InitEmbedding = 0;
 XRE_TermEmbeddingType XRE_TermEmbedding = 0;
+XRE_NotifyProfileType XRE_NotifyProfile = 0;
+XRE_LockProfileDirectoryType XRE_LockProfileDirectory = 0;
 
 static int gInitCount = 0;
 
 // ------------------------------------------------------------------------
 
-nsIDirectoryServiceProvider *sAppFileLocProvider = nsnull;
-nsCOMPtr<nsILocalFile> sProfileDir = nsnull;
+nsIDirectoryServiceProvider *sAppFileLocProvider = 0;
+nsCOMPtr<nsILocalFile> sProfileDir = 0;
+nsISupports * sProfileLock = 0;
 
 class MozEmbedDirectoryProvider : public nsIDirectoryServiceProvider2
 {
@@ -144,8 +148,8 @@ MozEmbedDirectoryProvider::GetFiles(const char *aKey,
     return dp2->GetFiles(aKey, aResult);
 }
 
-nsresult InitEmbedding(const char* aProfilePath, 
-                       const nsStaticModuleInfo* aComps, 
+nsresult InitEmbedding(const char* aProfilePath,
+                       const nsStaticModuleInfo* aComps,
                        int aNumComps)
 {
     nsresult rv;
@@ -187,6 +191,8 @@ nsresult InitEmbedding(const char* aProfilePath,
     nsDynamicFunctionLoad nsFuncs[] = {
             {"XRE_InitEmbedding", (NSFuncPtr*)&XRE_InitEmbedding},
             {"XRE_TermEmbedding", (NSFuncPtr*)&XRE_TermEmbedding},
+            {"XRE_NotifyProfile", (NSFuncPtr*)&XRE_NotifyProfile},
+            {"XRE_LockProfileDirectory", (NSFuncPtr*)&XRE_LockProfileDirectory},
             {0, 0}
     };
 
@@ -199,7 +205,7 @@ nsresult InitEmbedding(const char* aProfilePath,
     // strip the filename from xpcom so we have the dir instead
     size_t lastslash = xpcomPath.find_last_of("/\\");
     if (lastslash == string::npos) {
-        cerr << "Invalid path to xpcom: %s." << endl;
+        cerr << "Invalid path to xpcom:" << xpcomPath << "." << endl;
         return 3;
     }
     string xpcomDir = xpcomPath.substr(0, lastslash);
@@ -209,7 +215,8 @@ nsresult InitEmbedding(const char* aProfilePath,
     rv = NS_NewNativeLocalFile(nsCString(xpcomDir.c_str()), PR_FALSE,
                                getter_AddRefs(xuldir));
     if (NS_FAILED(rv)) {
-        cerr << "Unable to create nsILocalFile for xuldir " << xpcomDir << "." << endl;
+        cerr << "Unable to create nsILocalFile for xuldir " << xpcomDir
+             << "." << endl;
         return 6;
     }
 
@@ -262,6 +269,12 @@ nsresult InitEmbedding(const char* aProfilePath,
         sProfileDir->Create(nsIFile::DIRECTORY_TYPE, 0700);
     }
 
+    // Lock profile directory
+    if (sProfileDir && !sProfileLock) {
+        rv = XRE_LockProfileDirectory(sProfileDir, &sProfileLock);
+        NS_ENSURE_SUCCESS(rv, rv);
+    }
+
     // init embedding
     rv = XRE_InitEmbedding(xuldir, appdir,
                            const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider),
@@ -270,6 +283,9 @@ nsresult InitEmbedding(const char* aProfilePath,
         cerr << "XRE_InitEmbedding failed." << endl;
         return 9;
     }
+
+    // initialize profile:
+    XRE_NotifyProfile();
 
     NS_LogTerm();
 
@@ -292,10 +308,12 @@ nsresult TermEmbedding()
         cerr << "XRE_TermEmbedding not set." << endl;
         return NS_ERROR_ABORT;
     }
+
     XRE_TermEmbedding();
 
     // make sure this is freed before shutting down xpcom
-    sProfileDir = nsnull;
+    NS_IF_RELEASE(sProfileLock);
+    sProfileDir = 0;
 
     // shutdown xpcom
     rv = XPCOMGlueShutdown();
