@@ -39,6 +39,7 @@
 
 #include "QMozApp.h"
 #include "embed.h"
+#include <stdlib.h>
 
 class QMozApp::Private
 {
