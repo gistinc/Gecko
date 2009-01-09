@@ -64,6 +64,8 @@ public slots:
     void go();
     void startModal();
     void exitModal();
+    void consoleMessage(const QString &);
+
 private:
     QLineEdit* location;
     MyQMozView* mozView;

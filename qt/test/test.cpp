@@ -91,6 +91,8 @@ MyBrowser::MyBrowser(QWidget *parent, unsigned int flags)
     connect(location, SIGNAL(returnPressed()),
             this, SLOT(go()));
 
+    connect(mozView, SIGNAL(consoleMessage(const QString &)),
+            this, SLOT(consoleMessage(const QString &)));
 }
 
 void MyBrowser::loadUri(const QString& uri)
@@ -115,6 +117,11 @@ void MyBrowser::exitModal()
     done(0);
     // have to delete mozView now to avoid JS context assertions
     delete mozView;
+}
+
+void MyBrowser::consoleMessage(const QString& message)
+{
+    qDebug() << "CONSOLE:" << message;
 }
 
 int main(int argc, char *argv[])

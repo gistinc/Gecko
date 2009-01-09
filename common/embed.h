@@ -489,6 +489,13 @@ public:
     virtual void ExitModal(nsresult aResult);
 
     /**
+     * Inform the application about console messages (JS errors and such).
+     *
+     * @param aMessage the new console Message.
+     */
+    virtual void OnConsoleMessage(const char * aMessage);
+
+    /**
      * The focus entered or left the browser window.
      *
      * @param    aForward if PR_TRUE, the next sibling shall be focused (Tab), otherwise the

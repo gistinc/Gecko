@@ -11,16 +11,11 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is mozilla.org code.
- *
- * The Initial Developer of the Original Code is
- * Mozilla Corporation.
- * Portions created by the Initial Developer are Copyright (C) 2007
+ * The Initial Developer of the Original Code is Nokia
+ * Portions created by the Initial Developer are Copyright (C) 2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Pelle Johnsen <pjohnsen@mozilla.com>
- *   Dave Camp <dcamp@mozilla.com>
  *   Tobias Hunger <tobias.hunger@gmail.com>
  *   Steffen Imhof <steffen.imhof@googlemail.com>
  *
@@ -38,53 +33,26 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef QMOZEMBED_QMOZVIEW_H
-#define QMOZEMBED_QMOZVIEW_H
+#ifndef MOZEMBED_CONSOLELISTENER_H
+#define MOZEMBED_CONSOLELISTENER_H
 
-#include "QMozEmbedExport.h"
+#include "nsIConsoleListener.h"
+#include "nsWeakReference.h"
 
-#include <QtGui/QWidget>
+class MozView;
 
-class QMozViewListener;
-class nsIInterfaceRequestor;
-
-class Q_MOZEMBED_EXPORT QMozView : public QWidget
+class ConsoleListener : public nsIConsoleListener
 {
-    Q_OBJECT
-
 public:
-    explicit QMozView(QWidget *parent = 0, unsigned int flags = 0);
-    virtual ~QMozView();
 
-    void loadUri(const QString& uri);
-    void getInterfaceRequestor(nsIInterfaceRequestor** aRequestor);
-    QString evaluateJavaScript(const QString& script);
+    ConsoleListener(MozView *aOwner);
+    virtual ~ConsoleListener();
 
-    virtual QSize sizeHint() const;
-
-    bool findText(const QString & sub_string,
-                  bool case_sensitive = false, bool wrap = false,
-                  bool entire_word = false, bool backwards = false) const;
-
-Q_SIGNALS:
-    void locationChanged(const QString& newUri);
-    void titleChanged(const QString& newTitle);
-    void statusChanged(const QString& newStatus);
-    void consoleMessage(const QString & message);
-    void startModal();
-    void exitModal();
-
-protected:
-    virtual void resizeEvent(QResizeEvent*);
-
-    virtual QMozView* openWindow(unsigned int flags);
+    NS_DECL_ISUPPORTS
+    NS_DECL_NSICONSOLELISTENER
 
 private:
-    class Private;
-    Private * const mPrivate;
-
-    friend class QMozViewListener;
+    MozView * mOwner;
 };
 
 #endif /* Header guard */
-

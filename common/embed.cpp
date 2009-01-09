@@ -41,6 +41,7 @@
 #include "embed.h"
 #include "EmbeddingSetup.h"
 #include "WebBrowserChrome.h"
+#include "ConsoleListener.h"
 #include "ContentListener.h"
 #include "DOMEventListener.h"
 
@@ -58,6 +59,7 @@ using namespace std;
 #include "nsEmbedCID.h"
 
 #include "nsIBaseWindow.h"
+#include "nsIConsoleService.h"
 #include "nsIDocShellTreeItem.h"
 #include "nsIDOMEventTarget.h"
 #include "nsIDOMWindow2.h"
@@ -162,6 +164,12 @@ public:
 
     ~Private()
     {
+        nsCOMPtr<nsIConsoleService> consoleService(do_GetService(NS_CONSOLESERVICE_CONTRACTID));
+        if (!consoleService)
+            cerr << "Failed to get Console service!" << endl;
+        else if (NS_FAILED(consoleService->UnregisterListener(mConsoleListener)))
+            cerr << "Failed to unregister console listener." << endl;
+
         if (mChrome)
             mChrome->SetWebBrowser(0);
         if (mWebBrowser) {
@@ -175,6 +183,7 @@ public:
 
         mContentListener = 0;
         mDOMEventListener = 0;
+        mConsoleListener = 0;
         mWebNavigation = 0;
         mDOMWindow = 0;
         mChrome = 0;
@@ -195,6 +204,7 @@ public:
     nsCOMPtr<nsIWebBrowserChrome> mChrome;
     nsCOMPtr<nsIURIContentListener> mContentListener;
     nsCOMPtr<nsIDOMEventListener> mDOMEventListener;
+    nsCOMPtr<nsIConsoleListener> mConsoleListener;
 };
 
 class WindowCreator : public nsIWindowCreator2
@@ -335,6 +345,17 @@ nsresult MozView::CreateBrowser(void* aParentWindow,
 
     // register the DOM event listener
     mPrivate->mDOMEventListener = new DOMEventListener(this);
+
+    // register the console event listener
+    mPrivate->mConsoleListener = new ConsoleListener(this);
+    if (!mPrivate->mConsoleListener)
+        cerr << "No Console listener created!" << endl;
+
+    nsCOMPtr<nsIConsoleService> consoleService(do_GetService(NS_CONSOLESERVICE_CONTRACTID));
+    if (!consoleService)
+        cerr << "Failed to get Console service!" << endl;
+    else if (NS_FAILED(consoleService->RegisterListener(mPrivate->mConsoleListener)))
+        cerr << "Failed to register console listener." << endl;
 
     SetFocus(true);
 
@@ -592,6 +613,10 @@ void MozViewListener::StartModal()
 }
 
 void MozViewListener::ExitModal(nsresult /*aResult*/)
+{
+}
+
+void MozViewListener::OnConsoleMessage(const char * /*aMessage*/)
 {
 }
 

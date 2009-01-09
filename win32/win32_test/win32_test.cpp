@@ -19,6 +19,9 @@ public:
     void LocationChanged(const char* newLocation);
     PRBool OpenURI(const char* newLocation);
     void DocumentLoaded();
+    void OnConsoleMessage(const char * aMessage);
+    void OnFocusChanged(PRBool aForward);
+    
     MozView* OpenWindow(PRUint32 flags);
     void SizeTo(PRUint32 width, PRUint32 height);
     void SetVisibility(PRBool visible);
@@ -77,6 +80,15 @@ PRBool MyListener::OpenURI(const char* newLocation)
 void MyListener::DocumentLoaded()
 {
     cout << "FINISHED" << endl;
+}
+
+void MyListener::OnConsoleMessage(const char * aMessage)
+{
+    cout << "CONSOLE: " << aMessage << endl;
+}
+
+void MyListener::OnFocusChanged(PRBool aForward)
+{
 }
 
 MozView* MyListener::OpenWindow(PRUint32 flags)

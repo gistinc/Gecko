@@ -13,16 +13,13 @@
  *
  * The Original Code is mozilla.org code.
  *
- * The Initial Developer of the Original Code is
- * Mozilla Corporation.
- * Portions created by the Initial Developer are Copyright (C) 2007
+ * The Initial Developer of the Original Code is Nokia
+ * Portions created by the Initial Developer are Copyright (C) 2008
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Pelle Johnsen <pjohnsen@mozilla.com>
- *   Dave Camp <dcamp@mozilla.com>
  *   Tobias Hunger <tobias.hunger@gmail.com>
- *   Steffen Imhof <steffen.imhof@googlemail.com>
+ *   Steffen.Imhof <steffen.imhof@googlemail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -38,53 +35,32 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef QMOZEMBED_QMOZVIEW_H
-#define QMOZEMBED_QMOZVIEW_H
+#include "ConsoleListener.h"
+#include "nsStringAPI.h"
 
-#include "QMozEmbedExport.h"
+#include "embed.h"
 
-#include <QtGui/QWidget>
+NS_IMPL_ISUPPORTS1(ConsoleListener,
+                   nsIConsoleListener)
 
-class QMozViewListener;
-class nsIInterfaceRequestor;
+ConsoleListener::ConsoleListener(MozView *aOwner) :
+    mOwner(aOwner)
+{ }
 
-class Q_MOZEMBED_EXPORT QMozView : public QWidget
+ConsoleListener::~ConsoleListener()
+{ }
+
+NS_IMETHODIMP ConsoleListener::Observe(nsIConsoleMessage * aMessage)
 {
-    Q_OBJECT
+    MozViewListener *listener = mOwner->GetListener();
+    if (!listener)
+        return NS_OK;
 
-public:
-    explicit QMozView(QWidget *parent = 0, unsigned int flags = 0);
-    virtual ~QMozView();
-
-    void loadUri(const QString& uri);
-    void getInterfaceRequestor(nsIInterfaceRequestor** aRequestor);
-    QString evaluateJavaScript(const QString& script);
-
-    virtual QSize sizeHint() const;
-
-    bool findText(const QString & sub_string,
-                  bool case_sensitive = false, bool wrap = false,
-                  bool entire_word = false, bool backwards = false) const;
-
-Q_SIGNALS:
-    void locationChanged(const QString& newUri);
-    void titleChanged(const QString& newTitle);
-    void statusChanged(const QString& newStatus);
-    void consoleMessage(const QString & message);
-    void startModal();
-    void exitModal();
-
-protected:
-    virtual void resizeEvent(QResizeEvent*);
-
-    virtual QMozView* openWindow(unsigned int flags);
-
-private:
-    class Private;
-    Private * const mPrivate;
-
-    friend class QMozViewListener;
-};
-
-#endif /* Header guard */
-
+    nsString msg;
+    nsresult rv = aMessage->GetMessageMoz(getter_Copies(msg));
+    if (NS_SUCCEEDED(rv))
+    {
+        listener->OnConsoleMessage(NS_ConvertUTF16toUTF8(msg).get());
+    }
+    return NS_OK;
+}

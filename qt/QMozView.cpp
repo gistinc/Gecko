@@ -53,6 +53,7 @@ public:
     void LocationChanged(const char* newLocation);
     MozView* OpenWindow(PRUint32 flags);
     void SizeTo(PRUint32 width, PRUint32 height);
+    void OnConsoleMessage(const char * message);
     void StartModal();
     void ExitModal(nsresult result);
 
@@ -114,6 +115,12 @@ void QMozViewListener::ExitModal(nsresult result)
 {
     Q_UNUSED(result);
     pQMozView->exitModal();
+}
+
+void QMozViewListener::OnConsoleMessage(const char * message)
+{
+    QString qt_message(QString::fromUtf8(message));
+    emit pQMozView->consoleMessage(qt_message);
 }
 
 QMozView::QMozView(QWidget *parent, unsigned int flags) :
