@@ -10,6 +10,7 @@
 using namespace std;
 
 #define MAX_LOADSTRING 100
+#define MAX_LOCATION 1024
 
 class MyListener : public MozViewListener
 {
@@ -21,7 +22,7 @@ public:
     void DocumentLoaded();
     void OnConsoleMessage(const char * aMessage);
     void OnFocusChanged(PRBool aForward);
-    
+
     MozView* OpenWindow(PRUint32 flags);
     void SizeTo(PRUint32 width, PRUint32 height);
     void SetVisibility(PRBool visible);
@@ -44,6 +45,14 @@ WCHAR* Utf8ToWchar(const char* str)
     int len = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
     WCHAR* result = new WCHAR[len];
     MultiByteToWideChar(CP_UTF8, 0, str, -1, result, len);
+    return result;
+}
+
+char* WcharToUtf8(WCHAR* str)
+{
+    int len = WideCharToMultiByte(CP_UTF8, 0, str, -1, NULL, 0, NULL, NULL);
+    char *result = new char[len];
+    WideCharToMultiByte(CP_UTF8, 0, str, -1, result, len, NULL, NULL);
     return result;
 }
 
@@ -177,6 +186,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK OpenLocation(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                                          HINSTANCE hPrevInstance,
@@ -220,8 +230,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     SetWindowLongPtr(hMainWnd, GWLP_USERDATA, (__int3264)(LONG_PTR)(mozView));
 
     mozView->LoadURI("http://google.com");
-    //mozView->LoadURI("file:///C:/mozilla/test/test.html");
-    //mozView->LoadURI("chrome://test/content");
 
     // Main message loop:
     while (!gQuit) {
@@ -336,6 +344,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDM_ABOUT:
             DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
             break;
+        case IDM_OPENLOCATION:
+            DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_OPENLOCATION), hWnd, OpenLocation, (LONG_PTR)mMozView);
+            break;
         case IDM_EXIT:
         {
             MozView* parentView = mMozView->GetParentView();
@@ -389,7 +400,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (mMozView) {
             RECT rect;
             GetClientRect(hWnd, &rect);
-            mMozView->SetPositionAndSize(rect.left, rect.top, 
+            mMozView->SetPositionAndSize(rect.left, rect.top,
                     rect.right - rect.left, rect.bottom - rect.top);
         }
         break;
@@ -422,6 +433,44 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     return 0;
+}
+
+// Handler for Open Location dialog.
+INT_PTR CALLBACK OpenLocation(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    MozView *mozView = (MozView*)GetWindowLongPtr(hDlg, GWLP_USERDATA);
+    switch (message) {
+    case WM_INITDIALOG:
+        mozView = (MozView*)lParam;
+        if(mozView == NULL)
+            EndDialog(hDlg, LOWORD(wParam));
+
+        SetWindowLongPtr( hDlg, GWLP_USERDATA, (__int3264)(LONG_PTR)(mozView));
+        return (INT_PTR)TRUE;
+
+    case WM_COMMAND:
+        if (LOWORD(wParam) == IDGO) {
+            WCHAR urlForm[MAX_LOCATION];
+            char *url;
+
+            GetDlgItemText(hDlg, IDC_EDIT1, urlForm, MAX_LOCATION);
+            url = WcharToUtf8(urlForm);
+            MozView* mozView = (MozView*)GetWindowLongPtr(hDlg, GWLP_USERDATA);
+            if(mozView) {
+                mozView->LoadURI(url);
+            }
+            delete[] url;
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+
+        if (LOWORD(wParam) == IDCANCEL) {
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
 }
 
 // Message handler for about box.
