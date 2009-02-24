@@ -35,11 +35,11 @@
 #
 # ***** END LICENSE BLOCK *****
 
-MOZ_CFLAGS=-DMOZ_DLL_SUFFIX="\".so\"" `pkg-config --cflags libxul libxul-embedding-unstable`
-MOZ_LIBS=`pkg-config --libs libxul libxul-embedding-unstable`
+MOZ_CFLAGS=-DMOZ_DLL_SUFFIX="\".so\"" `pkg-config --cflags libxul-embedding-unstable`
+MOZ_LIBS=`pkg-config --libs libxul-embedding-unstable`
 
-CFLAGS=-fno-rtti -I../common `pkg-config --cflags gtk+-2.0` $(MOZ_CFLAGS)
-LDFLAGS=`pkg-config --libs gtk+-2.0` $(MOZ_LIBS) -L../x11 -lmozwebview
+CFLAGS=-fno-rtti -I../common -I../include `pkg-config --cflags gtk+-2.0` $(MOZ_CFLAGS)
+LDFLAGS=`pkg-config --libs gtk+-2.0` $(MOZ_LIBS) -lmozwebview
 
 all:test
 
