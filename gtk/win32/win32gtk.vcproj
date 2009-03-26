@@ -196,10 +196,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\moz-web-view-common.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\common\moz-web-view-common.h"
 				>
 			</File>
@@ -224,7 +220,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\common\ConsoleListener.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\ContentListener.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\DOMEventListener.cpp"
 				>
 			</File>
 			<File
@@ -233,6 +237,10 @@
 			</File>
 			<File
 				RelativePath="..\..\common\EmbeddingSetup.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\common\moz-web-view-common.cpp"
 				>
 			</File>
 			<File
@@ -248,7 +256,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\win32gtk.def"
+				RelativePath=".\mozwebview.def"
 				>
 			</File>
 		</Filter>

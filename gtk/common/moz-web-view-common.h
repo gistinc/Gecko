@@ -1,6 +1,9 @@
 #ifndef MOZ_WEB_VIEW_GTK_COMMON_H
 #define MOZ_WEB_VIEW_GTK_COMMON_H
 
+#include <moz-web-view.h>
+#include <embed.h>
+
 G_BEGIN_DECLS
 
 #define MOZ_TYPE_VIEWABLE            (moz_viewable_get_type ())
@@ -31,6 +34,22 @@ struct _MozViewableIface {
 
 GType     moz_viewable_get_type               (void) G_GNUC_CONST;
 
+enum {
+    TITLE_CHANGED,
+    STATUS_CHANGED,
+    LOCATION_CHANGED,
+    URI_REQUESTED,
+    DOCUMENT_LOADED,
+    LAST_SIGNAL
+};
+
+enum {
+    PROP_0,
+    PROP_REQUESTED_URI,
+    PROP_TITLE,
+    PROP_STATUS,
+    PROP_LOCATION
+};
 
 G_END_DECLS
 

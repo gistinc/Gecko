@@ -36,10 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "nsError.h"
-
-#include "embed.h"
 #include "EmbeddingSetup.h"
-#include "moz-web-view.h"
 #include "moz-web-view-common.h"
 #include "moz-web-view-marshal.h"
 
@@ -229,39 +226,40 @@ moz_viewable_get_type(void)
     return viewable_type;
 }
 
+static gchar *
+moz_web_view_get_prop(MozWebView *view, const gchar *prop)
+{
+    gchar *ret = NULL;
+    g_return_val_if_fail(MOZ_IS_WEB_VIEW(view), NULL);
+
+    g_object_get(G_OBJECT(view), prop, &ret, NULL);
+
+    return ret;
+}
 
 /*******************************************************
  *                MozWebView accessors                 *
  *******************************************************/
 gchar *
+moz_web_view_get_requested_uri(MozWebView *view)
+{
+    return moz_web_view_get_prop (view, "requested-uri");
+}
+
+gchar *
 moz_web_view_get_title(MozWebView *view)
 {
-    gchar *ret = NULL;
-    g_return_val_if_fail(MOZ_IS_WEB_VIEW(view), NULL);
-
-    g_object_get(G_OBJECT(view), "title", &ret, NULL);
-
-    return ret;
+    return moz_web_view_get_prop (view, "title");
 }
 
 gchar *
 moz_web_view_get_status(MozWebView *view)
 {
-    gchar *ret = NULL;
-    g_return_val_if_fail(MOZ_IS_WEB_VIEW(view), NULL);
-
-    g_object_get(G_OBJECT(view), "status", &ret, NULL);
-
-    return ret;
+    return moz_web_view_get_prop (view, "status");
 }
 
 gchar *
 moz_web_view_get_location(MozWebView *view)
 {
-    gchar *ret = NULL;
-    g_return_val_if_fail(MOZ_IS_WEB_VIEW(view), NULL);
-
-    g_object_get(G_OBJECT(view), "location", &ret, NULL);
-
-    return ret;
+    return moz_web_view_get_prop (view, "location");
 }

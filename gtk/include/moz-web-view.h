@@ -22,12 +22,6 @@ struct _MozWebView {
 
 struct _MozWebViewClass {
     GtkBinClass parent_class;
-
-    void     (*title_changed) (MozWebViewClass *view, const char *title);
-    void     (*status_changed) (MozWebViewClass *view, const char *status);
-    void     (*location_changed) (MozWebViewClass *view, const char *uri);
-    gboolean (*uri_requested) (MozWebViewClass  *view, const char *uri);
-    void     (*document_loaded) (MozWebViewClass *view);
 };
 
 GType      moz_web_view_get_type  (void);
@@ -41,9 +35,10 @@ void       moz_web_view_load_data      (MozWebView  *view,
                                         gsize        len);
 
 /* Apis implemented in common/moz-web-view-common.cpp follow */
-gchar *    moz_web_view_get_title      (MozWebView  *view);
-gchar *    moz_web_view_get_status     (MozWebView  *view);
-gchar *    moz_web_view_get_location   (MozWebView  *view);
+gchar *    moz_web_view_get_requested_uri (MozWebView  *view);
+gchar *    moz_web_view_get_title         (MozWebView  *view);
+gchar *    moz_web_view_get_status        (MozWebView  *view);
+gchar *    moz_web_view_get_location      (MozWebView  *view);
 
 gboolean   moz_web_view_init_embedding (const gchar *profile_path);
 gboolean   moz_web_view_term_embedding (void);
