@@ -32,14 +32,14 @@ dnl   decision by deleting the provisions above and replace them with the notice
 dnl   and other provisions required by the GPL or the LGPL. If you do not delete
 dnl   the provisions above, a recipient may use your version of this file under
 dnl   the terms of any one of the MPL, the GPL or the LGPL.
-dnl 
-dnl   ***** END LICENSE BLOCK ***** 
+dnl
+dnl   ***** END LICENSE BLOCK *****
 
 AC_INIT(configure.ac)
 AM_CONFIG_HEADER(config.h)
 
 if test -z "$VERSION"; then
-VERSION-0.0.1-1
+VERSION=0.0.1-1
 fi
 
 AM_INIT_AUTOMAKE(libmozwebview, $VERSION)
