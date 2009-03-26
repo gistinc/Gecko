@@ -114,7 +114,7 @@ static void
 update_property (MozWebView  *view, gint prop_id, const gchar *new_value)
 {
     MozWebViewPriv *priv = view->priv;
-    const gchar *name = NULL; 
+    const gchar *name = NULL;
     gchar **ptr;
 
     switch (prop_id) {
@@ -183,7 +183,7 @@ moz_web_view_class_init(MozWebViewClass *klass)
 
     object_klass->finalize      = moz_web_view_finalize;
     object_klass->get_property  = moz_web_view_get_property;
-    
+
     widget_klass->realize           = moz_web_view_realize;
     widget_klass->unrealize         = moz_web_view_unrealize;
     widget_klass->hierarchy_changed = moz_web_view_hierarchy_changed;
@@ -210,12 +210,12 @@ static void
 moz_web_view_init(MozWebView *view)
 {
     MozWebViewPriv *priv;
-    
+
     view->priv = priv = GET_PRIV(view);
-    
+
     GTK_WIDGET_SET_FLAGS(view, GTK_NO_WINDOW);
     GTK_WIDGET_SET_FLAGS(view, GTK_CAN_FOCUS);
-    
+
     priv->app = new MozApp();
     priv->view = new MozView();
     priv->listener = new ViewListener(view);
@@ -245,12 +245,12 @@ moz_web_view_finalize(GObject *object)
     (G_OBJECT_CLASS(moz_web_view_parent_class)->finalize)(object);
 }
 
-static void 
+static void
 moz_web_view_get_property (GObject     *object,
                            guint        prop_id,
                            GValue      *value,
                            GParamSpec  *pspec)
-{ 
+{
     MozWebViewPriv *priv = MOZ_WEB_VIEW (object)->priv;
 
     switch (prop_id) {
@@ -284,7 +284,7 @@ moz_web_view_realize(GtkWidget *widget)
     gint attributes_mask;
 
     GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);
-    
+
     attributes.window_type = GDK_WINDOW_CHILD;
     attributes.x = widget->allocation.x;
     attributes.y = widget->allocation.y;
@@ -297,20 +297,20 @@ moz_web_view_realize(GtkWidget *widget)
 	GDK_EXPOSURE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK |
 	GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK |
 	GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_FOCUS_CHANGE_MASK;
-    
+
     attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
-    
+
     widget->window = gtk_widget_get_parent_window(widget);
     g_object_ref(widget->window);
-    
+
     priv->native_window = create_native_window(widget);
-    
+
     priv->view->CreateBrowser(priv->native_window, 0, 0,
 			      widget->allocation.width, widget->allocation.height);
-    
+
     widget->style = gtk_style_attach(widget->style, widget->window);
     gtk_style_set_background(widget->style, widget->window, GTK_STATE_NORMAL);
-    
+
     if (priv->requested_uri)
         moz_web_view_load_uri(MOZ_WEB_VIEW(widget), priv->requested_uri);
 }
@@ -324,9 +324,9 @@ moz_web_view_unrealize(GtkWidget *widget)
 
     if (!DestroyWindow(priv->native_window))
 	g_warning("Problems destoying native view window");
-        
+
     priv->native_window = NULL;
-    
+
     GTK_WIDGET_CLASS(moz_web_view_parent_class)->unrealize(widget);
 }
 
@@ -340,14 +340,14 @@ moz_web_view_hierarchy_changed(GtkWidget         *widget,
     g_assert(toplevel || previous_toplevel);
 
     DBG(g_print("Hierarchy changed ! toplevel %p previous_toplevel %p\n", toplevel, previous_toplevel));
-    
+
     if (GTK_IS_WINDOW(toplevel)) {
-        g_signal_connect(G_OBJECT(toplevel), "configure-event",
+        g_signal_connect(toplevel, "configure-event",
                          G_CALLBACK(handle_toplevel_configure), widget);
     }
-    
+
     if (GTK_IS_WINDOW(previous_toplevel)) {
-        g_signal_handlers_disconnect_by_func(G_OBJECT(previous_toplevel), 
+        g_signal_handlers_disconnect_by_func(previous_toplevel,
                                              (gpointer)handle_toplevel_configure,
                                              widget);
     }
@@ -358,14 +358,14 @@ moz_web_view_size_allocate(GtkWidget     *widget,
                            GtkAllocation *allocation)
 {
     MozWebViewPriv *priv = GET_PRIV(widget);
-    
+
     g_return_if_fail(allocation != NULL);
-    
+
     widget->allocation = *allocation;
-    
+
     if (GTK_WIDGET_REALIZED(widget)) {
         gint x, y;
-	
+
         gdk_window_get_position(widget->window, &x, &y);
         x += allocation->x;
         y += allocation->y;
@@ -382,10 +382,10 @@ static void
 moz_web_view_map(GtkWidget *widget)
 {
     MozWebViewPriv *priv = GET_PRIV(widget);
-    
+
     /* This will ensure a realized widget */
     GTK_WIDGET_CLASS(moz_web_view_parent_class)->map(widget);
-    
+
     ShowWindow(priv->native_window, SW_SHOW);
 }
 
@@ -393,16 +393,16 @@ static void
 moz_web_view_unmap(GtkWidget *widget)
 {
     MozWebViewPriv *priv = GET_PRIV(widget);
-    
+
     GTK_WIDGET_CLASS(moz_web_view_parent_class)->unmap(widget);
-    	
+
     ShowWindow(priv->native_window, SW_HIDE);
 }
 
 /* We handle configure events on the toplevel in order to
  * reposition our window when the toplevel moves.
  */
-static gboolean 
+static gboolean
 handle_toplevel_configure(GtkWidget         *toplevel,
                           GdkEventConfigure *event,
                           GtkWidget         *widget)
@@ -412,7 +412,7 @@ handle_toplevel_configure(GtkWidget         *toplevel,
 
     priv = GET_PRIV(widget);
 
-    DBG(g_print("Configure event !\n"));    
+    DBG(g_print("Configure event !\n"));
 
     gdk_window_get_position(widget->window, &x, &y);
     x += widget->allocation.x;
@@ -428,7 +428,7 @@ handle_toplevel_configure(GtkWidget         *toplevel,
 /* Handle the window procedure by the window class directly
  * in order to call SetFocus() at the appropriate times.
  */
-static LRESULT 
+static LRESULT
 window_procedure(HWND   hwnd,
 		  UINT   message,
 		  WPARAM wparam,
@@ -436,7 +436,7 @@ window_procedure(HWND   hwnd,
 {
     GtkWidget *widget;
     MozWebViewPriv *priv;
-	
+
     widget = (GtkWidget *)GetProp(hwnd, "moz-view-widget");
 
     DBG(g_print("Procedure called ! widget %p\n", widget));
@@ -452,7 +452,7 @@ window_procedure(HWND   hwnd,
 
     switch (message) {
         case WM_INITDIALOG:
-        case WM_INITMENU: 
+        case WM_INITMENU:
         case WM_DESTROY:
             return TRUE;
         case WM_SYSCOMMAND:
@@ -483,15 +483,15 @@ window_procedure(HWND   hwnd,
  *
  * Problems here have to do with focus handling, i.e.
  * sharing and passing keyboard focus back and forth from
- * the gecko window to the rest of the app. The gecko 
+ * the gecko window to the rest of the app. The gecko
  * wants us to turn focus on and off when we receive the
- * WM_ACTIVATE message for our window; Gtk+ does not give 
- * us an opportunity to act on this message (TODO: patch 
+ * WM_ACTIVATE message for our window; Gtk+ does not give
+ * us an opportunity to act on this message (TODO: patch
  * gtk+ to do so and run tests).
  *
  * Also tried to turn on and off focus near when activate
  * messages come (i.e. focus in/out of the toplevel window)
- * with no luck (works to get started, but the gecko 
+ * with no luck (works to get started, but the gecko
  * will never relinquish focus afterwords).
  *
  * The current hack/workaround:
@@ -511,8 +511,8 @@ create_native_window(GtkWidget *widget)
     DWORD dwStyle, dwExStyle;
 
     if (!klass) {
-         static WNDCLASSEXW wcl; 
-	
+         static WNDCLASSEXW wcl;
+
          wcl.cbSize = sizeof(WNDCLASSEX);
          wcl.style = 0;
 
@@ -529,15 +529,15 @@ create_native_window(GtkWidget *widget)
          wcl.hIcon = NULL;
          wcl.hIconSm = NULL;
          wcl.hbrBackground = NULL;
-         wcl.hCursor = LoadCursor(NULL, IDC_ARROW); 
+         wcl.hCursor = LoadCursor(NULL, IDC_ARROW);
          wcl.lpszClassName = L"MozWindow";
 
          klass = RegisterClassExW(&wcl);
     }
 
-    dwExStyle = WS_EX_TOOLWINDOW; // for popup windows 
+    dwExStyle = WS_EX_TOOLWINDOW; // for popup windows
     dwStyle = WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS; // popup window
-    
+
     parent_handle = (HWND)GDK_WINDOW_HWND(gtk_widget_get_parent_window(widget));
     window_handle = CreateWindowExW(dwExStyle,
                                     MAKEINTRESOURCEW(klass),
