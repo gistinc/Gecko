@@ -43,6 +43,7 @@
 
 #include "nsIDOMWindow.h"
 #include "nsIURI.h"
+#include "nsIWebProgress.h"
 
 WebBrowserChrome::WebBrowserChrome(MozView* pAMozView) :
     mChromeFlags(0),
@@ -166,7 +167,7 @@ NS_IMETHODIMP WebBrowserChrome::ExitModalEventLoop(nsresult aStatus)
 
 // ----- Progress Listener -----
 
-NS_IMETHODIMP WebBrowserChrome::OnStateChange(nsIWebProgress * /*aWebProgress*/,
+NS_IMETHODIMP WebBrowserChrome::OnStateChange(nsIWebProgress * aWebProgress,
                                               nsIRequest * /*aRequest*/,
                                               PRUint32 aStateFlags,
                                               nsresult /*aStatus*/)
@@ -179,16 +180,22 @@ NS_IMETHODIMP WebBrowserChrome::OnStateChange(nsIWebProgress * /*aWebProgress*/,
     if ((aStateFlags & STATE_STOP) && (aStateFlags & STATE_IS_DOCUMENT)) {
         // if it was a chrome window and no one has already specified a size,
         // size to content
-        if (!mSizeSet &&
-            (mChromeFlags & nsIWebBrowserChrome::CHROME_OPENAS_CHROME)) {
-            nsCOMPtr<nsIDOMWindow> contentWin;
-            mWebBrowser->GetContentDOMWindow(getter_AddRefs(contentWin));
+        nsCOMPtr<nsIDOMWindow> contentWin;
+        mWebBrowser->GetContentDOMWindow(getter_AddRefs(contentWin));
+        if (!mSizeSet && (mChromeFlags & nsIWebBrowserChrome::CHROME_OPENAS_CHROME)) {
             if (contentWin)
                 contentWin->SizeToContent();
             SetVisibility(PR_TRUE);
         }
 
-        pListener->DocumentLoaded();
+        // XXXbz the fact that nsWebBrowser won't hand out its root web
+        // progress is ridiculous.
+        nsCOMPtr<nsIDOMWindow> progressWindow;
+        aWebProgress->GetDOMWindow(getter_AddRefs(progressWindow));
+        
+        // Make sure the current window is the main content window
+        if (SameCOMIdentity(progressWindow, contentWin))
+          pListener->DocumentLoaded();
     }
 
     return NS_OK;
