@@ -33,6 +33,10 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "DOMEventListener.h"
+#include "nsCOMPtr.h"
+#include "nsIDOMWindow2.h"
+#include "nsIDOMEventTarget.h"
+#include "nsStringAPI.h"
 #include "embed.h"
 
 #include "nsIDOMEvent.h"
@@ -43,6 +47,11 @@ NS_IMPL_ISUPPORTS1(DOMEventListener,
 DOMEventListener::DOMEventListener(MozView *aOwner)
 : mOwner(aOwner)
 {
+	nsCOMPtr<nsIDOMEventTarget> domEventTarget;
+	nsCOMPtr<nsIDOMWindow2> domWindow2 = mOwner->GetDOMWindow();
+	domWindow2->GetWindowRoot(getter_AddRefs(domEventTarget));
+	domEventTarget->AddEventListener(NS_LITERAL_STRING("shelltourl"),
+									 this, PR_FALSE);
 }
 
 DOMEventListener::~DOMEventListener()
