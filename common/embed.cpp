@@ -82,9 +82,9 @@ using namespace std;
 // globals
 static nsCOMPtr<WindowCreator> sWindowCreator;
 
-MozApp::MozApp(const char* aProfilePath)
+MozApp::MozApp(const char* aProfilePath, const char* aEmbedPath)
 {
-    InitEmbedding(aProfilePath);
+    InitEmbedding(aProfilePath, 0, 0, aEmbedPath);
 }
 
 MozApp::~MozApp()

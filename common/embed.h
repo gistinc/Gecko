@@ -68,8 +68,10 @@ public:
      *  mozembed of the application dir (where the executable
      *  recides). <b>NOTE:</b> Must be set before any MozView
      *  is created, otherwise the default is used.
+     *  @param aEmbedPath is an optional path to the xpcom.dll
+     *  and is used when we are embedded.
      */
-    MozApp(const char* aProfilePath = 0);
+    MozApp(const char* aProfilePath = 0, const char* aEmbedPath = 0);
 
     /**
      * Destructor.

@@ -150,7 +150,8 @@ MozEmbedDirectoryProvider::GetFiles(const char *aKey,
 
 nsresult InitEmbedding(const char* aProfilePath,
                        const nsStaticModuleInfo* aComps,
-                       int aNumComps)
+                       int aNumComps,
+		       const char* aEmbedPath)
 {
     nsresult rv;
 
@@ -174,7 +175,8 @@ nsresult InitEmbedding(const char* aProfilePath,
 
     if (NS_FAILED(rv)) {
         cerr << "Unable to find GRE, try setting GRE_HOME." << endl;
-        return 1;
+        //return 1;
+	xpcomPath = aEmbedPath;
     }
 
     // start the glue, i.e. load and link against xpcom shared lib
