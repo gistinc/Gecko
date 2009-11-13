@@ -61,7 +61,8 @@ typedef PRUint32 nsresult;
  */
 nsresult InitEmbedding(const char* aProfilePath = 0, 
                        const nsStaticModuleInfo* aComps = 0, 
-                       int aNumComps = 0);
+                       int aNumComps = 0,
+                       const char* aEmbedPath = 0);
 
 /**
  * Terminates embedding, i.e. does teardown and unloads needed libs.

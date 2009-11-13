@@ -82,9 +82,9 @@ using namespace std;
 // globals
 static nsCOMPtr<WindowCreator> sWindowCreator;
 
-MozApp::MozApp(const char* aProfilePath)
+MozApp::MozApp(const char* aProfilePath, const char* aEmbedPath)
 {
-    InitEmbedding(aProfilePath);
+    InitEmbedding(aProfilePath, 0, 0, aEmbedPath);
 }
 
 MozApp::~MozApp()
@@ -345,7 +345,7 @@ nsresult MozView::CreateBrowser(void* aParentWindow,
 
     // register the DOM event listener
     mPrivate->mDOMEventListener = new DOMEventListener(this);
-
+#if 0
     // register the console event listener
     mPrivate->mConsoleListener = new ConsoleListener(this);
     if (!mPrivate->mConsoleListener)
@@ -356,7 +356,7 @@ nsresult MozView::CreateBrowser(void* aParentWindow,
         cerr << "Failed to get Console service!" << endl;
     else if (NS_FAILED(consoleService->RegisterListener(mPrivate->mConsoleListener)))
         cerr << "Failed to register console listener." << endl;
-
+#endif
     SetFocus(true);
 
     return NS_OK;
