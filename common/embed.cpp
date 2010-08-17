@@ -23,6 +23,7 @@
  *   Dave Camp <dcamp@mozilla.com>
  *   Tobias Hunger <tobias.hunger@gmail.com>
  *   Steffen Imhof <steffen.imhof@googlemail.com>
+ *   Anton Rogaynis <wildriding@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -64,7 +65,8 @@ using namespace std;
 #include "nsIDOMEventTarget.h"
 #include "nsIDOMWindow2.h"
 #include "nsIDOMWindowInternal.h"
-#include "nsIPref.h"
+#include "nsIPrefBranch.h"
+#include "nsIPrefService.h"
 #include "nsIScriptContext.h"
 #include "nsIScriptGlobalObject.h"
 #include "nsIScriptObjectPrincipal.h"
@@ -96,7 +98,7 @@ nsresult MozApp::SetCharPref(const char *aName, const char *aValue)
 {
     nsresult rv;
 
-    nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
+    nsCOMPtr<nsIPrefBranch> pref(do_GetService(NS_PREFSERVICE_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
     return pref->SetCharPref(aName, aValue);
@@ -106,7 +108,7 @@ nsresult MozApp::SetBoolPref(const char *aName, PRBool aValue)
 {
     nsresult rv;
 
-    nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
+    nsCOMPtr<nsIPrefBranch> pref(do_GetService(NS_PREFSERVICE_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
     return pref->SetBoolPref(aName, aValue);
@@ -116,7 +118,7 @@ nsresult MozApp::SetIntPref(const char *aName, int aValue)
 {
     nsresult rv;
 
-    nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
+    nsCOMPtr<nsIPrefBranch> pref(do_GetService(NS_PREFSERVICE_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
     return pref->SetIntPref(aName, aValue);
@@ -126,7 +128,7 @@ nsresult MozApp::GetCharPref(const char *aName, char **aValue)
 {
     nsresult rv;
 
-    nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
+    nsCOMPtr<nsIPrefBranch> pref(do_GetService(NS_PREFSERVICE_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
     return pref->GetCharPref(aName, aValue);
@@ -136,7 +138,7 @@ nsresult MozApp::GetBoolPref(const char *aName, PRBool *aValue)
 {
     nsresult rv;
 
-    nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
+    nsCOMPtr<nsIPrefBranch> pref(do_GetService(NS_PREFSERVICE_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
     return pref->GetBoolPref(aName, aValue);
@@ -146,7 +148,7 @@ nsresult MozApp::GetIntPref(const char *aName, int *aValue)
 {
     nsresult rv;
 
-    nsCOMPtr<nsIPref> pref(do_GetService(NS_PREF_CONTRACTID, &rv));
+    nsCOMPtr<nsIPrefBranch> pref(do_GetService(NS_PREFSERVICE_CONTRACTID, &rv));
     NS_ENSURE_SUCCESS(rv, rv);
 
     return pref->GetIntPref(aName, aValue);
