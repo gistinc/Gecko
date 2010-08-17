@@ -24,6 +24,7 @@
  *   Tobias Hunger <tobias.hunger@gmail.com>
  *   Steffen Imhof <steffen.imhof@googlemail.com>
  *   Anton Rogaynis <wildriding@gmail.com>
+ *   Tatiana Meshkova <tanya.meshkova@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -174,6 +175,13 @@ public:
             cerr << "Failed to get Console service!" << endl;
         else if (NS_FAILED(consoleService->UnregisterListener(mConsoleListener)))
             cerr << "Failed to unregister console listener." << endl;
+
+        // disconnect listener before window destroy
+        nsCOMPtr<nsIWebProgressListener> listener = do_QueryInterface(mChrome);
+        nsCOMPtr<nsIWeakReference> thisListener(do_GetWeakReference(listener));
+        if (mWebBrowser)
+            mWebBrowser->RemoveWebBrowserListener(thisListener, NS_GET_IID(nsIWebProgressListener));
+        thisListener = nsnull;
 
         if (mChrome)
             mChrome->SetWebBrowser(0);
