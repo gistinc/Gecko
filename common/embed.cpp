@@ -86,7 +86,10 @@ static nsCOMPtr<WindowCreator> sWindowCreator;
 
 MozApp::MozApp(const char* aProfilePath)
 {
-    InitEmbedding(aProfilePath);
+    nsresult rv = InitEmbedding(aProfilePath);
+    if (NS_FAILED(rv)) {
+        NS_RUNTIMEABORT("Embedding initialization failed!");
+    }
 }
 
 MozApp::~MozApp()
@@ -263,7 +266,11 @@ WindowCreator::CreateChromeWindow2(nsIWebBrowserChrome *aParent,
 
 MozView::MozView()
 {
-    InitEmbedding();
+    nsresult rv = InitEmbedding();
+    if (NS_FAILED(rv)) {
+        NS_RUNTIMEABORT("Embedding initialization failed!");
+    }
+
     mPrivate = new Private();
 
     // TODO: should probably deal with WindowCreator in InitEmbedding
