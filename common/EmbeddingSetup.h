@@ -59,9 +59,7 @@ typedef PRUint32 nsresult;
  * @param aNumComps Optional argument to set number of
  *  static components.
  */
-nsresult InitEmbedding(const char* aProfilePath = 0, 
-                       const nsStaticModuleInfo* aComps = 0, 
-                       int aNumComps = 0);
+nsresult InitEmbedding(const char* aProfilePath = 0);
 
 /**
  * Terminates embedding, i.e. does teardown and unloads needed libs.

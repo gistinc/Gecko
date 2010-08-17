@@ -68,7 +68,7 @@ using namespace std;
 #  define MAX_PATH PATH_MAX
 #endif
 
-XRE_InitEmbeddingType XRE_InitEmbedding = 0;
+XRE_InitEmbedding2Type XRE_InitEmbedding2 = 0;
 XRE_TermEmbeddingType XRE_TermEmbedding = 0;
 XRE_NotifyProfileType XRE_NotifyProfile = 0;
 XRE_LockProfileDirectoryType XRE_LockProfileDirectory = 0;
@@ -148,9 +148,7 @@ MozEmbedDirectoryProvider::GetFiles(const char *aKey,
     return dp2->GetFiles(aKey, aResult);
 }
 
-nsresult InitEmbedding(const char* aProfilePath,
-                       const nsStaticModuleInfo* aComps,
-                       int aNumComps)
+nsresult InitEmbedding(const char* aProfilePath)
 {
     nsresult rv;
 
@@ -189,7 +187,7 @@ nsresult InitEmbedding(const char* aProfilePath,
 
     // load XUL functions
     nsDynamicFunctionLoad nsFuncs[] = {
-            {"XRE_InitEmbedding", (NSFuncPtr*)&XRE_InitEmbedding},
+            {"XRE_InitEmbedding2", (NSFuncPtr*)&XRE_InitEmbedding2},
             {"XRE_TermEmbedding", (NSFuncPtr*)&XRE_TermEmbedding},
             {"XRE_NotifyProfile", (NSFuncPtr*)&XRE_NotifyProfile},
             {"XRE_LockProfileDirectory", (NSFuncPtr*)&XRE_LockProfileDirectory},
@@ -276,9 +274,8 @@ nsresult InitEmbedding(const char* aProfilePath,
     }
 
     // init embedding
-    rv = XRE_InitEmbedding(xuldir, appdir,
-                           const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider),
-                           aComps, aNumComps);
+    rv = XRE_InitEmbedding2(xuldir, appdir,
+                           const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider));
     if (NS_FAILED(rv)) {
         cerr << "XRE_InitEmbedding failed." << endl;
         return 9;
