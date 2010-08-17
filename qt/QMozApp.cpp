@@ -22,6 +22,7 @@
  *   Pelle Johnsen <pjohnsen@mozilla.com>
  *   Tobias Hunger <tobias.hunger@gmail.com>
  *   Steffen Imhof <steffen.imhof@googlemail.com>
+ *   Tatiana Meshkova <tanya.meshkova@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -49,7 +50,7 @@ public:
 };
 
 QMozApp::QMozApp(const QString& profilePath) :
-    mPrivate(new Private(profilePath.toUtf8()))
+    mPrivate(new Private(profilePath.toUtf8().data()))
 {
 }
 

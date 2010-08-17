@@ -22,6 +22,7 @@
  *   Pelle Johnsen <pjohnsen@mozilla.com>
  *   Dave Camp <dcamp@mozilla.com>
  *   Tobias Hunger <tobias.hunger@gmail.com>
+ *   Tatiana Meshkova <tanya.meshkova@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -246,8 +247,9 @@ nsresult InitEmbedding(const char* aProfilePath)
     }
 
     // setup profile dir
-    if (aProfilePath) {
-        rv = NS_NewNativeLocalFile(nsCString(aProfilePath), PR_FALSE,
+    nsCString pr(aProfilePath);
+    if (!pr.IsEmpty()) {
+        rv = NS_NewNativeLocalFile(pr, PR_FALSE,
                                    getter_AddRefs(sProfileDir));
         NS_ENSURE_SUCCESS(rv, rv);
     } else {
