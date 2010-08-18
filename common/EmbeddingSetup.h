@@ -54,10 +54,6 @@ typedef PRUint32 nsresult;
  * @param aProfilePath Optional argument to set the path where
  *  profile data is stored. The directory will be created if it
  *  doesn't exist.
- * @param aComps Optional argument to register static
- *  components at startup.
- * @param aNumComps Optional argument to set number of
- *  static components.
  */
 nsresult InitEmbedding(const char* aProfilePath = 0);
 

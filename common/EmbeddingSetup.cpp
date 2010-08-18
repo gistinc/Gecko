@@ -279,7 +279,7 @@ nsresult InitEmbedding(const char* aProfilePath)
     rv = XRE_InitEmbedding2(xuldir, appdir,
                            const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider));
     if (NS_FAILED(rv)) {
-        cerr << "XRE_InitEmbedding failed." << endl;
+        cerr << "XRE_InitEmbedding2 failed." << endl;
         return 9;
     }
 
