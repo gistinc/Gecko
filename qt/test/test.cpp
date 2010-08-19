@@ -40,8 +40,21 @@
 #include <QDebug>
 #include <QPushButton>
 #include <QGraphicsProxyWidget>
+#include <nsCOMPtr.h>
+#include <nsIIOService.h>
+#include <nsNetUtil.h>
 
 #include "test.h"
+
+static nsresult ForceOnline()
+{
+    nsCOMPtr<nsIIOService> ioService = do_GetService(NS_IOSERVICE_CONTRACTID);
+    if (!ioService)
+        return NS_ERROR_FAILURE;
+
+    ioService->SetOffline(PR_FALSE);
+    return NS_OK;
+}
 
 MyQGraphicsView::MyQGraphicsView(QGraphicsScene* scene, QWidget* parent)
  : QGraphicsView(scene, parent)
@@ -102,6 +115,9 @@ void MyQGraphicsView::resizeEvent(QResizeEvent* event)
 
 void MyQGraphicsView::loadUri(const QString& uri)
 {
+    // ForceOnline() must be called before any network call
+    // in order to get connectivity working
+    ForceOnline();
     mozView->loadUri(uri);
 }
 
