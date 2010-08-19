@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Anton Rogaynis <wildriding@gmail.com>
+ *   Tatiana Meshkova <tanya.meshkova@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -38,38 +39,69 @@
 #ifndef __test_h_
 #define __test_h_
 
-#include <QDialog>
+#include <QGraphicsView>
+#include <QGraphicsWidget>
+#include <QGraphicsGridLayout>
+
 #include "QMozView.h"
+#include "QMozApp.h"
 
-class QUrl;
-class QLineEdit;
-class QLabel;
-
-class MyQMozView : public QMozView
+class MyTextWidget : public QGraphicsWidget
 {
+    Q_OBJECT
+
 public:
-    MyQMozView(QWidget *parent = 0, unsigned int flags = 0);
+    MyTextWidget(const QString& aText, QGraphicsItem* parent = 0)
+     : QGraphicsWidget(parent)
+     , text(aText)
+    {
+    }
+
 protected:
-    QMozView* openWindow(unsigned int flags);
-};
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
+    {
+        if (text.isEmpty())
+            return;
 
-class MyBrowser : public QDialog
-{
-Q_OBJECT
-public:
-    MyBrowser(QWidget *parent = 0, unsigned int flags = 0);
-    QMozView* getQMozView() {return mozView;}
-    void loadUri(const QString& uri);
-public slots:
-    void go();
-    void startModal();
-    void exitModal();
-    void consoleMessage(const QString &);
+        painter->drawText(boundingRect(), text);
+    }
+
+private slots:
+    void setText(const QString& aText)
+    {
+        text = aText;
+        update();
+    }
 
 private:
-    QLineEdit* location;
-    MyQMozView* mozView;
-    QLabel* status;
+    QString text;
+
+};
+
+class MyQGraphicsView : public QGraphicsView
+{
+    Q_OBJECT
+
+public:
+    MyQGraphicsView(QGraphicsScene* scene, QWidget* parent = 0);
+    ~MyQGraphicsView();
+
+    void loadUri(const QString& uri);
+
+protected:
+    void resizeEvent(QResizeEvent* event);
+
+private slots:
+    void consoleMessage(const QString& message);
+
+private:
+    QGraphicsWidget* mForm;
+    QGraphicsGridLayout* mLayout;
+    QMozView* mozView;
+
+    MyTextWidget* mTitle;
+    MyTextWidget* mLocation;
+    MyTextWidget* mStatus;
 };
 
 #endif /* __test_h_ */

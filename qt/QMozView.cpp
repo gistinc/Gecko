@@ -123,8 +123,8 @@ void QMozViewListener::OnConsoleMessage(const char * message)
     emit pQMozView->consoleMessage(qt_message);
 }
 
-QMozView::QMozView(QWidget *parent, unsigned int flags) :
-    QWidget(parent),
+QMozView::QMozView(QGraphicsWidget *parent, unsigned int flags) :
+    QGraphicsWidget(parent),
     mPrivate(new Private(this))
 {
 #if defined Q_OS_WIN
@@ -140,7 +140,7 @@ QMozView::~QMozView()
     delete mPrivate;
 }
 
-void QMozView::resizeEvent(QResizeEvent* event)
+void QMozView::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     Q_UNUSED(event);
     mPrivate->mozView.SetPositionAndSize(0, 0, size().width(), size().height());
