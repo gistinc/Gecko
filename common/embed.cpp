@@ -301,6 +301,7 @@ MozView::MozView()
 MozView::~MozView()
 {
     delete mPrivate;
+    mPrivate = NULL;
     TermEmbedding();
 }
 
@@ -489,6 +490,9 @@ void MozView::SetListener(MozViewListener *aNewListener)
 
 MozViewListener* MozView::GetListener()
 {
+    if (!mPrivate)
+        return NULL;
+
     return mPrivate->mListener;
 }
 
