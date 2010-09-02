@@ -20,6 +20,7 @@
  * Contributor(s):
  *   Tobias Hunger <tobias.hunger@gmail.com>
  *   Steffen.Imhof <steffen.imhof@googlemail.com>
+ *   Tatiana Meshkova <tanya.meshkova@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -50,8 +51,16 @@ ConsoleListener::ConsoleListener(MozView *aOwner) :
 ConsoleListener::~ConsoleListener()
 { }
 
+void ConsoleListener::Detach()
+{
+    mOwner = NULL;
+}
+
 NS_IMETHODIMP ConsoleListener::Observe(nsIConsoleMessage * aMessage)
 {
+    if (!mOwner)
+        return NS_OK;
+
     MozViewListener *listener = mOwner->GetListener();
     if (!listener)
         return NS_OK;

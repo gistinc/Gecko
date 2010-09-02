@@ -18,6 +18,7 @@
  * Contributor(s):
  *   Tobias Hunger <tobias.hunger@gmail.com>
  *   Steffen Imhof <steffen.imhof@googlemail.com>
+ *   Tatiana Meshkova <tanya.meshkova@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -47,6 +48,8 @@ public:
 
     ConsoleListener(MozView *aOwner);
     virtual ~ConsoleListener();
+
+    void Detach();
 
     NS_DECL_ISUPPORTS
     NS_DECL_NSICONSOLELISTENER

@@ -196,6 +196,7 @@ public:
 
         mContentListener = 0;
         mDOMEventListener = 0;
+        mConsoleListener->Detach();
         mConsoleListener = 0;
         mWebNavigation = 0;
         mDOMWindow = 0;
@@ -217,7 +218,7 @@ public:
     nsCOMPtr<nsIWebBrowserChrome> mChrome;
     nsCOMPtr<nsIURIContentListener> mContentListener;
     nsCOMPtr<nsIDOMEventListener> mDOMEventListener;
-    nsCOMPtr<nsIConsoleListener> mConsoleListener;
+    nsCOMPtr<ConsoleListener> mConsoleListener;
 };
 
 class WindowCreator : public nsIWindowCreator2
