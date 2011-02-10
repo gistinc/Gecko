@@ -504,6 +504,11 @@ public:
      *                    previous sibling is to be focused (Shift-Tab)
      */
     virtual void OnFocusChanged(PRBool aForward);
+    
+    /**
+     * Inform the application about a Close Window request
+     */
+    virtual nsresult OnDestroyWindow();
 
 protected:
     MozView* mMozView;
