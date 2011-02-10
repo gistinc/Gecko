@@ -121,7 +121,18 @@ NS_IMETHODIMP WebBrowserChrome::SetChromeFlags(PRUint32 aChromeFlags)
 NS_IMETHODIMP WebBrowserChrome::DestroyBrowserWindow()
 {
     if (mIsModal)
+    {
         ExitModalEventLoop(NS_OK);
+    }
+    else
+    {
+        MozViewListener * pListener = pMozView->GetListener();
+        if (!pListener)
+            return NS_ERROR_NOT_IMPLEMENTED;
+            
+        return pListener->OnDestroyWindow();
+    }
+
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 

@@ -623,3 +623,8 @@ void MozViewListener::OnConsoleMessage(const char * /*aMessage*/)
 void MozViewListener::OnFocusChanged(PRBool /*aForward*/)
 {
 }
+
+nsresult MozViewListener::OnDestroyWindow()
+{
+    return NS_OK;
+}
