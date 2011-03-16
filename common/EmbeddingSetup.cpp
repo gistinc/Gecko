@@ -22,6 +22,7 @@
  *   Pelle Johnsen <pjohnsen@mozilla.com>
  *   Dave Camp <dcamp@mozilla.com>
  *   Tobias Hunger <tobias.hunger@gmail.com>
+ *   Tatiana Meshkova <tanya.meshkova@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -68,7 +69,7 @@ using namespace std;
 #  define MAX_PATH PATH_MAX
 #endif
 
-XRE_InitEmbeddingType XRE_InitEmbedding = 0;
+XRE_InitEmbedding2Type XRE_InitEmbedding2 = 0;
 XRE_TermEmbeddingType XRE_TermEmbedding = 0;
 XRE_NotifyProfileType XRE_NotifyProfile = 0;
 XRE_LockProfileDirectoryType XRE_LockProfileDirectory = 0;
@@ -148,10 +149,7 @@ MozEmbedDirectoryProvider::GetFiles(const char *aKey,
     return dp2->GetFiles(aKey, aResult);
 }
 
-nsresult InitEmbedding(const char* aProfilePath,
-                       const nsStaticModuleInfo* aComps,
-                       int aNumComps,
-		       const char* aEmbedPath)
+nsresult InitEmbedding(const char* aProfilePath, const char* aEmbedPath)
 {
     nsresult rv;
 
@@ -191,7 +189,7 @@ nsresult InitEmbedding(const char* aProfilePath,
 
     // load XUL functions
     nsDynamicFunctionLoad nsFuncs[] = {
-            {"XRE_InitEmbedding", (NSFuncPtr*)&XRE_InitEmbedding},
+            {"XRE_InitEmbedding2", (NSFuncPtr*)&XRE_InitEmbedding2},
             {"XRE_TermEmbedding", (NSFuncPtr*)&XRE_TermEmbedding},
             {"XRE_NotifyProfile", (NSFuncPtr*)&XRE_NotifyProfile},
             {"XRE_LockProfileDirectory", (NSFuncPtr*)&XRE_LockProfileDirectory},
@@ -250,8 +248,9 @@ nsresult InitEmbedding(const char* aProfilePath,
     }
 
     // setup profile dir
-    if (aProfilePath) {
-        rv = NS_NewNativeLocalFile(nsCString(aProfilePath), PR_FALSE,
+    nsCString pr(aProfilePath);
+    if (!pr.IsEmpty()) {
+        rv = NS_NewNativeLocalFile(pr, PR_FALSE,
                                    getter_AddRefs(sProfileDir));
         NS_ENSURE_SUCCESS(rv, rv);
     } else {
@@ -278,11 +277,10 @@ nsresult InitEmbedding(const char* aProfilePath,
     }
 
     // init embedding
-    rv = XRE_InitEmbedding(xuldir, appdir,
-                           const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider),
-                           aComps, aNumComps);
+    rv = XRE_InitEmbedding2(xuldir, appdir,
+                           const_cast<MozEmbedDirectoryProvider*>(&kDirectoryProvider));
     if (NS_FAILED(rv)) {
-        cerr << "XRE_InitEmbedding failed." << endl;
+        cerr << "XRE_InitEmbedding2 failed." << endl;
         return 9;
     }
 

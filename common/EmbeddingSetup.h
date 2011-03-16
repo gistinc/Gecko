@@ -54,14 +54,10 @@ typedef PRUint32 nsresult;
  * @param aProfilePath Optional argument to set the path where
  *  profile data is stored. The directory will be created if it
  *  doesn't exist.
- * @param aComps Optional argument to register static
- *  components at startup.
- * @param aNumComps Optional argument to set number of
- *  static components.
+ * @param aEmbedPath Optional path to the actual xulrunner code,
+ *  to use a specific version rather than any registered version.
  */
-nsresult InitEmbedding(const char* aProfilePath = 0, 
-                       const nsStaticModuleInfo* aComps = 0, 
-                       int aNumComps = 0,
+nsresult InitEmbedding(const char* aProfilePath = 0,
                        const char* aEmbedPath = 0);
 
 /**

@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Anton Rogaynis <wildriding@gmail.com>
+ *   Tatiana Meshkova <tanya.meshkova@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,90 +37,91 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <QApplication>
-#include <QWidget>
-#include <QVBoxLayout>
-#include <QLineEdit>
-#include <QLabel>
-#include <QUrl>
 #include <QDebug>
+#include <QPushButton>
+#include <QGraphicsProxyWidget>
+#include <nsCOMPtr.h>
+#include <nsIIOService.h>
+#include <nsNetUtil.h>
 
 #include "test.h"
-#include "QMozApp.h"
 
-MyQMozView::MyQMozView(QWidget *parent, unsigned int flags)
-: QMozView(parent, flags)
-{}
-
-QMozView* MyQMozView::openWindow(unsigned int flags)
+static nsresult ForceOnline()
 {
-    MyBrowser* newBrowser = new MyBrowser(0, flags);
-    newBrowser->resize(400, 400);
-    newBrowser->show();
-    newBrowser->setAttribute(Qt::WA_DeleteOnClose);
-    return newBrowser->getQMozView();
+    nsCOMPtr<nsIIOService> ioService = do_GetService(NS_IOSERVICE_CONTRACTID);
+    if (!ioService)
+        return NS_ERROR_FAILURE;
+
+    ioService->SetOffline(PR_FALSE);
+    return NS_OK;
 }
 
-MyBrowser::MyBrowser(QWidget *parent, unsigned int flags)
-: QDialog(parent)
+MyQGraphicsView::MyQGraphicsView(QGraphicsScene* scene, QWidget* parent)
+ : QGraphicsView(scene, parent)
 {
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    location = new QLineEdit(this);
-    layout->addWidget(location);
+    mLayout = new QGraphicsGridLayout;
 
-    mozView = new MyQMozView(this, flags);
-    layout->addWidget(mozView, 1);
+    mTitle = new MyTextWidget("title");
+    mLayout->addItem(mTitle, 0, 0, 1, 2);
+    mLayout->setRowMaximumHeight(0, 20);
 
-    status = new QLabel(this);
-    layout->addWidget(status);
+    mLocation = new MyTextWidget("location");
+    mLayout->addItem(mLocation, 1, 0, 1, 2);
+    mLayout->setRowMaximumHeight(1, 20);
+
+    mForm = new QGraphicsWidget;
+    mForm->setLayout(mLayout);
+    scene->addItem(mForm);
+
+    mozView = new QMozView(mForm);
+    mLayout->addItem(mozView, 2, 0, 1, 2);
+
+    mStatus = new MyTextWidget("status");
+    mLayout->addItem(mStatus, 3, 0);
+    mLayout->setRowMaximumHeight(3, 20);
+
+    QWidget* exitButton = new QPushButton("Exit");
+    mLayout->addItem(scene->addWidget(exitButton), 3, 1);
+    mLayout->setColumnMaximumWidth(1, 50);
 
     connect(mozView, SIGNAL(locationChanged(const QString&)),
-            location, SLOT(setText(const QString&)));
+            mLocation, SLOT(setText(const QString&)));
 
     connect(mozView, SIGNAL(titleChanged(const QString&)),
-            this, SLOT(setWindowTitle(const QString&)));
+            mTitle, SLOT(setText(const QString&)));
 
     connect(mozView, SIGNAL(statusChanged(const QString&)),
-            status, SLOT(setText(const QString&)));
+            mStatus, SLOT(setText(const QString&)));
 
-    connect(mozView, SIGNAL(startModal()),
-            this, SLOT(startModal()));
+    connect(mozView, SIGNAL(consoleMessage(const QString&)),
+            this, SLOT(consoleMessage(const QString&)));
 
-    connect(mozView, SIGNAL(exitModal()),
-            this, SLOT(exitModal()));
-
-    connect(location, SIGNAL(returnPressed()),
-            this, SLOT(go()));
-
-    connect(mozView, SIGNAL(consoleMessage(const QString &)),
-            this, SLOT(consoleMessage(const QString &)));
+    connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
 }
 
-void MyBrowser::loadUri(const QString& uri)
+MyQGraphicsView::~MyQGraphicsView()
 {
-    location->setText(uri);
+}
+
+void MyQGraphicsView::resizeEvent(QResizeEvent* event)
+{
+    mForm->resize(event->size());
+    QGraphicsView::resizeEvent(event);
+}
+
+void MyQGraphicsView::loadUri(const QString& uri)
+{
+    // ForceOnline() must be called before any network call
+    // in order to get connectivity working
+    ForceOnline();
     mozView->loadUri(uri);
 }
 
-void MyBrowser::go()
-{
-    mozView->loadUri(location->text());
-}
-
-void MyBrowser::startModal()
-{
-    hide();
-    exec();
-}
-
-void MyBrowser::exitModal()
-{
-    done(0);
-    // have to delete mozView now to avoid JS context assertions
-    delete mozView;
-}
-
-void MyBrowser::consoleMessage(const QString& message)
+void MyQGraphicsView::consoleMessage(const QString& message)
 {
     qDebug() << "CONSOLE:" << message;
 }
@@ -128,15 +130,14 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    MyBrowser window;
-
-    window.resize(400, 400);
-    window.show();
-
+    QGraphicsScene scene;
+    MyQGraphicsView view(&scene);
     if(argc > 1)
-        window.loadUri(argv[argc - 1]);
+        view.loadUri(argv[argc - 1]);
     else
-        window.loadUri("http://mozilla.org");
+        view.loadUri("http://mozilla.org");
+
+    view.showFullScreen();
 
     return app.exec();
 }

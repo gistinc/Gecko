@@ -44,16 +44,17 @@
 #include "QMozEmbedExport.h"
 
 #include <QtGui/QWidget>
+#include <QtGui/QGraphicsWidget>
 
 class QMozViewListener;
 class nsIInterfaceRequestor;
 
-class Q_MOZEMBED_EXPORT QMozView : public QWidget
+class Q_MOZEMBED_EXPORT QMozView : public QGraphicsWidget
 {
     Q_OBJECT
 
 public:
-    explicit QMozView(QWidget *parent = 0, unsigned int flags = 0);
+    explicit QMozView(QGraphicsWidget *parent = 0, unsigned int flags = 0);
     virtual ~QMozView();
 
     void loadUri(const QString& uri);
@@ -75,7 +76,7 @@ Q_SIGNALS:
     void exitModal();
 
 protected:
-    virtual void resizeEvent(QResizeEvent*);
+    virtual void resizeEvent(QGraphicsSceneResizeEvent* event);
 
     virtual QMozView* openWindow(unsigned int flags);
 
