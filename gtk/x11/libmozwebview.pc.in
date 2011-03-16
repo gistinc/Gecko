@@ -1,0 +1,13 @@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+                                                                                                                                  
+Name:  libmozwebview
+Description: Mozilla embedding library
+Requires: @LIBMOZWEBVIEW_REQUIRES@
+Version: @VERSION@
+Libs: -L${libdir} -lmozwebview
+Cflags: -I${includedir} 
