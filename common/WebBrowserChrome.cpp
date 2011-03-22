@@ -281,9 +281,11 @@ NS_IMETHODIMP WebBrowserChrome::SetFocus()
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
-NS_IMETHODIMP WebBrowserChrome::GetVisibility(PRBool * /*aVisibility*/)
+NS_IMETHODIMP WebBrowserChrome::GetVisibility(PRBool * aVisibility)
 {
-    return NS_ERROR_NOT_IMPLEMENTED;
+    NS_ENSURE_ARG_POINTER(aVisibility);
+    *aVisibility = PR_TRUE;
+    return NS_OK;
 }
 
 NS_IMETHODIMP WebBrowserChrome::SetVisibility(PRBool aVisibility)
