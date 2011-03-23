@@ -1,0 +1,4 @@
+Release/
+Debug/
+x64/
+Gecko.vcproj.*.user
