@@ -81,6 +81,7 @@ using namespace std;
 #include "nsIWidget.h"
 #include "nsIWindowCreator2.h"
 #include "nsIWindowWatcher.h"
+#include "nsIXPConnect.h"
 
 // globals
 static nsCOMPtr<WindowCreator> sWindowCreator;
@@ -569,7 +570,20 @@ char* MozView::EvaluateJavaScript(const char* aScript)
     nsCOMPtr<nsIScriptContext> ctx = sgo->GetContext();
     nsString retval;
     nsCOMPtr<nsIScriptObjectPrincipal> sgoPrincipal = do_QueryInterface(sgo);
-    ctx->EvaluateString(NS_ConvertUTF8toUTF16(aScript), sgo->GetGlobalJSObject(),
+    nsresult rv;
+    JSObject * jsobj = sgo->GetGlobalJSObject();
+    nsCOMPtr<nsIXPConnect> xpconnect = do_GetService(nsIXPConnect::GetCID(), &rv);
+    if (NS_SUCCEEDED(rv))
+    {
+        JSContext * jsctx = static_cast<JSContext*>(ctx->GetNativeContext());
+        JSObject * jsunwrapped;
+        rv = xpconnect->GetJSObjectOfWrapper(jsctx, jsobj, &jsunwrapped);
+        if (NS_SUCCEEDED(rv))
+        {
+            jsobj = jsunwrapped;
+        }
+    }
+    ctx->EvaluateString(NS_ConvertUTF8toUTF16(aScript), jsobj,
                         sgoPrincipal->GetPrincipal(),
                         "mozembed", 0, nsnull, &retval, nsnull);
 
