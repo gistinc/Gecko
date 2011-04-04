@@ -176,7 +176,6 @@ public:
             cerr << "Failed to get Console service!" << endl;
         else if (NS_FAILED(consoleService->UnregisterListener(mConsoleListener)))
             cerr << "Failed to unregister console listener." << endl;
-
         // disconnect listener before window destroy
         nsCOMPtr<nsIWebProgressListener> listener = do_QueryInterface(mChrome);
         nsCOMPtr<nsIWeakReference> thisListener(do_GetWeakReference(listener));
@@ -365,7 +364,6 @@ nsresult MozView::CreateBrowser(void* aParentWindow,
 
     // register the DOM event listener
     mPrivate->mDOMEventListener = new DOMEventListener(this);
-#if 0
     // register the console event listener
     mPrivate->mConsoleListener = new ConsoleListener(this);
     if (!mPrivate->mConsoleListener)
@@ -376,7 +374,6 @@ nsresult MozView::CreateBrowser(void* aParentWindow,
         cerr << "Failed to get Console service!" << endl;
     else if (NS_FAILED(consoleService->RegisterListener(mPrivate->mConsoleListener)))
         cerr << "Failed to register console listener." << endl;
-#endif
     SetFocus(true);
 
     return NS_OK;
