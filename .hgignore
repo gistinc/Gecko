@@ -1,0 +1,21 @@
+syntax: regexp
+^win32/.*debug/
+^win32/.*Debug/
+^win32/.*release/
+^win32/.*Release/
+^win32/.*\.suo
+\.ncb
+\.\#
+^gtk/test$
+\.DS_Store
+Cache/
+\.orig$
+^qt/.*debug/
+^qt/.*release/
+^qt/.*\.sln
+^qt/.*\.suo
+^qt/.*\.vcproj.*
+^qt/.*\.idb
+^qt/.*\.pdb
+^qt/.*Makefile.*
+~$

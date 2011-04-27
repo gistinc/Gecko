@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "win32gtk", "win32gtk.vcproj", "{2E5F9BE0-07A2-4ED9-A1A1-8736AC154704}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2E5F9BE0-07A2-4ED9-A1A1-8736AC154704}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2E5F9BE0-07A2-4ED9-A1A1-8736AC154704}.Debug|Win32.Build.0 = Debug|Win32
+		{2E5F9BE0-07A2-4ED9-A1A1-8736AC154704}.Release|Win32.ActiveCfg = Release|Win32
+		{2E5F9BE0-07A2-4ED9-A1A1-8736AC154704}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
