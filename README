@@ -1,0 +1,14 @@
+
+This is a visual studio project that we're using at Gist. We build this as a
+static library that we include into our Outlook plugin.
+You will need to get the xulrunner-sdk (2.0), available from:
+https://developer.mozilla.org/En/Gecko_SDK
+or from the Mozilla hg repo http://hg.mozilla.org/releases/mozilla-2.0/
+We look for it in ../external/xulrunner-sdk subdirectory.
+Only real difference between this and the below original mozembed project is
+the added support to directly specify the path to xulrunner in the call to 
+InitEmbedding.
+
+This is a copy of https://wiki.mozilla.org/Embedding/NewApi/Win32
+The main repository is in:
+hg clone http://hg.mozilla.org/incubator/embedding/ mozembed
